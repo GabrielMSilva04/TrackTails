@@ -19,29 +19,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long registerUser(String displayName, String password1, String password2, String email){
-
-        if(!password1.equals(password2)){
-            throw new IllegalArgumentException("Passwords do not match");
-        }
-
-        if(!userRepository.findByEmail(email).isEmpty()){
+    public Long registerUser(User user) {
+        if(!userRepository.findByEmail(user.getEmail()).isEmpty()){
             throw new IllegalArgumentException("Email already in use");
         }
-
-        if (!userRepository.findByDisplayName(displayName).isEmpty()){
+        if (!userRepository.findByDisplayName(user.getDisplayName()).isEmpty()){
             throw new IllegalArgumentException("Display name already in use");
         }
 
-        String salt = "qwerty"; //Temos que arranjar uma maneira de gerar um salt aleatório para garantir segurança
-        String hashPassword = new BCryptPasswordEncoder().encode(password1 + salt);
+        String salt = "qwerty"; // Mudar para gerar um salt aleatório
+        user.setSalt(salt);
+        user.setHashPassword(new BCryptPasswordEncoder().encode(user.getHashPassword() + salt));
 
-        User newUser = new User(displayName,email,hashPassword,salt);
-
-        User savedUser = userRepository.save(newUser);
-
+        User savedUser = userRepository.save(user);
         return savedUser.getUserId();
-
     }
 
     @Override
@@ -75,27 +66,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long updateUser(Long userId, String newDisplayName, String newEmail, String newPassword1, String newPassword2){
+    public Long updateUser(Long userId, User user) {
         if (!userExists(userId)){
             throw new IllegalArgumentException("User not found");
-        };
+        }
         User userToUpdate = userRepository.findById(userId).orElse(null);
 
-        if(!newPassword1.equals(newPassword2)){
-            throw new IllegalArgumentException("Passwords do not match");
-        }
+        userToUpdate.setDisplayName(user.getDisplayName());
+        userToUpdate.setEmail(user.getEmail());
+        userToUpdate.setHashPassword(new BCryptPasswordEncoder().encode(user.getHashPassword() + userToUpdate.getSalt()));
 
-        try{
-            userToUpdate.setDisplayName(newDisplayName);
-            userToUpdate.setEmail(newEmail);
-            userToUpdate.setHashPassword(newPassword1);
-
-            User updatedUser = userRepository.save(userToUpdate);
-
-            return updatedUser.getUserId();
-        }catch (Exception e){
-            throw new IllegalArgumentException("Error updating user");
-        }
+        User updatedUser = userRepository.save(userToUpdate);
+        return updatedUser.getUserId();
     }
 
     @Override
