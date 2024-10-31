@@ -10,16 +10,10 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private String userId;
+    private Long userId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 15)
     private String displayName;
-
-    @Column(nullable = false)
-    private String firstName;
-
-    @Column(nullable = false)
-    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -35,19 +29,18 @@ public class User {
     public User() {
     }
 
-    public User(String userId, String displayName, String email, String hashPassword, String salt) {
-        this.userId = userId;
+    public User(String displayName, String email, String hashPassword, String salt) {
         this.displayName = displayName;
         this.email = email;
         this.salt = salt;
         this.hashPassword = new BCryptPasswordEncoder().encode(hashPassword + salt);
     }
 
-    public String getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -57,22 +50,6 @@ public class User {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public String getEmail() {
@@ -108,8 +85,6 @@ public class User {
         return "User{" +
                 "userId='" + userId + '\'' +
                 ", displayName='" + displayName + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", hashPassword='" + hashPassword + '\'' +
                 ", salt='" + salt + '\'' +

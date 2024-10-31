@@ -11,7 +11,7 @@ public interface UserService {
 
     // Basic CRUD methods
     //Create
-    Long registerUser();
+    Long registerUser(String displayName, String password1, String password2, String email);
 
     //Read
     User getUserById(Long id);
@@ -19,10 +19,10 @@ public interface UserService {
     User getUserByEmail(String email);
 
     //Update
-    Long updateUser(User user);
+    Long updateUser(Long userId, String newDisplayName, String newEmail, String newPassword1, String newPassword2);
 
     //Delete
-    Long deleteUser(User user);
+    Long deleteUser(Long userId);
 
 
     // Authentication Methods
@@ -30,7 +30,6 @@ public interface UserService {
 
 
     //Auxiliary Methods
-    Boolean userExists(User user);
+    Boolean userExists(Long userId);
     List<User> listAllUsers();
-
 }
