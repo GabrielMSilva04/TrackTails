@@ -19,9 +19,6 @@ public class Animal {
     @Column(nullable = false)
     private Date birthDate;
 
-    //TODO: Add a ManyToOne relationship with the User entity
-    // @ManyToOne
-
     public Animal() {
         super();
     }
