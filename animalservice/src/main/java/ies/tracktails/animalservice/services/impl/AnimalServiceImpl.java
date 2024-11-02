@@ -3,8 +3,8 @@ package ies.tracktails.animalservice.services.impl;
 import ies.tracktails.animalservice.services.AnimalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ies.tracktails.animalservice.repositories.AnimalRepository;
-import ies.tracktails.animalservice.entities.Animal;
+import ies.tracktails.animalsDataCore.repositories.AnimalRepository;
+import ies.tracktails.animalsDataCore.entities.Animal;
 import java.util.List;
 
 @Service

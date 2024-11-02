@@ -1,6 +1,6 @@
 package ies.tracktails.animalservice.controllers;
 
-import ies.tracktails.animalservice.entities.Animal;
+import ies.tracktails.animalsDataCore.entities.Animal;
 import ies.tracktails.animalservice.services.AnimalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

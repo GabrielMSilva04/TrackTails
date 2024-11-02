@@ -1,6 +1,6 @@
 package ies.tracktails.animalservice.services;
 
-import ies.tracktails.animalservice.entities.Animal;
+import ies.tracktails.animalsDataCore.entities.Animal;
 import java.util.List;
 
 public interface AnimalService {
