@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ies.tracktails</groupId>
-	<artifactId>animalsdataservice</artifactId>
+	<artifactId>notificationservice</artifactId>
 	<version>0.2.0-SNAPSHOT</version>
-	<name>animalsdataservice</name>
-	<description>Animal Data Service component from TrackTails project</description>
+	<name>notificationservice</name>
+	<description>Notification Service component from TrackTails project</description>
 	<url/>
 	<licenses>
 		<license/>
