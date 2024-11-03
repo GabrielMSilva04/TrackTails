@@ -29,6 +29,7 @@ public class AnimalDataDTO {
         this.heartRate = Optional.empty();
         this.breathRate = Optional.empty();
         this.additionalTags = new HashMap<>();
+        this.timestamp = Optional.empty();
     }
 
     public AnimalDataDTO(String animalId) {
@@ -41,6 +42,7 @@ public class AnimalDataDTO {
         this.heartRate = Optional.empty();
         this.breathRate = Optional.empty();
         this.additionalTags = new HashMap<>();
+        this.timestamp = Optional.empty();
     }
 
     public AnimalDataDTO(String animalId, Double weight, Double height, Double latitude, Double longitude, Double speed, Double heartRate, Double breathRate, Instant timestamp) {
