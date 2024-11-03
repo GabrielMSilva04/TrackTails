@@ -10,10 +10,11 @@ import java.util.Optional;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findAll();
-    Notification findByTitle(String title);
-    Notification findByContent(String content);
     Optional<Notification> findById(long id);
-
+    List<Notification> findByUserId(long userId);
+    List<Notification> findByAnimalId(long animalId);
+    List<Notification> findByUserIdAndAnimalId(long userId, long animalId);
+    List<Notification> findByUserIdAndRead(long userId, boolean read);
 
     Notification save(Notification notification);
 

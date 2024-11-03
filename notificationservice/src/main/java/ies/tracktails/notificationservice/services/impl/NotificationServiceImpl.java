@@ -48,13 +48,23 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification getNotificationByTitle(String title) {
-        return notificationRepository.findByTitle(title);
+    public List<Notification> getNotificationsByUserId(long userId) {
+        return notificationRepository.findByUserId(userId);
     }
 
     @Override
-    public Notification getNotificationByContent(String content) {
-        return notificationRepository.findByContent(content);
+    public List<Notification> getNotificationsByAnimalId(long animalId) {
+        return notificationRepository.findByAnimalId(animalId);
+    }
+
+    @Override
+    public List<Notification> getNotificationsByUserIdAndAnimalId(long userId, long animalId) {
+        return notificationRepository.findByUserIdAndAnimalId(userId, animalId);
+    }
+
+    @Override
+    public List<Notification> getNotificationsUnreadByUserId(long userId) {
+        return notificationRepository.findByUserIdAndRead(userId, false);
     }
 
     @Override

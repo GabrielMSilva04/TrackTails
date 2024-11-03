@@ -17,6 +17,11 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    @GetMapping("/hello")
+    public ResponseEntity<?> hello() {
+        return new ResponseEntity<>("Hello from Notification Service", HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
         Notification savedNotification = notificationService.addNotification(notification);
@@ -37,13 +42,17 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllNotifications() {
-        return new ResponseEntity<>(notificationService.getAllNotifications(), HttpStatus.OK);
-    }
-
-    @GetMapping("/hello")
-    public ResponseEntity<?> hello() {
-        return new ResponseEntity<>("Hello from Notification Service", HttpStatus.OK);
+    public ResponseEntity<?> getAllNotifications(@RequestParam(name = "userId", required = false) Long userId,
+                                                 @RequestParam(name = "animalId", required = false) Long animalId) {
+        if (userId != null && animalId != null) {
+            return new ResponseEntity<>(notificationService.getNotificationsByUserIdAndAnimalId(userId, animalId), HttpStatus.OK);
+        } else if (userId != null) {
+            return new ResponseEntity<>(notificationService.getNotificationsByUserId(userId), HttpStatus.OK);
+        } else if (animalId != null) {
+            return new ResponseEntity<>(notificationService.getNotificationsByAnimalId(animalId), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(notificationService.getAllNotifications(), HttpStatus.OK);
+        }
     }
 
     @GetMapping("{id}")
