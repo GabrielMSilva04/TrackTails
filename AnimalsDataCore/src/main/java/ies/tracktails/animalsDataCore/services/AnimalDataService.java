@@ -60,7 +60,7 @@ public class AnimalDataService {
     public Double getLatestValue(String animalId, String field) {
         // Query
         String query = "from(bucket: \"" + bucket + "\")\n" +
-               "  |> range(start: 0)\n" + // Isso considera todos os dados, sem limite de tempo
+               "  |> range(start: 0)\n" +
                "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
                "  |> filter(fn: (r) => r[\"_field\"] == \"" + field + "\")\n" +
                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
@@ -87,7 +87,7 @@ public class AnimalDataService {
     public AnimalDataDTO getLatestValues(String animalId) {
         // Query
         String query = "from(bucket: \"" + bucket + "\")\n" +
-               "  |> range(start: 0)\n" + // Isso considera todos os dados, sem limite de tempo
+               "  |> range(start: 0)\n" +
                "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
                "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
@@ -118,8 +118,8 @@ public class AnimalDataService {
         return null;
     }
 
-    // 3. All fields in a given time range (one value for each timeslot)
-    public List<AnimalDataDTO> getRangeValues(String animalId, String field, String start, String end, String timeWindow) {
+    // 3. One fields in a given time range (one value for each timeslot)
+    public List<AnimalDataDTO> getRangeValues(String animalId, String field, String start, String end, String timeWindow, String aggregateFunc) {
         // Query
         String query = "from(bucket: \"" + bucket + "\")\n" +
                "  |> range(start: " + start + ", stop: " + end + ")\n" +
@@ -127,8 +127,8 @@ public class AnimalDataService {
                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
                "  |> filter(fn: (r) => r[\"_field\"] == \"" + field + "\")\n" +
                "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
-               "  |> aggregateWindow(every: " + timeWindow + ", fn: last, createEmpty: false)\n" +
-               "  |> yield(name: \"last\")";
+               "  |> aggregateWindow(every: " + timeWindow + ", fn: " + aggregateFunc + ", createEmpty: false)\n" +
+               "  |> yield(name: \"" + aggregateFunc + "\")";
         
         System.out.println("Query: " + query);
         QueryApi queryApi = influxDBClient.getQueryApi();

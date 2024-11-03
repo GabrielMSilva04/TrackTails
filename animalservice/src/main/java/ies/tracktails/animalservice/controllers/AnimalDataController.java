@@ -42,13 +42,15 @@ public class AnimalDataController {
         return new ResponseEntity<>(latestValues, HttpStatus.OK);
     }
 
-    @GetMapping("/range/{animalId}/{field}")
+    @GetMapping("/historic/{animalId}/{field}")
     public ResponseEntity<?> getRangeValues(
         @PathVariable String animalId,
         @PathVariable String field,
-        @RequestParam(required = false) String start,
-        @RequestParam(required = false) String end,
-        @RequestParam(required = false) String interval) {
-        return new ResponseEntity<>(animalDataService.getRangeValues(animalId, field, start, end, interval), HttpStatus.OK);
+        @RequestParam(defaultValue = "-1d") String start,
+        @RequestParam(defaultValue = "now()") String end,
+        @RequestParam(defaultValue = "15m") String interval,
+        @RequestParam(defaultValue = "last") String aggregate) {
+
+        return new ResponseEntity<>(animalDataService.getRangeValues(animalId, field, start, end, interval, aggregate), HttpStatus.OK);
     }
 }
