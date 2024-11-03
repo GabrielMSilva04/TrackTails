@@ -10,6 +10,7 @@
 	</parent>
 	<groupId>ies.tracktails</groupId>
 	<artifactId>animals-data-core</artifactId>
+	<packaging>jar</packaging>
 	<version>0.2.0-SNAPSHOT</version>
 	<name>Animals Data Core</name>
 	<description>Core library to access animals data</description>
@@ -67,5 +68,7 @@
 	</dependencies>
 
 	<build>
+		<plugins>
+		</plugins>
 	</build>
 </project>

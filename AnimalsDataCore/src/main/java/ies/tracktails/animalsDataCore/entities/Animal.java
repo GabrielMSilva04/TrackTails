@@ -1,4 +1,4 @@
-package ies.tracktails.animalservice.entities;
+package ies.tracktails.animalsDataCore.entities;
 
 import jakarta.persistence.*;
 import java.util.Date;
@@ -16,7 +16,6 @@ public class Animal {
     @Column(nullable = false)
     private String species;
 
-    @Column(nullable = false)
     private Date birthDate;
 
     public Animal() {
