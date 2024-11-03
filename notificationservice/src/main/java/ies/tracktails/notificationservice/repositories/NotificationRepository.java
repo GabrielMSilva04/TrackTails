@@ -1,24 +1,25 @@
 package ies.tracktails.notificationservice.repositories;
 
-import ies.tracktails.notificationservice.entities.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import ies.tracktails.notificationservice.entities.Notification;
 
+import java.util.List;
+import java.util.Optional;
+
+@Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    Notification findByUserId(Long userId);
+    Notification findByTitle(String title);
 
-    Notification findByStatus(String status);
+    Notification findByContent(String content);
 
-    Notification findByCreatedAt(String createdAt);
+    //Notification findByDate(String date);
 
-    Notification findByUserIdAndStatus(Long userId, String status);
+    Notification save(Notification notification);
 
-    Notification findByUserIdAndCreatedAt(Long userId, String createdAt);
+    void deleteById(long id);
 
-    Notification findByMessageAndStatus(String message, String status);
+    Optional<Notification> findById(long id);
 
-    Notification findByStatusAndCreatedAt(String status, String createdAt);
-
-    Notification findByUserIdAndStatusAndCreatedAt(Long userId, String status, String createdAt);
-
-    Notification findByMessageAndStatusAndCreatedAt(String message, String status, String createdAt);
+    List<Notification> findAll();
 }

@@ -1,85 +1,87 @@
 package ies.tracktails.notificationservice.entities;
 
 import jakarta.persistence.*;
-
 import java.util.Date;
 
-@Table(name = "notification")
+@Table(name = "notifications")
 @Entity
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
-    @Column(name = "user_id")
-    private Long userId;
+    @Column(nullable = false)
+    private long userId;
 
-    @Column(name = "message")
-    private String message;
+    @Column(nullable = false)
+    private String title;
 
-    @Column(name = "status")
-    private String status;
+    @Column(nullable = false)
+    private String content;
 
-    @Column(name = "created_at")
-    private Date createdAt;
+//    @Column(nullable = false)
+//    private Date date;
 
     public Notification() {
         super();
     }
 
-    public Notification(Long userId, String message, String status, Date createdAt) {
+    public Notification(long userId, String title, String content/*, Date date*/) {
         super();
         this.userId = userId;
-        this.message = message;
-        this.status = status;
-        this.createdAt = createdAt;
+        this.title = title;
+        this.content = content;
+        //this.date = date;
     }
 
-    // Getters and Setters
-
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public Long getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public String getMessage() {
-        return message;
+    public String getTitle() {
+        return title;
     }
 
-    public String getStatus() {
-        return status;
+    public String getContent() {
+        return content;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
+//    public Date getDate() {
+//        return date;
+//    }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+//    public void setDate(Date date) {
+//        this.date = date;
+//    }
 
     @Override
     public String toString() {
-        return "Notification [id=" + id + ", userId=" + userId + ", message=" + message + ", status=" + status
-                + ", createdAt=" + createdAt + "]";
+        return "Notification{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", title='" + title + '\'' +
+                ", content='" + content + '\'' +
+                //", date=" + date +
+                '}';
     }
 }
