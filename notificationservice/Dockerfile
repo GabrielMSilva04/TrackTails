@@ -4,6 +4,7 @@ FROM maven:3.8.5-openjdk-17 AS builder
 # Set the working directory in the container
 WORKDIR /app
 
+# Uncomment this line if you are using AnimalDataCore as a dependency
 #COPY AnimalsDataCore /app/AnimalsDataCore
 #WORKDIR /app/AnimalsDataCore
 #RUN mvn dependency:go-offline -B
@@ -29,7 +30,5 @@ EXPOSE 8080
 COPY ./wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
 
+## Run the Spring Boot application
 ENTRYPOINT ["/app/wait-for-it.sh", "mariadb:3306", "--", "java", "-jar", "app.jar"]
-
-# Run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
