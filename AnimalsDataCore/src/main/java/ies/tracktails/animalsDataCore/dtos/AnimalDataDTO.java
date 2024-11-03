@@ -3,7 +3,11 @@ package ies.tracktails.animalsDataCore.dtos;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_EMPTY) // To ignore empty fields instead of returning null
 public class AnimalDataDTO {
     private String animalId;
     private Optional<Double> weight;
@@ -14,6 +18,7 @@ public class AnimalDataDTO {
     private Optional<Double> heartRate;
     private Optional<Double> breathRate;
     private Map<String, String> additionalTags;
+    private Optional<Instant> timestamp;
 
     public AnimalDataDTO() {
         this.weight = Optional.empty();
@@ -38,7 +43,7 @@ public class AnimalDataDTO {
         this.additionalTags = new HashMap<>();
     }
 
-    public AnimalDataDTO(String animalId, Double weight, Double height, Double latitude, Double longitude, Double speed, Double heartRate, Double breathRate) {
+    public AnimalDataDTO(String animalId, Double weight, Double height, Double latitude, Double longitude, Double speed, Double heartRate, Double breathRate, Instant timestamp) {
         this.animalId = animalId;
         this.weight = Optional.ofNullable(weight);
         this.height = Optional.ofNullable(height);
@@ -48,6 +53,7 @@ public class AnimalDataDTO {
         this.heartRate = Optional.ofNullable(heartRate);
         this.breathRate = Optional.ofNullable(breathRate);
         this.additionalTags = new HashMap<>();
+        this.timestamp = Optional.ofNullable(timestamp);
     }
 
     // Getters e Setters
@@ -115,11 +121,47 @@ public class AnimalDataDTO {
         this.breathRate = Optional.ofNullable(breathRate);
     }
 
+    public Optional<Instant> getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = Optional.ofNullable(timestamp);
+    }
+
     public Map<String, String> getAdditionalTags() {
         return additionalTags;
     }
 
     public void addAdditionalTag(String key, String value) {
         this.additionalTags.put(key, value);
+    }
+
+    public void addField(String key, String value) {
+        switch (key) {
+            case "weight":
+                this.setWeight(Double.parseDouble(value));
+                break;
+            case "height":
+                this.setHeight(Double.parseDouble(value));
+                break;
+            case "latitude":
+                this.setLatitude(Double.parseDouble(value));
+                break;
+            case "longitude":
+                this.setLongitude(Double.parseDouble(value));
+                break;
+            case "speed":
+                this.setSpeed(Double.parseDouble(value));
+                break;
+            case "heartRate":
+                this.setHeartRate(Double.parseDouble(value));
+                break;
+            case "breathRate":
+                this.setBreathRate(Double.parseDouble(value));
+                break;
+            default:
+                break;
+        }
     }
 }

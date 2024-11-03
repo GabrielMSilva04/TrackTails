@@ -41,4 +41,14 @@ public class AnimalDataController {
         }
         return new ResponseEntity<>(latestValues, HttpStatus.OK);
     }
+
+    @GetMapping("/range/{animalId}/{field}")
+    public ResponseEntity<?> getRangeValues(
+        @PathVariable String animalId,
+        @PathVariable String field,
+        @RequestParam(required = false) String start,
+        @RequestParam(required = false) String end,
+        @RequestParam(required = false) String interval) {
+        return new ResponseEntity<>(animalDataService.getRangeValues(animalId, field, start, end, interval), HttpStatus.OK);
+    }
 }

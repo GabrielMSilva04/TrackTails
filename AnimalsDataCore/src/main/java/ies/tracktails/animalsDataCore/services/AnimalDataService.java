@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class AnimalDataService {
@@ -42,6 +43,7 @@ public class AnimalDataService {
         animalDataDTO.getSpeed().ifPresent(speed -> point.addField("speed", speed));
         animalDataDTO.getHeartRate().ifPresent(heartRate -> point.addField("heartRate", heartRate));
         animalDataDTO.getBreathRate().ifPresent(breathRate -> point.addField("breathRate", breathRate));
+        animalDataDTO.getTimestamp().ifPresent(timestamp -> point.time(timestamp.toEpochMilli(), WritePrecision.MS));
 
         // Aditional tags
         for (Map.Entry<String, String> entry : animalDataDTO.getAdditionalTags().entrySet()) {
@@ -106,33 +108,53 @@ public class AnimalDataService {
                         String field = record.getValueByKey("_field").toString();
                         Double value = record.getValueByKey("_value") != null ? 
                                     ((Number) record.getValueByKey("_value")).doubleValue() : null;
-                        switch (field) {
-                            case "weight":
-                                animalDataDTO.setWeight(value);
-                                break;
-                            case "height":
-                                animalDataDTO.setHeight(value);
-                                break;
-                            case "latitude":
-                                animalDataDTO.setLatitude(value);
-                                break;
-                            case "longitude":
-                                animalDataDTO.setLongitude(value);
-                                break;
-                            case "speed":
-                                animalDataDTO.setSpeed(value);
-                                break;
-                            case "heartRate":
-                                animalDataDTO.setHeartRate(value);
-                                break;
-                            case "breathRate":
-                                animalDataDTO.setBreathRate(value);
-                                break;
-                        }
+                        animalDataDTO.addField(field, value.toString());
+                        animalDataDTO.setTimestamp(record.getTime());
                     }
                 }
             }
             return animalDataDTO;
+        }
+        return null;
+    }
+
+    // 3. All fields in a given time range (one value for each timeslot)
+    public List<AnimalDataDTO> getRangeValues(String animalId, String field, String start, String end, String timeWindow) {
+        // Query
+        String query = "from(bucket: \"" + bucket + "\")\n" +
+               "  |> range(start: " + start + ", stop: " + end + ")\n" +
+               "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
+               "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+               "  |> filter(fn: (r) => r[\"_field\"] == \"" + field + "\")\n" +
+               "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
+               "  |> aggregateWindow(every: " + timeWindow + ", fn: last, createEmpty: false)\n" +
+               "  |> yield(name: \"last\")";
+        
+        System.out.println("Query: " + query);
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        
+        List<FluxTable> tables = queryApi.query(query);
+        debugTables(tables);
+
+        List<AnimalDataDTO> result = new ArrayList<>();
+
+        if (!tables.isEmpty()) {
+            for (FluxTable table : tables) {
+                List<FluxRecord> records = table.getRecords();
+                if (!records.isEmpty()) {
+                    for (FluxRecord record : records) {
+                        AnimalDataDTO animalDataDTO = new AnimalDataDTO(animalId);
+
+                        Double value = record.getValueByKey("_value") != null ? 
+                                    ((Number) record.getValueByKey("_value")).doubleValue() : null;
+                        animalDataDTO.addField(field, value.toString());
+                        animalDataDTO.setTimestamp(record.getTime());
+
+                        result.add(animalDataDTO);
+                    }
+                }
+            }
+            return result;
         }
         return null;
     }
