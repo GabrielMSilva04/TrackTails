@@ -9,17 +9,13 @@ import java.util.Optional;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+    List<Notification> findAll();
     Notification findByTitle(String title);
-
     Notification findByContent(String content);
+    Optional<Notification> findById(long id);
 
-    //Notification findByDate(String date);
 
     Notification save(Notification notification);
 
     void deleteById(long id);
-
-    Optional<Notification> findById(long id);
-
-    List<Notification> findAll();
 }

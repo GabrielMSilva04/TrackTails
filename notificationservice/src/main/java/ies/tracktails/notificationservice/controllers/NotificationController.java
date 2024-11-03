@@ -18,9 +18,22 @@ public class NotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createNotification(@RequestBody Notification notification) {
+    public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
         Notification savedNotification = notificationService.addNotification(notification);
         return new ResponseEntity<>(savedNotification, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<?> deleteNotification(@PathVariable long id) {
+        notificationService.removeNotification(id);
+        return new ResponseEntity<>("Notification deleted successfully", HttpStatus.OK);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<Notification> updateNotification(@PathVariable long id, @RequestBody Notification notification) {
+        notification.setId(id);
+        notificationService.updateNotification(id, notification);
+        return new ResponseEntity<>(notification, HttpStatus.OK);
     }
 
     @GetMapping
@@ -34,31 +47,7 @@ public class NotificationController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<?> getNotification(@PathVariable long id) {
+    public ResponseEntity<Notification> getNotification(@PathVariable long id) {
         return new ResponseEntity<>(notificationService.getNotification(id), HttpStatus.OK);
     }
-
-    @DeleteMapping("{id}")
-    public ResponseEntity<?> deleteNotification(@PathVariable long id) {
-        notificationService.removeNotification(id);
-        return new ResponseEntity<>("Notification deleted successfully", HttpStatus.OK);
-    }
-
-//    @PutMapping("{id}")
-//    public ResponseEntity<?> updateNotification(@PathVariable long id, @RequestBody String message) {
-//        notificationService.updateNotification(id, message);
-//        return new ResponseEntity<>("Notification updated successfully", HttpStatus.OK);
-//    }
-
-//    @GetMapping("/send")
-//    public ResponseEntity<?> sendNotification() {
-//        notificationService.sendNotification("Test notification");
-//        return new ResponseEntity<>("Notification sent successfully", HttpStatus.OK);
-//    }
-//
-//    @GetMapping("/send/{id}")
-//    public ResponseEntity<?> sendNotification(@PathVariable long id) {
-//        notificationService.sendNotification(id);
-//        return new ResponseEntity<>("Notification sent successfully", HttpStatus.OK);
-//    }
 }

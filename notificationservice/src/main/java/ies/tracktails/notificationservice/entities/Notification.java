@@ -1,7 +1,7 @@
 package ies.tracktails.notificationservice.entities;
 
 import jakarta.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Table(name = "notifications")
 @Entity
@@ -10,28 +10,37 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private long userId;
 
-    @Column(nullable = false)
+    @Column(name = "animal_id", nullable = false)
+    private long animalId;
+
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(name = "content", nullable = false)
     private String content;
 
-//    @Column(nullable = false)
-//    private Date date;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "is_read", nullable = false)
+    private boolean read;
+
 
     public Notification() {
         super();
     }
 
-    public Notification(long userId, String title, String content/*, Date date*/) {
+    public Notification(long userId, long animalId, String title, String content) {
         super();
         this.userId = userId;
+        this.animalId = animalId;
         this.title = title;
         this.content = content;
-        //this.date = date;
+        this.createdAt = LocalDateTime.now();
+        this.read = false;
     }
 
     public long getId() {
@@ -42,6 +51,10 @@ public class Notification {
         return userId;
     }
 
+    public long getAnimalId() {
+        return animalId;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -50,9 +63,13 @@ public class Notification {
         return content;
     }
 
-//    public Date getDate() {
-//        return date;
-//    }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public boolean isRead() {
+        return read;
+    }
 
     public void setId(long id) {
         this.id = id;
@@ -60,6 +77,10 @@ public class Notification {
 
     public void setUserId(long userId) {
         this.userId = userId;
+    }
+
+    public void setAnimalId(long animalId) {
+        this.animalId = animalId;
     }
 
     public void setTitle(String title) {
@@ -70,18 +91,24 @@ public class Notification {
         this.content = content;
     }
 
-//    public void setDate(Date date) {
-//        this.date = date;
-//    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
+    }
 
     @Override
     public String toString() {
         return "Notification{" +
                 "id=" + id +
                 ", userId=" + userId +
+                ", animalId=" + animalId +
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
-                //", date=" + date +
+                ", createdAt=" + createdAt +
+                ", read=" + read +
                 '}';
     }
 }
