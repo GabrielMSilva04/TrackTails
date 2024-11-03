@@ -12,17 +12,13 @@ import com.influxdb.query.FluxTable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.List;
 
 @Service
 public class AnimalDataService {
-
-    Logger logger = LoggerFactory.getLogger(AnimalDataService.class);
-
+    
     private final InfluxDBClient influxDBClient;
 
     @Value("${influxdb.bucket}")
@@ -69,7 +65,6 @@ public class AnimalDataService {
                "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
                "  |> last()";
         
-        System.out.println(query);
         
         QueryApi queryApi = influxDBClient.getQueryApi();
         List<FluxTable> tables = queryApi.query(query);
@@ -86,13 +81,69 @@ public class AnimalDataService {
         return null;
     }
 
+    // 2. Latest values of all fields
+    public AnimalDataDTO getLatestValues(String animalId) {
+        // Query
+        String query = "from(bucket: \"" + bucket + "\")\n" +
+               "  |> range(start: 0)\n" + // Isso considera todos os dados, sem limite de tempo
+               "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
+               "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+               "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
+               "  |> last()";
+        
+        System.out.println("Query: " + query);
+        
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        List<FluxTable> tables = queryApi.query(query);
+        debugTables(tables);
+
+        if (!tables.isEmpty()) {
+            AnimalDataDTO animalDataDTO = new AnimalDataDTO(animalId);
+            for (FluxTable table : tables) {
+                List<FluxRecord> records = table.getRecords();
+                if (!records.isEmpty()) {
+                    for (FluxRecord record : records) {
+                        String field = record.getValueByKey("_field").toString();
+                        Double value = record.getValueByKey("_value") != null ? 
+                                    ((Number) record.getValueByKey("_value")).doubleValue() : null;
+                        switch (field) {
+                            case "weight":
+                                animalDataDTO.setWeight(value);
+                                break;
+                            case "height":
+                                animalDataDTO.setHeight(value);
+                                break;
+                            case "latitude":
+                                animalDataDTO.setLatitude(value);
+                                break;
+                            case "longitude":
+                                animalDataDTO.setLongitude(value);
+                                break;
+                            case "speed":
+                                animalDataDTO.setSpeed(value);
+                                break;
+                            case "heartRate":
+                                animalDataDTO.setHeartRate(value);
+                                break;
+                            case "breathRate":
+                                animalDataDTO.setBreathRate(value);
+                                break;
+                        }
+                    }
+                }
+            }
+            return animalDataDTO;
+        }
+        return null;
+    }
+
     public void debugTables(List<FluxTable> tables) {
         for (FluxTable table : tables) {
-            logger.debug("\n\nTable: {}", table);
+            System.out.printf("\n\nTable: %s\n", table);
             for (FluxRecord record : table.getRecords()) {
-                logger.debug("\nRecord: {}", record);
+                System.out.printf("\nRecord: %s\n", record);
                 for (Map.Entry<String, Object> entry : record.getValues().entrySet()) {
-                    logger.debug("{} : {}", entry.getKey(), entry.getValue());
+                    System.out.printf("%s: %s\n", entry.getKey(), entry.getValue());
                 }
             }
         }

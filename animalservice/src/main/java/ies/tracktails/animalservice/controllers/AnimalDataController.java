@@ -33,8 +33,12 @@ public class AnimalDataController {
         return new ResponseEntity<>(latestValue, HttpStatus.OK);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<String> testEndpoint() {
-        return ResponseEntity.ok("Endpoint is working!");
+    @GetMapping("/latest/{animalId}")
+    public ResponseEntity<AnimalDataDTO> getLatestValues(@PathVariable String animalId) {
+        AnimalDataDTO latestValues = animalDataService.getLatestValues(animalId);
+        if (latestValues == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Retorna 404 se não encontrar valor
+        }
+        return new ResponseEntity<>(latestValues, HttpStatus.OK);
     }
 }
