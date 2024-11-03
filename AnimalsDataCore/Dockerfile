@@ -23,7 +23,7 @@ WORKDIR /app
 # Copy the packaged application from the builder stage
 COPY --from=builder /app/target/*.jar app.jar
 
-# Expose the application's port
+# Expose the application's port (optional, change to your application's port)
 EXPOSE 8080
 
 # Run the Spring Boot application
