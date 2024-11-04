@@ -1,39 +1,41 @@
-package ies.tracktails.userservice.entity;
+package ies.tracktails.userservice.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
-@Entity(name = "user_tbl")
+@Entity(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long userId;
 
-    @Column(nullable = false, length = 15)
+    @Column(name = "display_name", nullable = false, length = 15)
     private String displayName;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @JsonIgnore
-    @Column(nullable = false)
+    @Column(name = "hash_password", nullable = false)
     public String hashPassword;
 
     @JsonIgnore
-    @Column
+    @Column(name = "salt", nullable = false)
     private String salt;
 
     public User() {
+        super();
     }
 
-    public User(String displayName, String email, String hashPassword, String salt) {
+    public User(String displayName, String email, String password, String salt) {
+        super();
         this.displayName = displayName;
         this.email = email;
         this.salt = salt;
-        this.hashPassword = new BCryptPasswordEncoder().encode(hashPassword + salt);
+        this.hashPassword = new BCryptPasswordEncoder().encode(password + salt);
     }
 
     public Long getUserId() {

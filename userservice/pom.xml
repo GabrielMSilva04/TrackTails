@@ -11,7 +11,7 @@
 	<groupId>ies.tracktails</groupId>
 	<artifactId>userservice</artifactId>
 	<version>0.2.0-SNAPSHOT</version>
-	<name>UsersService</name>
+	<name>userservice</name>
 	<description>User Service component from TrackTails project</description>
 	<url/>
 	<licenses>

@@ -1,40 +1,43 @@
-package ies.tracktails.userservice.controller;
+package ies.tracktails.userservice.controllers;
 
-import ies.tracktails.userservice.entity.User;
-import ies.tracktails.userservice.service.UserService;
+import ies.tracktails.userservice.entities.User;
+import ies.tracktails.userservice.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
+    private final UserService userService;
 
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
-    @PostMapping("/register")
+    @PostMapping
     public Long registerUser(@RequestBody User user) {
         return userService.registerUser(user);
     }
 
-    @PutMapping("/update/{userId}")
+    @PutMapping("{userId}")
     public Long updateUser(@PathVariable Long userId, @RequestBody User user) {
         return userService.updateUser(userId, user);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("{userId}")
     public User getUserById(@PathVariable Long userId) {
         return userService.getUserById(userId);
     }
 
-    @DeleteMapping("/delete/{userId}")
+    @DeleteMapping("{userId}")
     public Long deleteUser(@PathVariable Long userId) {
         return userService.deleteUser(userId);
     }
 
-    @GetMapping("/list")
+    @GetMapping
     public List<User> listAllUsers() {
         return userService.listAllUsers();
     }
