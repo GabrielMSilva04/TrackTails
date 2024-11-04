@@ -1,6 +1,6 @@
-package ies.tracktails.userservice.service;
+package ies.tracktails.userservice.services;
 
-import ies.tracktails.userservice.entity.User;
+import ies.tracktails.userservice.entities.User;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -10,18 +10,18 @@ public interface UserService {
     // Basic CRUD methods
     //Create
     // UserService.java
-    Long registerUser(User user);
+    User registerUser(User user);
 
     //Read
     User getUserById(Long id);
-    User getUserByDisplayName(String displayName);
+    List<User> getUserByDisplayName(String displayName);
     User getUserByEmail(String email);
 
     //Update
-    Long updateUser(Long userId, User user);
+    User updateUser(Long userId, User user);
 
     //Delete
-    Long deleteUser(Long userId);
+    User deleteUser(Long userId);
 
     // Authentication Methods
     Boolean authenticateUser(String password, String username);

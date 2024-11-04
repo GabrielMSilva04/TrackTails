@@ -4,14 +4,15 @@ FROM maven:3.8.5-openjdk-17 AS builder
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy the pom.xml and download dependencies
-COPY pom.xml .
+# Uncomment this line if you are using AnimalDataCore as a dependency
+#COPY AnimalsDataCore /app/AnimalsDataCore
+#WORKDIR /app/AnimalsDataCore
+#RUN mvn dependency:go-offline -B
+#RUN mvn clean install
+
+COPY userservice /app/userservice
+WORKDIR /app/userservice
 RUN mvn dependency:go-offline -B
-
-# Copy the source code
-COPY src ./src
-
-# Package the application
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
@@ -21,10 +22,13 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy the packaged application from the builder stage
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=builder /app/userservice/target/*.jar app.jar
 
 # Expose the application's port (optional, change to your application's port)
 EXPOSE 8080
 
-# Run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY ./wait-for-it.sh /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
+
+## Run the Spring Boot application
+ENTRYPOINT ["/app/wait-for-it.sh", "mariadb:3306", "--", "java", "-jar", "app.jar"]
