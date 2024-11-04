@@ -3,21 +3,32 @@ package ies.tracktails.reportservice.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity(name="report_tbl") //meti nome nesta tbl por uma questão de consistency
+@Entity(name="reports")
 public class Report {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "animal_id", nullable = false)
     private Long animalId;
 
+    @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 
+    @Column(name = "file_name", nullable = false)
     private String fileName;
 
     public Report() {
+        super();
         this.timestamp = LocalDateTime.now();
+    }
+
+    public Report(Long animalId, String fileName){
+        super();
+        this.animalId = animalId;
+        this.timestamp = LocalDateTime.now();
+        this.fileName = fileName;
     }
 
     public Long getId() {
@@ -49,12 +60,6 @@ public class Report {
     }
 
     public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public Report(Long animalId, LocalDateTime timestamp, String fileName){
-        this.animalId = animalId;
-        this.timestamp = LocalDateTime.now();
         this.fileName = fileName;
     }
 }

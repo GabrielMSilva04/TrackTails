@@ -9,9 +9,12 @@ import java.util.Optional;
 
 @Service
 public class ReportServiceImpl implements ReportService {
+    private final ReportRepository reportRepository;
 
     @Autowired
-    private ReportRepository reportRepository;
+    public ReportServiceImpl(ReportRepository reportRepository) {
+        this.reportRepository = reportRepository;
+    }
 
     public Report createReport(Long animalId, String fileName) {
         Report report = new Report();
@@ -20,9 +23,12 @@ public class ReportServiceImpl implements ReportService {
         return reportRepository.save(report);
     }
 
-    public Optional<Report> getReport(Long id) {
-        return reportRepository.findById(id);
+    public Report getReport(Long id) {
+        return reportRepository.findById(id).isPresent() ? reportRepository.findById(id).get() : null;
     }
 
+    public Report getReportByAnimalId(Long animalId) {
+        return reportRepository.findByAnimalId(animalId);
+    }
 }
 

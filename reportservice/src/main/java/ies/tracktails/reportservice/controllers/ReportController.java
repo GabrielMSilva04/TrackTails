@@ -3,24 +3,41 @@ package ies.tracktails.reportservice.controllers;
 import ies.tracktails.reportservice.entities.Report;
 import ies.tracktails.reportservice.services.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/reports")
+@RequestMapping("/api/v1/reports")
 public class ReportController {
+    private final ReportService reportService;
 
     @Autowired
-    private ReportService reportService;
+    public ReportController(ReportService reportService) {
+        this.reportService = reportService;
+    }
 
-    @PostMapping("/create")
-    public Report createReport(@RequestBody  Report report) {
-        return reportService.createReport(report.getAnimalId(), report.getFileName());
+    @GetMapping("/hello")
+    public ResponseEntity<?> hello() {
+        return new ResponseEntity<>("Hello from Report Service", HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<Report> createReport(@RequestBody  Report report) {
+        Report savedReport = reportService.createReport(report.getAnimalId(), report.getFileName());
+        if (savedReport == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(savedReport, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public Report getReport(@PathVariable Long id) {
-        return reportService.getReport(id).orElse(null);
+    public ResponseEntity<Report> getReport(@PathVariable Long id) {
+        Report report = reportService.getReport(id);
+        if (report == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(report, HttpStatus.OK);
     }
-
 }
 
