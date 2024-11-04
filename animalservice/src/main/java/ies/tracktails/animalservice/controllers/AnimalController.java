@@ -55,10 +55,13 @@ public class AnimalController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllAnimals(@RequestParam(name= "name", required = false) String name) {
+    public ResponseEntity<?> getAllAnimals(@RequestParam(name= "name", required = false) String name, @RequestParam(name= "userId", required = false) Long userId) {
         if (name != null) {
             Animal animal = animalService.getAnimalByName(name);
             return new ResponseEntity<>(animal, HttpStatus.OK);
+        }
+        if (userId != null) {
+            return new ResponseEntity<>(animalService.getAnimalsByUserId(userId), HttpStatus.OK);
         }
         return new ResponseEntity<>(animalService.getAllAnimals(), HttpStatus.OK);
     }
