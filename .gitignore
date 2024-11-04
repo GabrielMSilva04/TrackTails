@@ -78,3 +78,6 @@ HELP.md
 *.iml
 out
 gen
+
+# Data files
+*_data/

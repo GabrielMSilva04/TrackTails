@@ -9,11 +9,11 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ies.tracktails</groupId>
-	<artifactId>animalservice</artifactId>
+	<artifactId>animals-data-core</artifactId>
 	<packaging>jar</packaging>
 	<version>0.2.0-SNAPSHOT</version>
-	<name>animalservice</name>
-	<description>Animal Service component from TrackTails project</description>
+	<name>Animals Data Core</name>
+	<description>Core library to access animals data</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -56,29 +56,19 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.influxdb</groupId>
+			<artifactId>influxdb-client-java</artifactId>
+			<version>7.2.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.0.4</version>
-		</dependency>
-		<dependency>
-			<groupId>ies.tracktails</groupId>
-			<artifactId>animals-data-core</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
 		</plugins>
 	</build>
-
 </project>
