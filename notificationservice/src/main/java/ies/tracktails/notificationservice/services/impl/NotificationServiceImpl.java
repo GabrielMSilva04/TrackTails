@@ -28,13 +28,21 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     @Override
-    public void removeNotification(long id) {
+    public Notification removeNotification(long id) {
+        Notification notification = getNotification(id);
+        if (notification == null) {
+            return null;
+        }
         notificationRepository.deleteById(id);
+        return notification;
     }
 
     @Override
     public Notification updateNotification(long id, Notification notification) {
-        Notification existingNotification = notificationRepository.findById(notification.getId()).get();
+        Notification existingNotification = getNotification(id);
+        if (existingNotification == null) {
+            return null;
+        }
         existingNotification.setTitle(notification.getTitle());
         existingNotification.setContent(notification.getContent());
         existingNotification.setCreatedAt(notification.getCreatedAt());
