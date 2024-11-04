@@ -6,19 +6,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import ies.tracktails.animalservice.components.JwtUtil;
 
 @RestController
 @RequestMapping("/api/v1/animals")
 public class AnimalController {
     private final AnimalService animalService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public AnimalController(AnimalService animalService) {
+    public AnimalController(AnimalService animalService, JwtUtil jwtUtil) {
         this.animalService = animalService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping
-    public ResponseEntity<Animal> createAnimal(@RequestBody Animal animal) {
+    public ResponseEntity<Animal> createAnimal(@RequestBody Animal animal, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String token = authorizationHeader.substring(7);
+        String userId = jwtUtil.extractUserId(token);
+        animal.setUserId(Long.parseLong(userId));
+
         Animal savedAnimal = animalService.addAnimal(animal);
         return new ResponseEntity<>(savedAnimal, HttpStatus.CREATED);
     }
@@ -43,10 +55,13 @@ public class AnimalController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllAnimals(@RequestParam(name= "name", required = false) String name) {
+    public ResponseEntity<?> getAllAnimals(@RequestParam(name= "name", required = false) String name, @RequestParam(name= "userId", required = false) Long userId) {
         if (name != null) {
             Animal animal = animalService.getAnimalByName(name);
             return new ResponseEntity<>(animal, HttpStatus.OK);
+        }
+        if (userId != null) {
+            return new ResponseEntity<>(animalService.getAnimalsByUserId(userId), HttpStatus.OK);
         }
         return new ResponseEntity<>(animalService.getAllAnimals(), HttpStatus.OK);
     }
