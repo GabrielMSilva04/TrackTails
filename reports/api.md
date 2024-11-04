@@ -230,6 +230,130 @@ The `Animal` entity represents the animal data structure.
 
 ---
 
+### 3. Notification Controller
+
+Base URL: `/api/v1/notifications`
+
+---
+
+#### **Create Notification**
+
+- **Endpoint:** `POST /api/v1/notifications`
+- **Description:** Creates a new notification for a specified user and animal.
+- **Request Body:**
+  - `Notification` (JSON) - Data for the notification to be created, including:
+    - `userId` (long, required) - ID of the user associated with the notification.
+    - `animalId` (long, required) - ID of the animal associated with the notification.
+    - `title` (String, required) - Title of the notification.
+    - `content` (String, required) - Content or message of the notification.
+- **Responses:**
+  - **201 Created**: Notification created successfully.
+    - **Schema:** `Notification`
+  - **400 Bad Request**: Notification creation failed.
+- **Example Request:**
+    ```json
+    POST /api/v1/notifications
+    {
+      "userId": 1,
+      "animalId": 101,
+      "title": "Vaccination Reminder",
+      "content": "Your pet is due for a vaccination."
+    }
+    ```
+
+---
+
+#### **Delete Notification**
+
+- **Endpoint:** `DELETE /api/v1/notifications/{id}`
+- **Description:** Deletes a notification by its ID.
+- **Path Parameters:**
+  - `id` (long) - ID of the notification to be deleted.
+- **Responses:**
+  - **200 OK**: Notification deleted successfully.
+    - **Schema:** `Notification`
+  - **404 Not Found**: Notification not found.
+- **Example Request:**
+    ```http
+    DELETE /api/v1/notifications/1
+    ```
+
+---
+
+#### **Update Notification**
+
+- **Endpoint:** `PUT /api/v1/notifications/{id}`
+- **Description:** Updates an existing notification's details.
+- **Path Parameters:**
+  - `id` (long) - ID of the notification to be updated.
+- **Request Body:**
+  - `Notification` (JSON) - Updated data for the notification, including:
+    - `title` (String, required) - Updated title of the notification.
+    - `content` (String, required) - Updated content or message.
+- **Responses:**
+  - **200 OK**: Notification updated successfully.
+    - **Schema:** `Notification`
+  - **404 Not Found**: Notification not found.
+- **Example Request:**
+    ```json
+    PUT /api/v1/notifications/1
+    {
+      "title": "Updated Reminder",
+      "content": "Vaccination reminder updated."
+    }
+    ```
+
+---
+
+#### **Get All Notifications**
+
+- **Endpoint:** `GET /api/v1/notifications`
+- **Description:** Retrieves all notifications or filters by `userId` and/or `animalId`.
+- **Query Parameters:**
+  - `userId` (long, optional) - ID of the user to filter notifications.
+  - `animalId` (long, optional) - ID of the animal to filter notifications.
+- **Responses:**
+  - **200 OK**: Notifications retrieved successfully.
+    - **Schema:** List of `Notification`
+- **Example Request:**
+    ```http
+    GET /api/v1/notifications?userId=1&animalId=101
+    ```
+
+---
+
+#### **Get Notification by ID**
+
+- **Endpoint:** `GET /api/v1/notifications/{id}`
+- **Description:** Retrieves a single notification by its ID.
+- **Path Parameters:**
+  - `id` (long) - ID of the notification to retrieve.
+- **Responses:**
+  - **200 OK**: Notification retrieved successfully.
+    - **Schema:** `Notification`
+  - **404 Not Found**: Notification not found.
+- **Example Request:**
+    ```http
+    GET /api/v1/notifications/1
+    ```
+
+---
+
+## Notification Entity Schema
+
+The `Notification` entity represents the structure for notifications.
+
+- **Schema:** `Notification`
+  - `id` (long): Unique identifier of the notification.
+  - `userId` (long): ID of the user associated with the notification.
+  - `animalId` (long): ID of the animal associated with the notification.
+  - `title` (String): Title of the notification.
+  - `content` (String): Content or message of the notification.
+  - `createdAt` (LocalDateTime): Date and time when the notification was created.
+  - `read` (boolean): Indicates if the notification has been read.
+
+---
+
 ## Error Response Schema
 
 In case of errors, the API returns an `ErrorResponse` object formatted as follows:
@@ -248,7 +372,3 @@ In case of errors, the API returns an `ErrorResponse` object formatted as follow
   "code": 404
 }
 ```
-
----
-
-This documentation provides an overview of the `AnimalController` API, listing available endpoints, descriptions, parameters, and success and error responses.
