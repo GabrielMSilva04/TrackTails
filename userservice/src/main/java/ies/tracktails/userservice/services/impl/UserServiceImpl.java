@@ -4,7 +4,7 @@ import ies.tracktails.userservice.entities.User;
 import ies.tracktails.userservice.repositories.UserRepository;
 import ies.tracktails.userservice.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("User not found");
         }
 
-        return new BCryptPasswordEncoder().matches(password + userToAuthenticate.getSalt(), userToAuthenticate.getHashPassword());
+        return BCrypt.checkpw(password + userToAuthenticate.getSalt(), userToAuthenticate.getHashPassword());
     }
 
     @Override

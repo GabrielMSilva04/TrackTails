@@ -1,7 +1,7 @@
 package ies.tracktails.userservice.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -34,8 +34,8 @@ public class User {
         super();
         this.displayName = displayName;
         this.email = email;
-        this.salt = "qwerty"; // Mudar para gerar um salt aleatório
-        this.hashPassword = new BCryptPasswordEncoder().encode(password + salt);
+        this.salt = BCrypt.gensalt(); // Mudar para gerar um salt aleatório
+        this.hashPassword = BCrypt.hashpw(password , salt);
     }
 
     public Long getUserId() {
