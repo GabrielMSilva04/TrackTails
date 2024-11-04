@@ -30,11 +30,11 @@ public class User {
         super();
     }
 
-    public User(String displayName, String email, String password, String salt) {
+    public User(String displayName, String email, String password) {
         super();
         this.displayName = displayName;
         this.email = email;
-        this.salt = salt;
+        this.salt = "qwerty"; // Mudar para gerar um salt aleatório
         this.hashPassword = new BCryptPasswordEncoder().encode(password + salt);
     }
 

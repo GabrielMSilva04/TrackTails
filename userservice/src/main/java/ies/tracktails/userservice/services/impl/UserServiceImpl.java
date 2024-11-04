@@ -23,13 +23,6 @@ public class UserServiceImpl implements UserService {
         if(!userRepository.findByEmail(user.getEmail()).isEmpty()){
             throw new IllegalArgumentException("Email already in use");
         }
-        if (!userRepository.findByDisplayName(user.getDisplayName()).isEmpty()){
-            throw new IllegalArgumentException("Display name already in use");
-        }
-
-        String salt = "qwerty"; // Mudar para gerar um salt aleatório
-        user.setSalt(salt);
-        user.setHashPassword(new BCryptPasswordEncoder().encode(user.getHashPassword() + salt));
 
         User savedUser = userRepository.save(user);
         return savedUser;
