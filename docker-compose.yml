@@ -27,12 +27,10 @@ services:
       - mariadb
   
   influxdb:
-    image: influxdb:latest
+    image: influxdb:2
     container_name: influxdb
-    environment:
-      INFLUXDB_DB: ${INFLUXDB_DB}
-      INFLUXDB_ADMIN_USER: ${INFLUXDB_ADMIN_USER}
-      INFLUXDB_ADMIN_PASSWORD: ${INFLUXDB_ADMIN_PASSWORD}
+    env_file:
+      - .env
     ports:
       - "8086:8086"
     volumes:
@@ -62,8 +60,13 @@ services:
     env_file:
       - .env
     environment:
-      - DB_HOST=mariadb
-      - DB_PORT=3306
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      INFLUX_HOST: influxdb
+      INFLUX_PORT: 8086
+      INFLUX_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      INFLUX_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
+      INFLUX_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
     depends_on:
       - mariadb
       - influxdb
@@ -72,8 +75,8 @@ services:
 
   notificationservice:
     build:
-      context: ./notificationservice
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./notificationservice/Dockerfile
     container_name: notificationservice
     ports:
       - "8083:8080"
