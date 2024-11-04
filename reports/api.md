@@ -93,6 +93,135 @@ Base URL: `/api/v1/animaldata`
     ```http
     GET /api/v1/animaldata/historic/12345/weight?start=-2d&end=now()&interval=15m&aggregate=mean
     ```
+Here's the API documentation for the `AnimalController`:
+
+---
+---
+
+### 2. Animal Controller
+
+Base URL: `/api/v1/animals`
+
+---
+
+#### **Create Animal**
+
+- **Endpoint:** `POST /api/v1/animals`
+- **Description:** Creates a new animal entry. Requires authorization.
+- **Headers:**
+  - `Authorization` (String) - Bearer token for authentication.
+- **Request Body:**
+  - `Animal` (JSON) - Animal data to be recorded.
+- **Responses:**
+  - **201 Created**: Animal created successfully.
+    - **Schema:** `Animal`
+  - **401 Unauthorized**: Missing or invalid authorization header.
+- **Example Request:**
+    ```json
+    POST /api/v1/animals
+    Authorization: Bearer <your_token>
+    {
+      "name": "Buddy",
+      "species": "Dog",
+      "age": 4
+    }
+    ```
+
+---
+
+#### **Delete Animal**
+
+- **Endpoint:** `DELETE /api/v1/animals/{id}`
+- **Description:** Deletes an animal entry by its ID.
+- **Path Parameters:**
+  - `id` (long) - Unique identifier of the animal to delete.
+- **Responses:**
+  - **200 OK**: Animal deleted successfully.
+  - **404 Not Found**: Animal with the specified ID not found.
+- **Example Request:**
+    ```http
+    DELETE /api/v1/animals/12345
+    ```
+
+---
+
+#### **Update Animal**
+
+- **Endpoint:** `PUT /api/v1/animals/{id}`
+- **Description:** Updates an existing animal's data.
+- **Path Parameters:**
+  - `id` (long) - Unique identifier of the animal to update.
+- **Request Body:**
+  - `Animal` (JSON) - Updated animal data.
+- **Responses:**
+  - **200 OK**: Animal updated successfully.
+    - **Schema:** `Animal`
+  - **404 Not Found**: Animal with the specified ID not found.
+- **Example Request:**
+    ```json
+    PUT /api/v1/animals/12345
+    {
+      "name": "Buddy",
+      "species": "Dog",
+      "age": 5
+    }
+    ```
+
+---
+
+#### **Get Animal by ID**
+
+- **Endpoint:** `GET /api/v1/animals/{id}`
+- **Description:** Retrieves a specific animal by its ID.
+- **Path Parameters:**
+  - `id` (long) - Unique identifier of the animal.
+- **Responses:**
+  - **200 OK**: Animal retrieved successfully.
+    - **Schema:** `Animal`
+  - **404 Not Found**: Animal with the specified ID not found.
+- **Example Request:**
+    ```http
+    GET /api/v1/animals/12345
+    ```
+
+---
+
+#### **Get All Animals**
+
+- **Endpoint:** `GET /api/v1/animals`
+- **Description:** Retrieves all animals, or searches by name if a name query parameter is provided.
+- **Query Parameters:**
+  - `name` (String) - (Optional) Name of the animal to search for.
+- **Responses:**
+  - **200 OK**: Animal(s) retrieved successfully.
+    - **Schema:** List of `Animal` objects.
+  - **404 Not Found**: No animal found with the specified name.
+- **Example Request:**
+    ```http
+    GET /api/v1/animals?name=Buddy
+    ```
+
+---
+
+## Error Response Schema
+
+In case of errors, the API may return an `ErrorResponse` object, which includes:
+
+- **Schema:** `ErrorResponse`
+  - `message` (String): Error message.
+  - `status` (HttpStatus): HTTP status code as a string.
+  - `code` (int): Numeric HTTP status code.
+
+### Example Error Response
+
+```json
+{
+  "message": "Authorization header missing or invalid",
+  "status": "UNAUTHORIZED",
+  "code": 401
+}
+```
+
 
 ---
 
@@ -116,5 +245,3 @@ In case of errors, the API returns an `ErrorResponse` object in the response bod
 ```
 
 --- 
-
-This document provides an overview of the `AnimalDataController` API, listing available endpoints, descriptions, parameters, and success and error responses.
