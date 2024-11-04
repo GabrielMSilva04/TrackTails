@@ -7,8 +7,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@ComponentScan(basePackages = "ies.tracktails.animalservice")
-@ComponentScan(basePackages = "ies.tracktails.animalsDataCore")
+@ComponentScan(basePackages = {
+    "ies.tracktails.animalservice",
+    "ies.tracktails.animalsDataCore",
+	"ies.tracktails.animalsDataCore.services",
+	"ies.tracktails.animalsDataCore.configurations",
+})
 @EnableJpaRepositories(basePackages = "ies.tracktails.animalsDataCore.repositories")
 @EntityScan(basePackages = "ies.tracktails.animalsDataCore.entities")
 public class AnimalserviceApplication {
