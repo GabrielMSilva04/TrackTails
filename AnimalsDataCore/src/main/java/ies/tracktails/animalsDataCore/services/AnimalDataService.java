@@ -57,7 +57,7 @@ public class AnimalDataService {
 
     // Read Operations
     //  1. Latest value of a field
-    public Double getLatestValue(String animalId, String field) {
+    public AnimalDataDTO getLatestValue(String animalId, String field) {
         // Query
         String query = "from(bucket: \"" + bucket + "\")\n" +
                "  |> range(start: 0)\n" +
@@ -76,8 +76,12 @@ public class AnimalDataService {
             List<FluxRecord> records = tables.get(0).getRecords();
             if (!records.isEmpty()) {
                 FluxRecord record = records.get(0);
-                return record.getValueByKey("_value") != null ? 
-                       ((Number) record.getValueByKey("_value")).doubleValue() : null;
+                AnimalDataDTO animalDataDTO = new AnimalDataDTO(animalId);
+                Double value = record.getValueByKey("_value") != null ? 
+                            ((Number) record.getValueByKey("_value")).doubleValue() : null;
+                animalDataDTO.addField(field, value.toString());
+                animalDataDTO.setTimestamp(record.getTime());
+                return animalDataDTO;
             }
         }
         return null;
