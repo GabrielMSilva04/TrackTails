@@ -19,7 +19,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long registerUser(User user) {
+    public User registerUser(User user) {
         if(!userRepository.findByEmail(user.getEmail()).isEmpty()){
             throw new IllegalArgumentException("Email already in use");
         }
@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
         user.setHashPassword(new BCryptPasswordEncoder().encode(user.getHashPassword() + salt));
 
         User savedUser = userRepository.save(user);
-        return savedUser.getUserId();
+        return savedUser;
     }
 
     @Override

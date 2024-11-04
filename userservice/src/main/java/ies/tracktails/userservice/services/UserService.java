@@ -10,7 +10,7 @@ public interface UserService {
     // Basic CRUD methods
     //Create
     // UserService.java
-    Long registerUser(User user);
+    User registerUser(User user);
 
     //Read
     User getUserById(Long id);
