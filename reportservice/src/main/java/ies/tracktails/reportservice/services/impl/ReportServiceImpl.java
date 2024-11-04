@@ -1,13 +1,14 @@
-package ies.tracktails.reportservice.service;
+package ies.tracktails.reportservice.services.impl;
 
-import ies.tracktails.reportservice.entity.Report;
-import ies.tracktails.reportservice.repository.ReportRepository;
+import ies.tracktails.reportservice.services.ReportService;
+import ies.tracktails.reportservice.entities.Report;
+import ies.tracktails.reportservice.repositories.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class ReportServiceImpl implements ReportService{
+public class ReportServiceImpl implements ReportService {
 
     @Autowired
     private ReportRepository reportRepository;

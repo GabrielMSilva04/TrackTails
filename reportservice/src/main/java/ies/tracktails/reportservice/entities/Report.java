@@ -1,4 +1,4 @@
-package ies.tracktails.reportservice.entity;
+package ies.tracktails.reportservice.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

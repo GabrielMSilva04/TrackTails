@@ -1,7 +1,7 @@
-package ies.tracktails.reportservice.controller;
+package ies.tracktails.reportservice.controllers;
 
-import ies.tracktails.reportservice.entity.Report;
-import ies.tracktails.reportservice.service.ReportService;
+import ies.tracktails.reportservice.entities.Report;
+import ies.tracktails.reportservice.services.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

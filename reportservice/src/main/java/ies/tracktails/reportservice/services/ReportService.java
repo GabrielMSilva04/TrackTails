@@ -1,6 +1,6 @@
-package ies.tracktails.reportservice.service;
+package ies.tracktails.reportservice.services;
 
-import ies.tracktails.reportservice.entity.Report;
+import ies.tracktails.reportservice.entities.Report;
 
 import java.util.Optional;
 
