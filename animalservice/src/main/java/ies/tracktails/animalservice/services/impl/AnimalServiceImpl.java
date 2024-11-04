@@ -22,21 +22,23 @@ public class AnimalServiceImpl implements AnimalService {
     }
 
     @Override
-    public void removeAnimal(long id) {
+    public void removeAnimal(Long id) {
         animalRepository.deleteById(id);
     }
 
     @Override
-    public Animal updateAnimal(long id, Animal animal) {
+    public Animal updateAnimal(Long id, Animal animal) {
         Animal existingAnimal = animalRepository.findById(animal.getId()).get();
         existingAnimal.setName(animal.getName());
         existingAnimal.setSpecies(animal.getSpecies());
+        existingAnimal.setSex(animal.getSex());
         existingAnimal.setBirthDate(animal.getBirthDate());
+        existingAnimal.setUserId(animal.getUserId());
         return animalRepository.save(existingAnimal);
     }
 
     @Override
-    public Animal getAnimal(long id) {
+    public Animal getAnimal(Long id) {
         return animalRepository.findById(id).isPresent() ? animalRepository.findById(id).get() : null;
     }
 
@@ -48,5 +50,10 @@ public class AnimalServiceImpl implements AnimalService {
     @Override
     public List<Animal> getAllAnimals() {
         return animalRepository.findAll();
+    }
+
+    @Override
+    public List<Animal> getAnimalsByUserId(Long userId) {
+        return animalRepository.findByUserId(userId);
     }
 }
