@@ -491,6 +491,135 @@ The `Report` entity represents the structure of each report.
 }
 ```
 
+Here's the API documentation for the `UserController` in English:
+
+---
+
+### 5. User Controller
+
+Base URL: `/api/v1/users`
+
+---
+
+#### **Register User**
+
+- **Endpoint:** `POST /api/v1/users`
+- **Description:** Registers a new user with the provided information.
+- **Request Body:**
+  - `User` (JSON) - Contains the following fields:
+    - `displayName` (String, required) - The display name of the user (max 15 characters).
+    - `email` (String, required) - The unique email address of the user.
+    - `password` (String, required) - The password for the user (hashed and salted upon registration).
+- **Responses:**
+  - **201 Created**: User registered successfully.
+    - **Schema:** `User`
+  - **400 Bad Request**: User registration failed due to invalid data.
+- **Example Request:**
+    ```json
+    POST /api/v1/users
+    {
+      "displayName": "JohnDoe",
+      "email": "johndoe@example.com",
+      "password": "securepassword123"
+    }
+    ```
+
+---
+
+#### **Update User**
+
+- **Endpoint:** `PUT /api/v1/users/{userId}`
+- **Description:** Updates the information for an existing user.
+- **Path Parameters:**
+  - `userId` (Long) - The unique ID of the user to update.
+- **Request Body:**
+  - `User` (JSON) - Contains the updated fields:
+    - `displayName` (String) - New display name of the user (optional).
+    - `email` (String) - New email address of the user (optional).
+    - `password` (String) - New password for the user (optional).
+- **Responses:**
+  - **200 OK**: User updated successfully.
+    - **Schema:** `User`
+  - **404 Not Found**: User not found.
+- **Example Request:**
+    ```json
+    PUT /api/v1/users/1
+    {
+      "displayName": "JaneDoe",
+      "email": "janedoe@example.com"
+    }
+    ```
+
+---
+
+#### **Get User by ID**
+
+- **Endpoint:** `GET /api/v1/users/{userId}`
+- **Description:** Retrieves a user by their unique ID.
+- **Path Parameters:**
+  - `userId` (Long) - The ID of the user to retrieve.
+- **Responses:**
+  - **200 OK**: User retrieved successfully.
+    - **Schema:** `User`
+  - **404 Not Found**: User not found.
+- **Example Request:**
+    ```http
+    GET /api/v1/users/1
+    ```
+
+---
+
+#### **Delete User**
+
+- **Endpoint:** `DELETE /api/v1/users/{userId}`
+- **Description:** Deletes a user by their unique ID.
+- **Path Parameters:**
+  - `userId` (Long) - The ID of the user to delete.
+- **Responses:**
+  - **200 OK**: User deleted successfully.
+  - **404 Not Found**: User not found.
+- **Example Request:**
+    ```http
+    DELETE /api/v1/users/1
+    ```
+
+---
+
+#### **List All Users**
+
+- **Endpoint:** `GET /api/v1/users`
+- **Description:** Retrieves a list of all registered users.
+- **Responses:**
+  - **200 OK**: List of users retrieved successfully.
+    - **Schema:** Array of `User` objects.
+- **Example Request:**
+    ```http
+    GET /api/v1/users
+    ```
+
+---
+
+## User Entity Schema
+
+The `User` entity represents the structure of each user.
+
+- **Schema:** `User`
+  - `userId` (Long): Unique identifier for the user.
+  - `displayName` (String): Display name of the user.
+  - `email` (String): Email address of the user.
+  - `hashPassword` (String): Hashed password of the user (hidden in JSON responses).
+  - `salt` (String): Salt used for hashing the password (hidden in JSON responses).
+
+### Example User Object
+
+```json
+{
+  "userId": 1,
+  "displayName": "JohnDoe",
+  "email": "johndoe@example.com"
+}
+```
+
 ---
 ---
 
