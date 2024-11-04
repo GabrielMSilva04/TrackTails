@@ -67,6 +67,8 @@ services:
     depends_on:
       - mariadb
       - influxdb
+    volumes:
+      - ./animalservice/src/main/resources/security/pub.pem:/app/src/main/resources/security/pub.pem
 
   notificationservice:
     build:
