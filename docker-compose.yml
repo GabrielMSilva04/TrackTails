@@ -87,35 +87,36 @@ services:
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb
-      - influxdb
 
   reportservice:
     build:
-      context: ./reportservice
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./reportservice/Dockerfile
     container_name: reportservice
     ports:
       - "8084:8080"
+    env_file:
+        - .env
     environment:
       - DB_HOST=mariadb
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb
-      - influxdb
 
   userservice:
     build:
-      context: ./userservice
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./userservice/Dockerfile
     container_name: userservice
     ports:
       - "8085:8080"
+    env_file:
+        - .env
     environment:
       - DB_HOST=mariadb
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb
-      - influxdb
 
 volumes:
   mariadb_data:
