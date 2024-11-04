@@ -41,7 +41,7 @@ Base URL: `/api/v1/animaldata`
   - `field` (String) - Field of the data to be retrieved.
 - **Responses:**
   - **200 OK**: Data retrieved successfully.
-    - **Schema:** `Double` - Value of the specific field.
+    - **Schema:** `AnimalDataDTO` - Value of the specific field.
   - **404 Not Found**: Data not found.
     - **Schema:** `ErrorResponse`
 - **Example Request:**
@@ -101,6 +101,60 @@ Base URL: `/api/v1/animaldata`
   - `-1mo`: Last month
   - `2024-11-03T16:48:00Z`: Specific date and time
   - `now()`: Current date and time
+Here is the schema documentation for the `AnimalDataDTO` class:
+
+---
+
+## AnimalDataDTO Schema
+
+The `AnimalDataDTO` data transfer object (DTO) represents the structure for tracking various data points about an animal. Fields in this schema are optional and will only be included in JSON responses if they contain data, as the class uses `JsonInclude.Include.NON_EMPTY`.
+
+### Schema: `AnimalDataDTO`
+
+- **`animalId`** (String, required): Unique identifier for the animal.
+
+- **`weight`** (Optional\<Double\>): The weight of the animal in kilograms. May be null.
+
+- **`height`** (Optional\<Double\>): The height of the animal in meters. May be null.
+
+- **`latitude`** (Optional\<Double\>): The geographical latitude of the animal's current location. May be null.
+
+- **`longitude`** (Optional\<Double\>): The geographical longitude of the animal's current location. May be null.
+
+- **`speed`** (Optional\<Double\>): The speed of the animal in meters per second. May be null.
+
+- **`heartRate`** (Optional\<Double\>): The heart rate of the animal in beats per minute. May be null.
+
+- **`breathRate`** (Optional\<Double\>): The respiratory rate of the animal in breaths per minute. May be null.
+
+- **`additionalTags`** (Map\<String, String\>): A map of additional custom key-value pairs for any extra data relevant to the animal.
+
+- **`timestamp`** (Optional\<Instant\>): The timestamp indicating when this data was recorded. May be null.
+
+### Example JSON Representation
+
+```json
+{
+  "animalId": "A12345",
+  "weight": 15.3,
+  "height": 0.6,
+  "latitude": -34.6118,
+  "longitude": -58.4173,
+  "speed": 12.4,
+  "heartRate": 80,
+  "breathRate": 20,
+  "additionalTags": {
+    "tag1": "value1",
+    "tag2": "value2"
+  },
+  "timestamp": "2024-10-12T07:20:50.52Z"
+}
+```
+
+### Additional Details
+
+- **Optional Fields**: Fields such as `weight`, `height`, `latitude`, `longitude`, `speed`, `heartRate`, `breathRate`, and `timestamp` are wrapped in `Optional`. If not provided, these fields will be omitted from the JSON response.
+- **Additional Tags**: This map allows for flexible, dynamic fields that might be relevant for different use cases.
 
 ---
 ---
@@ -228,6 +282,7 @@ The `Animal` entity represents the animal data structure.
   - `species` (String): Species of the animal.
   - `birthDate` (Date): Birth date of the animal.
 
+---
 ---
 
 ### 3. Notification Controller
