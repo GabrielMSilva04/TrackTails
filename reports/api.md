@@ -101,7 +101,6 @@ Base URL: `/api/v1/animaldata`
   - `-1mo`: Last month
   - `2024-11-03T16:48:00Z`: Specific date and time
   - `now()`: Current date and time
-Here is the schema documentation for the `AnimalDataDTO` class:
 
 ---
 
@@ -407,6 +406,92 @@ The `Notification` entity represents the structure for notifications.
   - `createdAt` (LocalDateTime): Date and time when the notification was created.
   - `read` (boolean): Indicates if the notification has been read.
 
+---
+---
+
+### 4. Report Controller
+
+Base URL: `/api/v1/reports`
+
+---
+
+#### **Hello Endpoint**
+
+- **Endpoint:** `GET /api/v1/reports/hello`
+- **Description:** A simple endpoint to test the Report Service.
+- **Responses:**
+  - **200 OK**: Returns a greeting message from the Report Service.
+- **Example Response:**
+    ```json
+    {
+      "message": "Hello from Report Service"
+    }
+    ```
+
+---
+
+#### **Create Report**
+
+- **Endpoint:** `POST /api/v1/reports`
+- **Description:** Creates a new report for a specified animal.
+- **Request Body:**
+  - `Report` (JSON) - Contains the following fields:
+    - `animalId` (Long, required) - The ID of the animal associated with the report.
+    - `fileName` (String, required) - The file name or identifier of the report document.
+- **Responses:**
+  - **201 Created**: Report created successfully.
+    - **Schema:** `Report`
+  - **400 Bad Request**: Report creation failed due to invalid data.
+- **Example Request:**
+    ```json
+    POST /api/v1/reports
+    {
+      "animalId": 123,
+      "fileName": "report_123.pdf"
+    }
+    ```
+
+---
+
+#### **Get Report by ID**
+
+- **Endpoint:** `GET /api/v1/reports/{id}`
+- **Description:** Retrieves a report by its unique ID.
+- **Path Parameters:**
+  - `id` (Long) - The ID of the report to retrieve.
+- **Responses:**
+  - **200 OK**: Report retrieved successfully.
+    - **Schema:** `Report`
+  - **404 Not Found**: Report not found.
+- **Example Request:**
+    ```http
+    GET /api/v1/reports/1
+    ```
+
+---
+
+## Report Entity Schema
+
+The `Report` entity represents the structure of each report.
+
+- **Schema:** `Report`
+  - `id` (Long): Unique identifier of the report.
+  - `animalId` (Long): ID of the animal associated with the report.
+  - `timestamp` (LocalDateTime): Date and time when the report was created.
+  - `fileName` (String): Name or identifier of the report file.
+
+### Example Report Object
+
+```json
+{
+  "id": 1,
+  "animalId": 123,
+  "timestamp": "2023-12-15T12:34:56",
+  "fileName": "report_123.pdf"
+}
+```
+
+---
 ---
 
 ## Error Response Schema
