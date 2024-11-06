@@ -1,0 +1,31 @@
+server:
+  port: 8102
+
+spring:
+  application:
+    name: Gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: test_route
+          uri: http://localhost:8082  # Simulando uma URL local dos microserviços
+          predicates:
+            - Path=/api/**
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9009/pub.json # URL do servidor de autorização jwk
+
+# JWK deve ter uma estrutura com a informação mínima de chave pública
+# {
+#   "keys": [
+#     {
+#       "kty": "RSA",
+#       "e": "AQAB",
+#       "n": "n0X
+#     }
+#   ]
+# }
