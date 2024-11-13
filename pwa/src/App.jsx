@@ -10,7 +10,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route path="/" element={Home} />
+          <Route path="/" element={<Home />} />
           <Route path="/about" element={<h2>About</h2>} />
 
           {/* 404 Not Found Route */}

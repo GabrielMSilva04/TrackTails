@@ -39,9 +39,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       // If the resource is cached, return it
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      //if (cachedResponse) {
+        //return cachedResponse;
+      //}
 
       // If not, fetch from the network
       return fetch(event.request)
