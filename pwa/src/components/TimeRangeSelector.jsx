@@ -16,11 +16,58 @@ const TimeRangeButton = ({ label, isActive, onClick, icon }) => {
   );
 };
 
+const CustomTimeRangeDropdown = ({ onSelect, isActive }) => {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const handleApply = () => {
+    if (startDate && endDate) {
+      // Verify if startDate is before endDate
+      if (new Date(startDate) > new Date(endDate)) {
+        return;
+      }
+      onSelect(`${startDate}-${endDate}`);
+    }
+  };
+
+  return (
+    <div className="dropdown dropdown-end">
+      <label tabIndex={0} className={`btn btn-xs btn-outline m-1 rounded-lg
+        ${isActive ? "btn-primary text-white" : "btn-secondary text-gray-600"}
+      `}>
+        <FontAwesomeIcon icon={faCalendarAlt} className="text-lg" />
+      </label>
+      <div tabIndex={0} className="dropdown-content p-4 shadow bg-base-200 rounded-lg w-64">
+        <h3 className="text-sm font-semibold mb-2">Select a custom range</h3>
+        <input
+          type="datetime-local"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="input input-bordered input-sm w-full mb-2"
+        />
+        <input
+          type="datetime-local"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          className="input input-bordered input-sm w-full mb-4"
+        />
+        <button
+          onClick={handleApply}
+          className="btn btn-sm btn-primary w-full"
+          disabled={!startDate || !endDate}
+        >
+          Apply
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const TimeRangeSelector = ({ onSelect }) => {
-  const [activeRange, setActiveRange] = useState("24h");
+  const [activeRange, setActiveRange] = useState("24H");
 
   // List of available ranges
-  const ranges = ["1h", "24h", "1w", "1M", "3M", "1Y", "MAX"];
+  const ranges = ["1H", "24H", "1W", "1M", "3M", "1Y", "MAX"];
   const customButtonIcon = faCalendarAlt;
 
   const handleSelect = (range) => {
@@ -46,11 +93,9 @@ const TimeRangeSelector = ({ onSelect }) => {
         </div>
       </div>
       {/* Fixed button */}
-      <TimeRangeButton
-        icon={customButtonIcon}
-        isActive={activeRange === "Custom"}
-        onClick={() => handleSelect("Custom")}
-      />
+      <CustomTimeRangeDropdown
+        isActive={!ranges.includes(activeRange)}
+        onSelect={handleSelect} />
     </div>
   );
 };

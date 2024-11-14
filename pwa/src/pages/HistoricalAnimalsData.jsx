@@ -1,9 +1,16 @@
 // src/pages/HistoricalAnimalsData.jsx
 import React from "react";
+import { useParams } from "react-router-dom";
 import ChartComponent from "../components/Chart";
 import TimeRangeSelector from "../components/TimeRangeSelector"
 
 const HistoricalAnimalsData = () => {
+  const { metric } = useParams();
+
+  const selectHandler = (range) => {
+    console.log(range);
+  }
+
   const data = {
     labels: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio"],
     datasets: [
@@ -45,12 +52,9 @@ const HistoricalAnimalsData = () => {
 
   return (
     <div className="h-64">
-      <h1>Gráfico Genérico com Chart.js</h1>
-
-      <h2>Gráfico de Barras</h2>
       <ChartComponent type="bar" data={data} options={options} />
 
-      <TimeRangeSelector />
+      <TimeRangeSelector onSelect={selectHandler} />
     </div>
   );
 };
