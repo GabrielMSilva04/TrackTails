@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons'
+import {Link} from "react-router-dom";
 
 export function MyPets() {
     const pets = [
@@ -7,19 +8,21 @@ export function MyPets() {
             name: 'Fluffy',
             species: 'Cat',
             sex: 'F',
-            image: 'https://placekitten.com/300/300',
+            image: 'https://placecats.com/300/300',
         },
         {
             name: 'Cookie',
             species: 'Dog',
+            breed: 'Golden Retriever',
             sex: 'M',
             image: 'https://placedog.net/300/300',
         },
         {
             name: 'Bella',
             species: 'Cat',
+            breed: 'Siamese',
             sex: 'F',
-            image: 'https://placekitten.com/300/300',
+            // image: '',
         },
     ]
     const speciesIcon = {
@@ -37,7 +40,8 @@ export function MyPets() {
                 {/* Pet Image */}
                 <div
                     className="absolute -top-10 rounded-full overflow-hidden h-20 w-20 shadow-md">
-                    <img src={pet.image} alt={pet.name} className="object-cover w-full h-full"/>
+                    <img src={pet.image ? pet.image : 'https://placehold.co/300'}
+                     alt={pet.name} className="object-cover w-full h-full"/>
                 </div>
 
                 {/* Spacer for the image */}
@@ -67,7 +71,7 @@ export function MyPets() {
         <>
             <div className="flex flex-line justify-between items-center mb-10">
                 <h1 className="text-3xl text-primary font-bold">My Pets</h1>
-                <div className="btn btn-primary text-white mt-4">+ Add Pet</div>
+                <Link to="/petregister" className="btn btn-primary text-white mt-4">+ Add Pet</Link>
             </div>
             <div className="flex flex-wrap justify-center gap-4">
                 {pets.map((pet, index) => (

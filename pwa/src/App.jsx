@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import './App.css'
 import {MyPets} from "./pages/MyPets.jsx";
+import {RegisterPet} from "./pages/RegisterPet.jsx";
 
 function App() {
 
@@ -14,6 +15,7 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<h2>About</h2>} />
                     <Route path="/mypets" element={<MyPets />} />
+                    <Route path="/petregister" element={<RegisterPet />} />
 
                     {/* 404 Not Found Route */}
                     <Route path="*" element={<h2>404 - Page Not Found</h2>} />
