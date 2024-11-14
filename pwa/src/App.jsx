@@ -2,6 +2,7 @@ import { useState } from 'react'
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
 import Layout from './components/Layout'
 import Home from './pages/Home'
+import Register from './pages/Register'
 import './App.css'
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           {/* 404 Not Found Route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Route>
+          <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   )
