@@ -13,8 +13,8 @@ export function RegisterPet() {
                 {/* Formulary Section */}
                 <div className="bg-white w-full h-fit rounded-t-3xl p-8 flex flex-col items-center absolute bottom-0">
                     <div className="flex items-center justify-between w-full relative mb-12">
-                        <Link to={"/"} className="text-primary font-bold text-lg absolute left-0">← Back</Link>
-                        <h2 className="text-2xl font-bold text-primary mx-auto">New pet</h2>
+                        <Link to={"/mypets"} className="text-primary font-bold text-lg absolute left-0">← Back</Link>
+                        <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
                     </div>
                     <form className="flex flex-col gap-2 px-6 mb-10">
                         <label className="form-control w-full">

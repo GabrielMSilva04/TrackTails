@@ -26,9 +26,9 @@ export default function Layout() {
                       </a>
                   </button>
                   <button>
-                      <a className="tooltip" data-tip="My Animals">
+                      <Link to="/mypets" className="tooltip" data-tip="My Animals">
                           <FontAwesomeIcon icon={faPaw} color="white"/>
-                      </a>
+                      </Link>
                   </button>
                   <button>
                       <a className="tooltip" data-tip="Notifications">
