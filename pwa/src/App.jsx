@@ -17,13 +17,13 @@ function App() {
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<h2>About</h2>} />
                     <Route path="/mypets" element={<MyPets />} />
-                    <Route path="/petregister" element={<RegisterPet />} />
 
                     {/* 404 Not Found Route */}
                     <Route path="*" element={<h2>404 - Page Not Found</h2>} />
                 </Route>
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/petregister" element={<RegisterPet />} />
             </Routes>
         </Router>
     )
