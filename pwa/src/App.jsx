@@ -33,10 +33,9 @@ function App() {
         </Route>
         <Route path="/animal" element={<LayoutAnimal />}>
           <Route path="/animal/historical" element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />} />
-          <Route path="/pet-monitoring" element={<LayoutAnimal />}>
-            <Route path="" element={<Pet />} />
-          </Route>
-
+        </Route>
+        <Route path="/pet-monitoring" element={<LayoutAnimal />}>
+          <Route path="" element={<Pet />} />
         </Route>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />

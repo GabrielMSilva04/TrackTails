@@ -46,3 +46,6 @@ export default function LayoutAnimal() {
                     </div>
                 </div>
             </div>
+        </div>
+    );
+}
