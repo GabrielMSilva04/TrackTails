@@ -8,14 +8,14 @@ import PropTypes from "prop-types";
 const Card = ({ icon, label, value, to, image }) => (
     <Link to={to} className="card bg-primary text-primary-content w-40 h-32 rounded-t-2xl shadow-xl">
         <div className="card-body flex flex-col justify-between p-4">
-            <h2 className="card-title text-5xl relative">
+            <h2 className="card-title text-5xl relative text-white">
                 {image ? (
                     <img src={image} alt={label} className="w-12 h-12" />
                 ) : (
                     <FontAwesomeIcon icon={icon} aria-label={label} />
                 )}
             </h2>
-            <div className="text-xl font-bold">{value}</div>
+            <div className="text-xl font-bold text-white">{value}</div>
         </div>
     </Link>
 );
