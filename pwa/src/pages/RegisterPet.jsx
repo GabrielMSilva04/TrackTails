@@ -1,13 +1,18 @@
 import {InputField} from "../components/InputField.jsx";
 import {Link} from "react-router-dom";
-import React, { useState } from 'react';
+import {useForm} from "react-hook-form";
 
 export function RegisterPet() {
-    const [formData, setFormData] = useState({
-        name: '',
-        species: '',
-        sex: '',
-    });
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm();
+
+    const onSubmit = (data) => {
+        console.log('Form Data:', data);
+        alert('Pet registered successfully!');
+    };
 
     const speciesOptions = [
         { value: 'dog', label: 'Dog' },
@@ -18,42 +23,6 @@ export function RegisterPet() {
         { value: 'male', label: 'Male' },
         { value: 'female', label: 'Female' },
     ];
-
-    const [errors, setErrors] = useState({});
-    const [submitted, setSubmitted] = useState(false);
-
-    const handleInputChange = (field, value) => {
-        setFormData({ ...formData, [field]: value });
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-        if (!formData.name) {
-            newErrors.name = 'Name is required.';
-        }
-        if (!formData.species) {
-            newErrors.species = 'Species is required.';
-        }
-        if (!formData.deviceId) {
-            newErrors.deviceId = 'Device ID is required.';
-        }
-        return newErrors;
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Form Data:', formData);
-        setSubmitted(true);
-
-        const validationErrors = validateForm();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors); // Display errors
-        } else {
-            setErrors({});
-            console.log('Form Data:', formData);
-            alert('Form submitted successfully!');
-        }
-    }
 
     return (
         <>
@@ -69,7 +38,7 @@ export function RegisterPet() {
                         <Link to={"/mypets"} className="text-primary font-bold text-lg absolute left-0">← Back</Link>
                         <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
                     </div>
-                    <form className="flex flex-col gap-2 px-6 mb-10" onSubmit={handleSubmit}>
+                    <form className="flex flex-col gap-2 px-6 mb-10" onSubmit={handleSubmit(onSubmit)}>
                         <label className="form-control w-full">
                             <div className="label">
                                 <span className="label-text text-secondary font-bold">Photo</span>
@@ -78,15 +47,21 @@ export function RegisterPet() {
                                 type="file"
                                 className="file-input file-input-bordered file-input-primary w-full"/>
                         </label>
+
+                        {/* Pet Name Input */}
                         <InputField
                             label="Pet Name*"
                             name="name"
                             type="text"
                             placeholder="Enter your pet's name"
-                            value={formData.name}
-                            onChange={(value) => handleInputChange('name', value)}
-                            error={submitted && errors.name}
+                            register={register}
+                            required={{
+                                value: true,
+                                message: 'Pet name is required',
+                            }}
+                            error={errors.name && errors.name.message}
                         />
+
                         <div className="flex flex-line gap-2">
                             {/* Species Dropdown */}
                             <InputField
@@ -94,10 +69,16 @@ export function RegisterPet() {
                                 name="species"
                                 type="select"
                                 placeholder="Select a species"
-                                value={formData.species}
-                                onChange={(value) => handleInputChange('species', value)}
-                                options={speciesOptions}
-                                error={submitted && errors.species}
+                                register={register}
+                                required={{
+                                    value: true,
+                                    message: 'Species is required',
+                                }}
+                                options={[
+                                    { value: '', label: 'Select a species' },
+                                    ...speciesOptions,
+                                ]}
+                                error={errors.species && errors.species.message}
                             />
 
                             {/* Sex Dropdown */}
@@ -106,42 +87,78 @@ export function RegisterPet() {
                                 name="sex"
                                 type="select"
                                 placeholder="Select the sex"
-                                value={formData.sex}
-                                onChange={(value) => handleInputChange('sex', value)}
-                                options={sexOptions}
+                                register={register}
+                                required={false}
+                                options={[
+                                    { value: '', label: 'Select the sex' },
+                                    ...sexOptions,
+                                ]}
+                                error={errors.sex && errors.sex.message}
                             />
                         </div>
+
+                        {/* Breed */}
                         <InputField
                             label="Breed"
+                            name="breed"
                             type="text"
                             placeholder="Breed"
+                            register={register}
+                            required={false}
+                            error={errors.breed && errors.breed.message}
                         />
-                        <div className="flex flex-line gap-2">
+
+                        {/* Weight and Height */}
+                        <div className="flex gap-2">
                             <InputField
                                 label="Weight"
+                                name="weight"
                                 type="number"
-                                placeholder="Weight"
+                                placeholder="Weight (kg)"
+                                register={register}
+                                required={false}
+                                error={errors.weight && errors.weight.message}
                             />
                             <InputField
                                 label="Height"
+                                name="height"
                                 type="number"
-                                placeholder="Height"
+                                placeholder="Height (cm)"
+                                register={register}
+                                required={false}
+                                error={errors.height && errors.height.message}
                             />
                         </div>
+
+                        {/* Birthday */}
                         <InputField
                             label="Birthday"
+                            name="birthday"
                             type="date"
                             placeholder="Birthday"
+                            register={register}
+                            required={false}
+                            error={errors.birthday && errors.birthday.message}
                         />
+
+                        {/* Device ID */}
                         <InputField
                             label="Device ID*"
+                            name="deviceId"
                             type="text"
                             placeholder="Device ID"
-                            value={formData.deviceId}
-                            onChange={(value) => handleInputChange('deviceId', value)}
-                            error={submitted && errors.deviceId}
+                            register={register}
+                            required={{
+                                value: true,
+                                message: 'Device ID is required',
+                            }}
+                            error={errors.deviceId && errors.deviceId.message}
                         />
-                        <button className="btn btn-primary text-white w-full mt-4">Register</button>
+
+                        {/* Register Button */}
+                        <button type="submit" className="btn btn-primary">
+                            Register Pet
+                        </button>
                     </form>
                 </div>
             </div>

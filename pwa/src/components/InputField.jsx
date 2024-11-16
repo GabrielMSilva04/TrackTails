@@ -1,3 +1,5 @@
+import React from 'react';
+
 const InputField = ({
                         label,
                         name,
@@ -5,8 +7,10 @@ const InputField = ({
                         placeholder,
                         value,
                         onChange,
-                        error,
+                        register,
+                        required = false,
                         options,
+                        error,
                     }) => {
     return (
         <>
@@ -14,13 +18,13 @@ const InputField = ({
                 <span className="label-text text-secondary font-bold">{label}</span>
                 {type === 'select' ? (
                     <select
-                        name={name}
+                        {...register(name, { required })}
                         value={value}
-                        onChange={(e) => onChange(e.target.value)}
+                        onChange={(e) => onChange?.(e.target.value)}
                         className="select select-bordered w-full"
                     >
                         <option value="" disabled>
-                            {placeholder || `Select ${label}`}
+                            {placeholder || 'Select an option'}
                         </option>
                         {options?.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -30,18 +34,18 @@ const InputField = ({
                     </select>
                 ) : (
                     <input
+                        {...register(name, { required })}
                         type={type}
-                        name={name}
                         placeholder={placeholder}
                         value={value}
-                        onChange={(e) => onChange(e.target.value)}
+                        onChange={(e) => onChange?.(e.target.value)}
                         className="input input-bordered w-full"
                     />
                 )}
                 {error && <p className="text-error text-sm">{error}</p>}
             </label>
         </>
-    )
-}
+    );
+};
 
-export { InputField }
+export { InputField };
