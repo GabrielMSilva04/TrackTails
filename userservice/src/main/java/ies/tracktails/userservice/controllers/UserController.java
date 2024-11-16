@@ -60,13 +60,15 @@ public class UserController {
             );
 
             if (!isAuthenticated) {
-                return new ResponseEntity<>("Invalid Credentials.", HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>("Credenciais inválidas.", HttpStatus.UNAUTHORIZED);
             }
 
-            String token = jwtTokenProvider.generateToken(loginRequest.getEmail());
+            User user = userService.getUserByEmail(loginRequest.getEmail());
+            String token = jwtTokenProvider.generateToken(user.getUserId());
+
             return ResponseEntity.ok(new JwtResponse(token));
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
