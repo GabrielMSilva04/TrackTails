@@ -7,6 +7,7 @@ import {Login} from './pages/Login'
 import {MyPets} from "./pages/MyPets.jsx";
 import {RegisterPet} from "./pages/RegisterPet.jsx";
 import './App.css'
+import {EditPet} from "./pages/EditPet.jsx";
 
 function App() {
 
@@ -23,7 +24,8 @@ function App() {
                 </Route>
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/petregister" element={<RegisterPet />} />
+                <Route path="/registerpet" element={<RegisterPet />} />
+                <Route path="/editpet" element={<EditPet />} />
             </Routes>
         </Router>
     )

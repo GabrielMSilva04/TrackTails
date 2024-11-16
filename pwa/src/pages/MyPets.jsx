@@ -71,7 +71,7 @@ export function MyPets() {
         <>
             <div className="flex flex-line justify-between items-center mb-10">
                 <h1 className="text-3xl text-primary font-bold">My Pets</h1>
-                <Link to="/petregister" className="btn btn-primary text-white mt-4">+ Add Pet</Link>
+                <Link to="/registerpet" className="btn btn-primary text-white mt-4">+ Add Pet</Link>
             </div>
             <div className="flex flex-wrap justify-center gap-4">
                 {pets.map((pet, index) => (
