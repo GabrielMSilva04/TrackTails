@@ -5,7 +5,7 @@ import {faBell, faHouse, faLocationDot, faPaw, faUser} from "@fortawesome/free-s
 
 export default function Layout() {
   return (
-      <div>
+      <>
           <div className="fixed w-full">
               <div className="w-32 mx-auto mt-4">
                   <h1 className="btn btn-ghost text-xl text-primary mx-auto">trackTails.</h1>
@@ -21,9 +21,9 @@ export default function Layout() {
                       </a>
                   </button>
                   <button>
-                      <a className="tooltip" data-tip="Map">
+                      <Link to="/map" className="tooltip" data-tip="Map">
                           <FontAwesomeIcon icon={faLocationDot} color="white"/>
-                      </a>
+                      </Link>
                   </button>
                   <button>
                       <a className="tooltip" data-tip="My Animals">
@@ -41,6 +41,6 @@ export default function Layout() {
                       </a>
                   </button>
           </div>
-      </div>
+      </>
   );
 }
