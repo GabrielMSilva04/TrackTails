@@ -7,8 +7,8 @@ const TimeRangeButton = ({ label, isActive, onClick, icon }) => {
   return (
     <button
       onClick={onClick}
-      className={`btn btn-xs btn-outline m-1 rounded-lg
-        ${isActive ? "btn-primary text-white" : "btn-secondary text-gray-600"}
+      className={`btn btn-xs m-1 rounded-lg
+        ${isActive ? "btn-primary text-white" : "btn-secondary btn-outline text-gray-600"}
       `}
     >
       {icon ? <FontAwesomeIcon icon={icon} className="text-lg" /> : label}
@@ -32,8 +32,8 @@ const CustomTimeRangeDropdown = ({ onSelect, isActive }) => {
 
   return (
     <div className="dropdown dropdown-end">
-      <label tabIndex={0} className={`btn btn-xs btn-outline m-1 rounded-lg
-        ${isActive ? "btn-primary text-white" : "btn-secondary text-gray-600"}
+      <label tabIndex={0} className={`btn btn-xs m-1 rounded-lg
+        ${isActive ? "btn-primary text-white" : "btn-secondary btn-outline text-gray-600"}
       `}>
         <FontAwesomeIcon icon={faCalendarAlt} className="text-lg" />
       </label>

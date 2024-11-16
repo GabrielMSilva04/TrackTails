@@ -52,6 +52,7 @@ const HistoricalAnimalsData = () => {
 
   return (
     <div className="h-64">
+
       <ChartComponent type="bar" data={data} options={options} />
 
       <TimeRangeSelector onSelect={selectHandler} />
