@@ -7,8 +7,12 @@ import TimeRangeSelector from "../components/TimeRangeSelector"
 const HistoricalAnimalsData = () => {
   const { metric } = useParams();
 
-  const selectHandler = (range) => {
+  const timeRangeSelectHandler = (range) => {
     console.log(range);
+  }
+
+  const chartTypeSelectorHandler = (event) => {
+    console.log(event.target.value);
   }
 
   /* Mock data */
@@ -53,7 +57,7 @@ const HistoricalAnimalsData = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <select className="select select-sm select-bordered w-full max-w-xs m-auto">
+      <select className="select select-sm select-bordered w-full max-w-xs m-auto" onChange={chartTypeSelectorHandler}>
         <option value="1">Janeiro</option>
         <option value="2">Fevereiro</option>
         <option value="3">Março</option>
@@ -63,7 +67,7 @@ const HistoricalAnimalsData = () => {
       <div className="h-64">
         <ChartComponent type="bar" data={data} options={options} />
       </div>
-      <TimeRangeSelector onSelect={selectHandler} />
+      <TimeRangeSelector onSelect={timeRangeSelectHandler} />
     </div>
   );
 };
