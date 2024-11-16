@@ -29,7 +29,7 @@ export default function LayoutAnimal() {
             <div className="bg-primary">
                 <div className="bg-white w-full h-3/4 rounded-t-3xl p-1 flex flex-col items-center absolute bottom-0">
                     <div className="mt-7 text-primary font-bold text-2xl items-center justify-center">
-                        <button className="absolute top-3 right-3 text-lg text-warning border rounded-full border-warning w-7 h-7 items-center justify-center"><FontAwesomeIcon icon={faTrash}/></button>
+                        <button className="absolute top-3 right-3 text-lg text-red-700 border rounded-full border-red-700 w-7 h-7 items-center justify-center"><FontAwesomeIcon icon={faTrash}/></button>
                         {animal.name}
                         <button className="ml-1.5 text-lg text-neutral border rounded-full border-neutral w-7 h-7 items-center justify-center"><FontAwesomeIcon icon={faEdit}/></button>
                     </div>
