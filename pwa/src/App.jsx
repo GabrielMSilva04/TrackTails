@@ -5,6 +5,7 @@ import LayoutAnimal from './components/LayoutAnimal'
 import Home from './pages/Home'
 import Register from './pages/Register'
 import Login from './pages/Login'
+import Pet from './pages/Pet'
 import './App.css'
 
 function App() {
@@ -14,13 +15,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route path="/" element={<Home />} />
-
-
           {/* 404 Not Found Route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Route>
-          <Route path="/test" element={<LayoutAnimal />}>
-
+          <Route path="/pet-monitoring" element={<LayoutAnimal />}>
+            <Route path="" element={<Pet />} />
           </Route>
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
