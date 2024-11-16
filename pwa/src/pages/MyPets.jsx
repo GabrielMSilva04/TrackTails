@@ -1,16 +1,19 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons'
 import {Link} from "react-router-dom";
+import {useState} from "react";
 
 export function MyPets() {
     const pets = [
         {
+            id: 1,
             name: 'Fluffy',
             species: 'Cat',
             sex: 'F',
             image: 'https://placecats.com/300/300',
         },
         {
+            id: 2,
             name: 'Cookie',
             species: 'Dog',
             breed: 'Golden Retriever',
@@ -18,6 +21,7 @@ export function MyPets() {
             image: 'https://placedog.net/300/300',
         },
         {
+            id: 3,
             name: 'Bella',
             species: 'Cat',
             breed: 'Siamese',
@@ -25,6 +29,23 @@ export function MyPets() {
             // image: '',
         },
     ]
+
+    // State for filtering
+    const [filters, setFilters] = useState({ name: '', species: '' });
+
+    // Filtered pets
+    const filteredPets = pets.filter((pet) => {
+        const matchesName = pet.name.toLowerCase().includes(filters.name.toLowerCase());
+        const matchesSpecies = filters.species ? pet.species === filters.species : true;
+        return matchesName && matchesSpecies;
+    });
+
+    // Update filter state
+    const handleFilterChange = (field, value) => {
+        setFilters((prev) => ({ ...prev, [field]: value }));
+    };
+
+
     const speciesIcon = {
         Cat: <FontAwesomeIcon icon={faCat} />,
         Dog: <FontAwesomeIcon icon={faDog} />,
@@ -33,7 +54,6 @@ export function MyPets() {
         F: <FontAwesomeIcon icon={faVenus} />,
         M: <FontAwesomeIcon icon={faMars} />,
     }
-
     const petCard = (pet) => {
         return (
             <div className="relative flex flex-col items-center bg-primary rounded-xl p-4 w-40 shadow-lg mt-10">
@@ -69,17 +89,47 @@ export function MyPets() {
 
     return (
         <>
+            {/* Header Section */}
             <div className="flex flex-line justify-between items-center mb-10">
                 <h1 className="text-3xl text-primary font-bold">My Pets</h1>
                 <Link to="/registerpet" className="btn btn-primary text-white mt-4">+ Add Pet</Link>
             </div>
+
+            {/* Filter Section */}
+            <div className="flex flex-line justify-between items-center gap-4 mb-6">
+                {/* Name Filter */}
+                <input
+                    type="text"
+                    placeholder="Search by name"
+                    value={filters.name}
+                    onChange={(e) => handleFilterChange('name', e.target.value)}
+                    className="input input-bordered border-2 input-primary w-7/12"
+                />
+
+                {/* Species Filter */}
+                <select
+                    value={filters.species}
+                    onChange={(e) => handleFilterChange('species', e.target.value)}
+                    className="select select-bordered border-2 select-primary w-5/12"
+                >
+                    <option value="">All Species</option>
+                    <option value="Dog">Dog</option>
+                    <option value="Cat">Cat</option>
+                </select>
+            </div>
+
+            {/* Pet Cards Section */}
             <div className="flex flex-wrap justify-center gap-4">
-                {pets.map((pet, index) => (
-                    <div key={index}>
-                        {petCard(pet)}
-                    </div>
-                ))}
+                {filteredPets.length > 0 ? (
+                    filteredPets.map((pet, index) => (
+                        <div key={index}>
+                            {petCard(pet)}
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-gray-500 text-center w-full">No pets found.</p>
+                )}
             </div>
         </>
-    )
+    );
 }
