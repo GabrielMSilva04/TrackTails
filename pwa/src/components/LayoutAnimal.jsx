@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import NavBar from './Navbar';
 
 
 export default function LayoutAnimal() {
@@ -20,6 +21,7 @@ export default function LayoutAnimal() {
                     <Outlet/>
                 </div>
             </div>
+            <NavBar />
         </div>
     );
 }
