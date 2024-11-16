@@ -25,27 +25,33 @@ export function RegisterPet() {
     ];
 
     return (
-        <>
-            <div className="bg-primary h-screen flex flex-col">
-                {/* Logo Section */}
-                <div className="w-full flex justify-center items-center mt-12">
-                    <h1 className="text-3xl text-white font-bold tracking-wide">trackTails.</h1>
+        <div className="bg-primary h-screen w-full flex flex-col overflow-hidden">
+            {/* Logo Section */}
+            <div className="h-1/6 w-full flex justify-center items-center bg-primary">
+                <h1 className="text-3xl text-white font-bold tracking-wide">trackTails.</h1>
+            </div>
+
+            {/* Formulary Section */}
+            <div className="bg-white w-full rounded-t-3xl p-8 flex flex-col items-center h-5/6 overflow-hidden">
+                <div className="flex items-center justify-between w-full relative mb-6">
+                    <Link to={"/mypets"} className="text-primary font-bold text-lg absolute left-0">← Back</Link>
+                    <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
                 </div>
 
-                {/* Formulary Section */}
-                <div className="bg-white w-full h-fit rounded-t-3xl p-8 flex flex-col items-center absolute bottom-0">
-                    <div className="flex items-center justify-between w-full relative mb-12">
-                        <Link to={"/mypets"} className="text-primary font-bold text-lg absolute left-0">← Back</Link>
-                        <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
-                    </div>
-                    <form className="flex flex-col gap-2 px-6 mb-10" onSubmit={handleSubmit(onSubmit)}>
+                {/* Form Section */}
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="flex flex-col gap-2 h-full w-full">
+                    {/* Scrollable Content */}
+                    <div className="flex-grow overflow-y-auto space-y-4 px-4">
                         <label className="form-control w-full">
                             <div className="label">
                                 <span className="label-text text-secondary font-bold">Photo</span>
                             </div>
                             <input
                                 type="file"
-                                className="file-input file-input-bordered file-input-primary w-full"/>
+                                className="file-input file-input-bordered file-input-primary w-full"
+                            />
                         </label>
 
                         {/* Pet Name Input */}
@@ -75,7 +81,7 @@ export function RegisterPet() {
                                     message: 'Species is required',
                                 }}
                                 options={[
-                                    { value: '', label: 'Select a species' },
+                                    {value: '', label: 'Select a species'},
                                     ...speciesOptions,
                                 ]}
                                 error={errors.species && errors.species.message}
@@ -90,7 +96,7 @@ export function RegisterPet() {
                                 register={register}
                                 required={false}
                                 options={[
-                                    { value: '', label: 'Select the sex' },
+                                    {value: '', label: 'Select the sex'},
                                     ...sexOptions,
                                 ]}
                                 error={errors.sex && errors.sex.message}
@@ -154,14 +160,16 @@ export function RegisterPet() {
                             }}
                             error={errors.deviceId && errors.deviceId.message}
                         />
+                    </div>
 
-                        {/* Register Button */}
-                        <button type="submit" className="btn btn-primary">
+                    {/* Register Button */}
+                    <div className="py-4 bg-white w-full mb-6">
+                        <button type="submit" className="btn btn-primary w-full">
                             Register Pet
                         </button>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
-        </>
+        </div>
     );
 }
