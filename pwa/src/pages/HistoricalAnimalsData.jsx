@@ -19,7 +19,7 @@ const HistoricalAnimalsData = () => {
         data: [30, 50, 80, 45, 90],
         backgroundColor: [
           "rgba(255, 99, 132, 0.5)",
-          "rgba(54, 162, 235, 0.5)",
+          "rgba(55, 55, 55, 0.5)",
           "rgba(255, 206, 86, 0.5)",
           "rgba(75, 192, 192, 0.5)",
           "rgba(153, 102, 255, 0.5)",
@@ -51,12 +51,14 @@ const HistoricalAnimalsData = () => {
   };
 
   return (
-    <div className="h-64">
+    <>
+      <div className="h-64">
 
-      <ChartComponent type="bar" data={data} options={options} />
+        <ChartComponent type="bar" data={data} options={options} />
 
+      </div>
       <TimeRangeSelector onSelect={selectHandler} />
-    </div>
+    </>
   );
 };
 

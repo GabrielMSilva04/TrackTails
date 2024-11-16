@@ -1,5 +1,5 @@
 // src/components/TimeRangeSelector.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarAlt } from "@fortawesome/free-solid-svg-icons";
 
@@ -19,6 +19,10 @@ const TimeRangeButton = ({ label, isActive, onClick, icon }) => {
 const CustomTimeRangeDropdown = ({ onSelect, isActive }) => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false); // Estado para controlar a direção do dropdown
+  const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const handleApply = () => {
     if (startDate && endDate) {
@@ -30,14 +34,38 @@ const CustomTimeRangeDropdown = ({ onSelect, isActive }) => {
     }
   };
 
+  useEffect(() => {
+    if (isOpen && buttonRef.current && dropdownRef.current) {
+      const buttonRect = buttonRef.current.getBoundingClientRect();
+      const dropdownHeight = dropdownRef.current.offsetHeight;
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      
+      // Verifica se há espaço suficiente abaixo do botão
+      setIsFlipped(spaceBelow < dropdownHeight);
+    }
+  }, [isOpen]);
+
   return (
     <div className="dropdown dropdown-end">
-      <label tabIndex={0} className={`btn btn-xs m-1 rounded-lg
-        ${isActive ? "btn-primary text-white" : "btn-secondary btn-outline text-gray-600"}
-      `}>
+      <label
+        tabIndex={0}
+        ref={buttonRef}
+        onClick={() => setIsOpen(!isOpen)}
+        className={`btn btn-xs m-1 rounded-lg ${isActive ? "btn-primary text-white" : "btn-secondary btn-outline text-gray-600"}`}
+      >
         <FontAwesomeIcon icon={faCalendarAlt} className="text-lg" />
       </label>
-      <div tabIndex={0} className="dropdown-content p-4 shadow bg-base-200 rounded-lg w-64">
+
+      {/* Ajuste de posição baseado no estado `isFlipped` */}
+      <div
+        ref={dropdownRef}
+        className={`dropdown-content p-4 shadow bg-base-200 rounded-lg w-64 ${isOpen ? "" : "hidden"}`}
+        style={{
+          position: "absolute",
+          top: isFlipped ? "auto" : "100%", // Se não houver espaço abaixo, mostrar acima
+          bottom: isFlipped ? "100%" : "auto",
+        }}
+      >
         <h3 className="text-sm font-semibold mb-2">Select a custom range</h3>
         <input
           type="datetime-local"
