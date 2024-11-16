@@ -9,7 +9,7 @@ export default function LayoutAnimal() {
                 <h1 className="text-3xl text-white font-bold tracking-wide">trackTails.</h1>
             </div>
             <div className="avatar placeholder">
-                <div className="bg-neutral border-8 border-white text-neutral-content w-32 rounded-full z-10 mx-auto mt-6">
+                <div className="bg-neutral border-8 border-base-100 text-neutral-content w-32 rounded-full z-10 mx-auto mt-6">
                     <img src="https://ilovemydogsomuch.com/wp-content/uploads/2023/02/323839-1600x1066-border-collie-breed-1400x933.jpg" alt="adsasd"/>
                 </div>
             </div>
