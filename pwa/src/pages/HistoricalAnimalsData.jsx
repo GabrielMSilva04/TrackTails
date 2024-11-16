@@ -11,6 +11,7 @@ const HistoricalAnimalsData = () => {
     console.log(range);
   }
 
+  /* Mock data */
   const data = {
     labels: ["Janeiro", "Fevereiro", "Março", "Abril", "Maio"],
     datasets: [
@@ -51,14 +52,19 @@ const HistoricalAnimalsData = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col items-center">
+      <select className="select select-sm select-bordered w-full max-w-xs m-auto">
+        <option value="1">Janeiro</option>
+        <option value="2">Fevereiro</option>
+        <option value="3">Março</option>
+        <option value="4">Abril</option>
+        <option value="5">Maio</option>
+      </select>
       <div className="h-64">
-
         <ChartComponent type="bar" data={data} options={options} />
-
       </div>
       <TimeRangeSelector onSelect={selectHandler} />
-    </>
+    </div>
   );
 };
 

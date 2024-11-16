@@ -15,7 +15,7 @@ export default function LayoutAnimal() {
       </div>
       <div className="h-full pt-24">
         <div className="bg-base-100 w-full h-full rounded-t-3xl flex flex-col items-center pb-44">
-          <div className="mt-10 text-primary font-bold">
+          <div className="mt-8 mb-2 text-primary font-bold">
             Jack
           </div>
           <div className="py-1 h-full overflow-y-auto">
