@@ -27,11 +27,11 @@ public class AnimalController {
     @Operation(summary = "Create animal",
             description = "Create animal")
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Animal created successfully", content = @Content(schema = @Schema(implementation = Animal.class)))
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = String.class)))
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Animal created successfully", content = @Content(schema = @Schema(implementation = Animal.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = String.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Bad request", content = @Content(schema = @Schema(implementation = String.class)))
     })
-    }
+    
     @PostMapping
     public ResponseEntity<Animal> createAnimal(@RequestBody Animal animal, @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
@@ -50,7 +50,7 @@ public class AnimalController {
     @Operation(summary = "Delete animal",
             description = "Delete animal")
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Animal deleted successfully", content = @Content(schema = @Schema(implementation = String.class)))
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Animal deleted successfully", content = @Content(schema = @Schema(implementation = String.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Animal not found", content = @Content(schema = @Schema(implementation = String.class)))
     })
     @DeleteMapping("{id}")
@@ -62,9 +62,8 @@ public class AnimalController {
     @Operation(summary = "Update animal",
             description = "Update animal")
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Animal updated successfully", content = @Content(schema = @Schema(implementation = Animal.class)))
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Animal updated successfully", content = @Content(schema = @Schema(implementation = Animal.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Animal not found", content = @Content(schema = @Schema(implementation = String.class)))
-            @
     })
     @PutMapping("{id}")
     public ResponseEntity<Animal> updateAnimal(@PathVariable long id, @RequestBody Animal animal) {
@@ -76,7 +75,7 @@ public class AnimalController {
     @Operation(summary = "Get animal",
             description = "Get animal")
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Animal retrieved successfully", content = @Content(schema = @Schema(implementation = Animal.class)))
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Animal retrieved successfully", content = @Content(schema = @Schema(implementation = Animal.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Animal not found", content = @Content(schema = @Schema(implementation = String.class)))
     })
     @GetMapping("{id}")
@@ -88,7 +87,7 @@ public class AnimalController {
     @Operation(summary = "Get all animals",
             description = "Get all animals")
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Animals retrieved successfully", content = @Content(schema = @Schema(implementation = Animal.class)))
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Animals retrieved successfully", content = @Content(schema = @Schema(implementation = Animal.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Animals not found", content = @Content(schema = @Schema(implementation = String.class)))
     })
     @GetMapping

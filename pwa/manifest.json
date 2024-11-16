@@ -1,6 +1,6 @@
 {
-    "short_name": "ReactPWA",
-    "name": "React Progressive Web App",
+    "short_name": "TrackTails",
+    "name": "TrackTails",
     "icons": [
       {
         "src": "/icon-192x192.png",
@@ -13,7 +13,7 @@
         "type": "image/png"
       }
     ],
-    "start_url": ".",
+    "start_url": "/",
     "display": "standalone",
     "theme_color": "#000000",
     "background_color": "#ffffff"

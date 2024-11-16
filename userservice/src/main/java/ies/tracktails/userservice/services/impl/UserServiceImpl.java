@@ -20,12 +20,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User registerUser(User user) {
-        if(!userRepository.findByEmail(user.getEmail()).isEmpty()){
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already in use");
         }
 
-        User savedUser = userRepository.save(user);
-        return savedUser;
+        String originalPassword = user.getHashPassword();
+        String hashedPassword = BCrypt.hashpw(originalPassword, BCrypt.gensalt());
+        user.setHashPassword(hashedPassword);
+
+        return userRepository.save(user);
     }
 
     @Override
@@ -44,15 +47,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long userId, User user){
+    public User updateUser(Long userId, User user) {
         User userToUpdate = getUserById(userId);
-        if (userToUpdate == null){
+        if (userToUpdate == null) {
             return null;
         }
+
         userToUpdate.setDisplayName(user.getDisplayName());
         userToUpdate.setEmail(user.getEmail());
-        userToUpdate.setHashPassword(user.getHashPassword());
-        userToUpdate.setSalt(user.getSalt());
+
+        if (user.getHashPassword() != null && !user.getHashPassword().isEmpty()) {
+            String hashedPassword = BCrypt.hashpw(user.getHashPassword(), BCrypt.gensalt());
+            userToUpdate.setHashPassword(hashedPassword);
+        }
+
         return userRepository.save(userToUpdate);
     }
 
@@ -67,13 +75,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean authenticateUser(String password, String email){
+    public Boolean authenticateUser(String password, String email) {
         User userToAuthenticate = getUserByEmail(email);
-        if(userToAuthenticate == null){
+        if (userToAuthenticate == null) {
             throw new IllegalArgumentException("User not found");
         }
 
-        return BCrypt.checkpw(password + userToAuthenticate.getSalt(), userToAuthenticate.getHashPassword());
+        boolean isPasswordValid = BCrypt.checkpw(password, userToAuthenticate.getHashPassword());
+
+        return isPasswordValid;
     }
 
     @Override
