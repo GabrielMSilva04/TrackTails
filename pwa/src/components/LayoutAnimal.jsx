@@ -14,7 +14,7 @@ export default function LayoutAnimal() {
                 </div>
             </div>
             <div className="bg-primary">
-                <div className="bg-white w-full h-3/4 rounded-t-3xl p-8 flex flex-col items-center absolute bottom-0">
+                <div className="bg-base-100 w-full h-3/4 rounded-t-3xl p-8 flex flex-col items-center absolute bottom-0">
                     <div className="mt-10 text-primary font-bold">
                         Jack
                     </div>
