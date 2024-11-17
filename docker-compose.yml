@@ -36,18 +36,17 @@ services:
     volumes:
       - influxdb_data:/var/lib/influxdb
 
-  # Nginx as a reverse proxy
-  nginx:
-    image: nginx:latest
-    container_name: nginx
+  # Spring Boot Cloud Gateway as a reverse proxy
+  gateway:
+    build:
+      context: ./
+      dockerfile: ./gateway/Dockerfile
+    container_name: gateway
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf  # Mounting to conf.d as default.conf
     depends_on:
-      - mariadb
-      - influxdb
+      - userservice
 
   # Application services
   animalservice:
@@ -113,13 +112,26 @@ services:
     ports:
       - "8085:8080"
     env_file:
-        - .env
+      - .env
     environment:
       - DB_HOST=mariadb
       - DB_PORT=3306
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb
+
+  pwa:
+    build:
+      context: ./
+      dockerfile: ./pwa/Dockerfile
+    container_name: pwa
+    env_file:
+      - .env
+    depends_on:
+      - animalservice
+      - notificationservice
+      - reportservice
+      - userservice
 
 volumes:
   mariadb_data:

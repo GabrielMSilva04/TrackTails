@@ -1,0 +1,49 @@
+server:
+  port: 80
+
+spring:
+  application:
+    name: Gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: animalservice
+          uri: http://animalservice:8080
+          predicates:
+            - Path=/api/v1/animals/**
+            - Path=/api/v1/animaldata/**
+        - id: notificationservice
+          uri: http://notificationservice:8080
+          predicates:
+            - Path=/api/v1/notifications/**
+        - id: reportservice
+          uri: http://reportservice:8080
+          predicates:
+            - Path=/api/v1/reports/**
+        - id: userservice
+          uri: http://userservice:8080
+          predicates:
+            - Path=/api/v1/users/**
+        - id: pwa
+          uri: http://pwa:5173
+          predicates:
+            - Path=/**
+
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://userservice/api/v1/pub_key # URL do servidor de autorização jwk
+
+# JWK deve ter uma estrutura com a informação mínima de chave pública
+# {
+#   "keys": [
+#     {
+#       "kty": "RSA",
+#       "e": "...",
+#       "n": "..."
+#     }
+#   ]
+# }
