@@ -1,6 +1,7 @@
 package ies.tracktails.userservice.dtos;
 
-public class LoginRequest {
+public class RegisterRequest {
+    private String displayName;
     private String email;
     private String password;
 
@@ -12,6 +13,14 @@ public class LoginRequest {
         this.email = email;
     }
 
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -20,4 +29,3 @@ public class LoginRequest {
         this.password = password;
     }
 }
-

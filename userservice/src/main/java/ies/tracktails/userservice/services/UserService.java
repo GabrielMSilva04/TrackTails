@@ -10,7 +10,7 @@ public interface UserService {
     // Basic CRUD methods
     //Create
     // UserService.java
-    User registerUser(User user);
+    User registerUser(String displayName, String email, String password);
 
     //Read
     User getUserById(Long id);
@@ -18,13 +18,13 @@ public interface UserService {
     User getUserByEmail(String email);
 
     //Update
-    User updateUser(Long userId, User user);
+    User updateUser(Long userId, String displayName, String email, String password);
 
     //Delete
     User deleteUser(Long userId);
 
     // Authentication Methods
-    Boolean authenticateUser(String password, String username);
+    Boolean authenticateUser(String password, String email);
 
     //Auxiliary Methods
     Boolean userExists(Long userId);
