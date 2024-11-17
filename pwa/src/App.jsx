@@ -36,11 +36,10 @@ function App() {
           {/* 404 Not Found Route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Route>
-        <Route path="/animal" element={<LayoutAnimal />}>
+        <Route path="/animal" element={<LayoutAnimal showButtons={"back-only"}/>}>
           <Route path="/animal/historical" element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />} />
         </Route>
-
-        <Route path="/pet-monitoring" element={<LayoutAnimal />}>
+        <Route path="/pet-monitoring" element={<LayoutAnimal showButtons={"all"} />}>
           <Route path="" element={<Pet />} />
         </Route>
 

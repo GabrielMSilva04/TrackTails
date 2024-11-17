@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faHeartPulse, faMapLocationDot, faGauge, faSyringe, faLungs} from "@fortawesome/free-solid-svg-icons";
+import {faHeartPulse, faMapLocationDot, faGauge, faSyringe, faLungs, faPlus} from "@fortawesome/free-solid-svg-icons";
 import { faFilePdf } from "@fortawesome/free-regular-svg-icons";
 import sleepLogo from "../assets/sleep.png";
 import PropTypes from "prop-types";
@@ -30,6 +30,11 @@ Card.propTypes = {
 
 export default function LayoutAnimal() {
     const animal = {
+        age: 3,
+        species: "Dog",
+        weight: 30,
+        height: 50,
+        sex: "m",
         bpm: 120,
         sleep: "2H20MIN",
         speed: 5,
@@ -47,17 +52,26 @@ export default function LayoutAnimal() {
     ];
 
     return (
-        <div className="flex flex-wrap justify-between px-4 mt-4 gap-4">
-            {stats.map((stat, index) => (
-                <Card
-                    key={index}
-                    icon={stat.icon}
-                    label={stat.label}
-                    value={stat.value}
-                    to={stat.to}
-                    image={stat.image}
-                />
-            ))}
+        <div>
+            <div className="mt-2 text-secondary font-bold text-xs text-center">
+                Age: {animal.age}, {animal.species}, Sex: {animal.sex === 'm' ? 'Male' : 'Female'}
+            </div>
+            <div className="mt-2 text-secondary font-bold text-xs text-center">
+                Last Weight: {animal.weight}kg, Last Height: {animal.height}cm
+                {/*<button className="ml-1.5 text-sm text-neutral border rounded-full border-neutral w-5 h-5 items-center justify-center"><FontAwesomeIcon icon={faPlus}/></button>*/}
+            </div>
+            <div className="flex flex-wrap justify-between px-4 mt-4 gap-4">
+                {stats.map((stat, index) => (
+                    <Card
+                        key={index}
+                        icon={stat.icon}
+                        label={stat.label}
+                        value={stat.value}
+                        to={stat.to}
+                        image={stat.image}
+                    />
+                ))}
+            </div>
         </div>
     );
 }
