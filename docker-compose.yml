@@ -62,11 +62,11 @@ services:
     environment:
       DB_HOST: mariadb
       DB_PORT: 3306
-      INFLUX_HOST: influxdb
-      INFLUX_PORT: 8086
-      INFLUX_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
-      INFLUX_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
-      INFLUX_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
+      INFLUXDB_HOST: influxdb
+      INFLUXDB_PORT: 8086
+      INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
+      INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
     depends_on:
       - mariadb
       - influxdb
@@ -84,6 +84,7 @@ services:
       - .env
     environment:
       - DB_HOST=mariadb
+      - DB_PORT=3306
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb
@@ -99,6 +100,7 @@ services:
         - .env
     environment:
       - DB_HOST=mariadb
+      - DB_PORT=3306
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb
@@ -114,6 +116,7 @@ services:
         - .env
     environment:
       - DB_HOST=mariadb
+      - DB_PORT=3306
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb

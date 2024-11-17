@@ -1,4 +1,4 @@
-package ies.tracktails.notificationservice.configurations;
+package ies.tracktails.userservice.configurations;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -11,8 +11,8 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("Notifications API")
+                .info(new Info().title("TrackTails Users API")
                         .version("1.0")
-                        .description("Notifications API documentation for TrackTails"));
+                        .description("Users API documentation for TrackTails"));
     }
 }
