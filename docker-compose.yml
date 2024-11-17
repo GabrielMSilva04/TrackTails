@@ -113,13 +113,28 @@ services:
     ports:
       - "8085:8080"
     env_file:
-        - .env
+      - .env
     environment:
       - DB_HOST=mariadb
       - DB_PORT=3306
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb
+
+  pwa:
+    build:
+      context: ./
+      dockerfile: ./pwa/Dockerfile
+    container_name: pwa
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - animalservice
+      - notificationservice
+      - reportservice
+      - userservice
 
 volumes:
   mariadb_data:
