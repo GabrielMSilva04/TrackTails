@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import {InputField} from "../components/InputField.jsx";
 
-export const EditPet = () => {
+export default function EditPet() {
     // Example pet information
     const petData = {
         name: 'Buddy',
