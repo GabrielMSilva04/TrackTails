@@ -1,34 +1,45 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faHouse, faLocationDot, faPaw, faUser } from '@fortawesome/free-solid-svg-icons';
+import {NavLink} from "react-router-dom";
 
 export default function Navbar() {
     return (
         <div className="btm-nav bg-primary rounded-lg mb-3 w-3/4 mx-auto">
             <button>
-                <a className="tooltip my-auto" data-tip="Home">
-                    <FontAwesomeIcon icon={faHouse} color="white" />
-                </a>
+                <NavLink to="/" className='tooltip my-auto' data-tip="Home">
+                    {({ isActive }) => (
+                        <FontAwesomeIcon icon={faHouse} color={isActive ? '#1cb51c' : 'white'} />
+                    )}
+                </NavLink>
             </button>
             <button>
-                <a className="tooltip" data-tip="Map">
-                    <FontAwesomeIcon icon={faLocationDot} color="white" />
-                </a>
+                <NavLink to="/map" className="tooltip" data-tip="Map">
+                    {({ isActive }) => (
+                        <FontAwesomeIcon icon={faLocationDot} color={isActive ? '#1cb51c' : 'white'} />
+                    )}
+                </NavLink>
             </button>
             <button>
-                <a className="tooltip" data-tip="My Animals">
-                    <FontAwesomeIcon icon={faPaw} color="white" />
-                </a>
+                <NavLink to="/mypets" className="tooltip" data-tip="My Animals">
+                    {({ isActive }) => (
+                        <FontAwesomeIcon icon={faPaw} color={isActive ? '#1cb51c' : 'white'} />
+                    )}
+                </NavLink>
             </button>
             <button>
-                <a className="tooltip" data-tip="Notifications">
-                    <FontAwesomeIcon icon={faBell} color="white" />
-                </a>
+                <NavLink className="tooltip" data-tip="Notifications">
+                    {({ isActive }) => (
+                        <FontAwesomeIcon icon={faBell} color="white" />
+                    )}
+                </NavLink>
             </button>
             <button>
-                <a className="tooltip" data-tip="Profile">
-                    <FontAwesomeIcon icon={faUser} color="white" />
-                </a>
+                <NavLink className="tooltip" data-tip="Profile">
+                    {({ isActive }) => (
+                        <FontAwesomeIcon icon={faUser} color="white" />
+                    )}
+                </NavLink>
             </button>
         </div>
     );
