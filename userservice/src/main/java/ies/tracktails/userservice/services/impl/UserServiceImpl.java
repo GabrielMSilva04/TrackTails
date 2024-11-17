@@ -19,14 +19,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User registerUser(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+    public User registerUser(String displayName, String email, String password) {
+        if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already in use");
         }
 
-        String originalPassword = user.getHashPassword();
-        String hashedPassword = BCrypt.hashpw(originalPassword, BCrypt.gensalt());
-        user.setHashPassword(hashedPassword);
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        User user = new User(displayName, email, hashedPassword);
 
         return userRepository.save(user);
     }
@@ -47,17 +46,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long userId, User user) {
+    public User updateUser(Long userId, String displayName, String email, String password){
         User userToUpdate = getUserById(userId);
         if (userToUpdate == null) {
             return null;
         }
 
-        userToUpdate.setDisplayName(user.getDisplayName());
-        userToUpdate.setEmail(user.getEmail());
+        userToUpdate.setDisplayName(displayName);
+        userToUpdate.setEmail(email);
 
-        if (user.getHashPassword() != null && !user.getHashPassword().isEmpty()) {
-            String hashedPassword = BCrypt.hashpw(user.getHashPassword(), BCrypt.gensalt());
+        if (password != null && !password.isEmpty()) {
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
             userToUpdate.setHashPassword(hashedPassword);
         }
 
