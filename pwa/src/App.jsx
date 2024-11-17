@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
 import Home from './pages/Home'
-//import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
+import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
 import Register from './pages/Register'
 import Login from './pages/Login'
 import './App.css'
@@ -33,7 +33,7 @@ function App() {
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Route>
         <Route path="/animal" element={<LayoutAnimal />}>
-          {/*<Route path="/animal/historical" element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />} />*/}
+          <Route path="/animal/historical" element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />} />
 
         </Route>
         <Route path="/register" element={<Register />} />
