@@ -1,18 +1,6 @@
-const InputField = ({ label, type, placeholder, value, onChange }) => {
-    return (
-        <div className="mb-2">
-            <label className="text-secondary text-sm font-bold">{label}</label>
-            <input
-                type={type}
-                placeholder={placeholder}
-                className="input h-10 bg-base-200 text-primary w-full"
-            />
-        </div>
-    );
-};
+import {InputField} from "../components/InputField.jsx";
 
-
-export default function Home() {
+export default function Register() {
     return (
         <div className="bg-primary h-screen flex flex-col">
             {/* Logo Section */}
@@ -23,7 +11,7 @@ export default function Home() {
             {/* Formulary Section */}
             <div className="bg-white w-full h-3/4 rounded-t-3xl p-8 flex flex-col items-center absolute bottom-0">
                 <h2 className="text-2xl font-bold text-primary mb-2">Create your account</h2>
-                <form className="w-3/4 mt-2 flex flex-col">
+                <form className="w-3/4 mt-2 flex flex-col gap-2">
                     <InputField
                         label="Display Name"
                         type="text"

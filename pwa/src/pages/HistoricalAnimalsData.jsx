@@ -56,7 +56,7 @@ const HistoricalAnimalsData = () => {
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center mt-2">
       <select className="select select-sm select-bordered w-full max-w-xs m-auto" onChange={chartTypeSelectorHandler}>
         <option value="1">Janeiro</option>
         <option value="2">Fevereiro</option>
