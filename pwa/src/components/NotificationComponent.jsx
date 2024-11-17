@@ -8,7 +8,7 @@ export default function NotificationComponent({ name, notification, image, warni
         name: PropTypes.string.isRequired,
         notification: PropTypes.string.isRequired,
         image: PropTypes.string.isRequired,
-        warning: PropTypes.number // New prop to handle the warning state
+        warning: PropTypes.number
     };
 
     const [isVisible, setIsVisible] = useState(true);

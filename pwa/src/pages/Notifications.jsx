@@ -2,6 +2,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
 import { useState } from "react";
 import NotificationComponent from "../components/NotificationComponent";
+import axios from "axios";
+
+const base_url = "http://localhost:8083/api/v1/notifications";
 
 export default function Notifications() {
     const initialNotifications = [
