@@ -1,7 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import NavBar from './Navbar';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 
 
