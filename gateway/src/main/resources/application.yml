@@ -8,24 +8,42 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: test_route
-          uri: http://localhost:8082  # Simulando uma URL local dos microserviços
+        - id: animalservice
+          uri: http://animalservice
           predicates:
-            - Path=/api/**
+            - Path=/api/v1/animals/**
+            - Path=/api/v1/animaldata/**
+        - id: notificationservice
+          uri: http://notificationservice
+          predicates:
+            - Path=/api/v1/notifications/**
+        - id: reportservice
+          uri: http://reportservice
+          predicates:
+            - Path=/api/v1/reports/**
+        - id: userservice
+          uri: http://userservice
+          predicates:
+            - Path=/api/v1/users/**
+        - id: pwa
+          uri: http://pwa
+          predicates:
+            - Path=/**
+
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:9009/pub.json # URL do servidor de autorização jwk
+          jwk-set-uri: http://userservice/api/v1/pub_key # URL do servidor de autorização jwk
 
 # JWK deve ter uma estrutura com a informação mínima de chave pública
 # {
 #   "keys": [
 #     {
 #       "kty": "RSA",
-#       "e": "AQAB",
-#       "n": "n0X
+#       "e": "...",
+#       "n": "..."
 #     }
 #   ]
 # }

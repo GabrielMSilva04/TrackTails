@@ -1,6 +1,6 @@
 import {InputField} from "../components/InputField.jsx";
 
-export function Register() {
+export default function Register() {
     return (
         <div className="bg-primary h-screen flex flex-col">
             {/* Logo Section */}
