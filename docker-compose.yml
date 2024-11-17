@@ -36,18 +36,17 @@ services:
     volumes:
       - influxdb_data:/var/lib/influxdb
 
-  # Nginx as a reverse proxy
-  nginx:
-    image: nginx:latest
-    container_name: nginx
+  # Spring Boot Cloud Gateway as a reverse proxy
+  gateway:
+    build:
+      context: ./
+      dockerfile: ./gateway/Dockerfile
+    container_name: gateway
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf  # Mounting to conf.d as default.conf
     depends_on:
-      - mariadb
-      - influxdb
+      - userservice
 
   # Application services
   animalservice:
