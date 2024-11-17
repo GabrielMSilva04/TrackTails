@@ -3,7 +3,11 @@ package ies.tracktails.animalservice.controllers;
 import ies.tracktails.animalsDataCore.entities.Animal;
 import ies.tracktails.animalservice.services.AnimalService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import ies.tracktails.animalservice.components.JwtTokenProvider;
@@ -11,12 +15,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/animals")
 public class AnimalController {
     private final AnimalService animalService;
     private final JwtTokenProvider jwtTokenProvider;
+
+    @Value("${upload.max-file-size}")
+    private long maxFileSize;
 
     @Autowired
     public AnimalController(AnimalService animalService, JwtTokenProvider jwtTokenProvider) {
@@ -124,5 +137,97 @@ public class AnimalController {
             return new ResponseEntity<>(animalService.getAnimalsByUserId(userId), HttpStatus.OK);
         }
         return new ResponseEntity<>(animalService.getAllAnimals(), HttpStatus.OK);
+    }
+
+    @Operation(summary = "Upload image for animal", description = "Upload an image and associate it with an animal")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid file"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Animal not found"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @PostMapping("/{id}/upload-image")
+    public ResponseEntity<?> uploadImage(
+            @PathVariable Long id,
+            @RequestParam("image") MultipartFile file,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+
+        ResponseEntity<?> response = validateAndExtractUserId(authorizationHeader);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            return response;
+        }
+
+        try {
+            Animal animal = animalService.getAnimal(id);
+            if (animal == null) {
+                return new ResponseEntity<>("Animal not found", HttpStatus.NOT_FOUND);
+            }
+
+            String contentType = file.getContentType();
+            if (contentType == null || (!contentType.equals("image/jpeg") && !contentType.equals("image/png") && !contentType.equals("image/heic"))) {
+                return new ResponseEntity<>("Invalid file type. Only JPG, PNG, and HEIC are allowed.", HttpStatus.BAD_REQUEST);
+            }
+
+            if (file.getSize() > maxFileSize) {
+                return new ResponseEntity<>("File size exceeds the limit of " + (maxFileSize / (1024 * 1024)) + "MB.", HttpStatus.BAD_REQUEST);
+            }
+
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+
+            Path uploadDir = Paths.get("uploads/animals");
+            Files.createDirectories(uploadDir);
+
+            Path filePath = uploadDir.resolve(fileName);
+
+            if (animal.getImagePath() != null) {
+                Path oldImagePath = Paths.get(animal.getImagePath());
+                Files.deleteIfExists(oldImagePath);
+            }
+
+            Files.write(filePath, file.getBytes());
+
+            animal.setImagePath(filePath.toString());
+            animalService.updateAnimal(id, animal);
+
+            return new ResponseEntity<>("Image uploaded successfully", HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Could not upload image", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Operation(summary = "Get animal image", description = "Retrieve the image associated with an animal")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Image retrieved successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Image not found")
+    })
+    @GetMapping("/{id}/image")
+    public ResponseEntity<?> getImage(@PathVariable Long id) {
+        try {
+            Animal animal = animalService.getAnimal(id);
+            if (animal == null || animal.getImagePath() == null) {
+                return new ResponseEntity<>("Image not found", HttpStatus.NOT_FOUND);
+            }
+
+            Path filePath = Paths.get(animal.getImagePath());
+            Resource file = new UrlResource(filePath.toUri());
+
+            if (!file.exists()) {
+                return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+            }
+
+            String contentType = Files.probeContentType(filePath);
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(file);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Could not retrieve image", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

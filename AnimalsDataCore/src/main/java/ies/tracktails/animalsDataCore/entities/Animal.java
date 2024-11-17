@@ -28,6 +28,9 @@ public class Animal {
 
     private String beCarefulWith;
 
+    @Column(name="image_path", nullable = true)
+    private String imagePath;
+
     public Animal() {
         super();
     }
@@ -89,6 +92,14 @@ public class Animal {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public Long getDeviceId() {

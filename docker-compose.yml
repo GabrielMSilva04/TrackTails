@@ -72,6 +72,8 @@ services:
     depends_on:
       - mariadb
       - influxdb
+    volumes:
+    - animal-images:/uploads/animals
 
   notificationservice:
     build:
@@ -126,3 +128,4 @@ services:
 volumes:
   mariadb_data:
   influxdb_data:
+  animal-images:
