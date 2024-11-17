@@ -3,13 +3,13 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
 import Home from './pages/Home'
-import {Pet} from './pages/Pet'
-import {Register} from './pages/Register'
-import {Login} from './pages/Login'
-import {MyPets} from "./pages/MyPets.jsx";
-import {RegisterPet} from "./pages/RegisterPet.jsx";
-import {EditPet} from "./pages/EditPet.jsx";
-import {HistoricalAnimalsData} from './pages/HistoricalAnimalsData'
+import Pet from './pages/Pet'
+import Register from './pages/Register'
+import Login from './pages/Login'
+import MyPets from "./pages/MyPets.jsx";
+import RegisterPet from "./pages/RegisterPet.jsx";
+import EditPet from "./pages/EditPet.jsx";
+import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
 
 import './App.css'
 

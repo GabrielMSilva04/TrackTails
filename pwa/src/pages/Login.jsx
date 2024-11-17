@@ -1,6 +1,6 @@
 import {InputField} from "../components/InputField.jsx";
 
-export function Login() {
+export default function Login() {
     return (
         <div className="bg-primary h-screen flex flex-col">
             {/* Logo Section */}
