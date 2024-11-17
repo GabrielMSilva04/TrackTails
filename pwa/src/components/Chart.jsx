@@ -5,7 +5,7 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-	TimeScale,
+  TimeScale,
   BarElement,
   LineElement,
   PointElement,
@@ -21,7 +21,7 @@ import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 ChartJS.register(
   CategoryScale,
   LinearScale,
-	TimeScale,
+  TimeScale,
   BarElement,
   LineElement,
   PointElement,

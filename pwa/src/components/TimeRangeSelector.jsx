@@ -39,7 +39,7 @@ const CustomTimeRangeDropdown = ({ onSelect, isActive }) => {
       const buttonRect = buttonRef.current.getBoundingClientRect();
       const dropdownHeight = dropdownRef.current.offsetHeight;
       const spaceBelow = window.innerHeight - buttonRect.bottom;
-      
+
       // Verifica se há espaço suficiente abaixo do botão
       setIsFlipped(spaceBelow < dropdownHeight);
     }
