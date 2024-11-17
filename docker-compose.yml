@@ -67,11 +67,13 @@ services:
       INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
       INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
       INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
     depends_on:
       - mariadb
       - influxdb
     volumes:
-      - ./animalservice/src/main/resources/security/pub.pem:/app/src/main/resources/security/pub.pem
+    - animal-images:/uploads/animals
 
   notificationservice:
     build:
@@ -118,9 +120,12 @@ services:
       - DB_HOST=mariadb
       - DB_PORT=3306
       - INFLUX_HOST=influxdb
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
     depends_on:
       - mariadb
 
 volumes:
   mariadb_data:
   influxdb_data:
+  animal-images:
