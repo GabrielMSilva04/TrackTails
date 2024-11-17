@@ -12,7 +12,7 @@ export default function Finders() {
     const [showTooltip, setShowTooltip] = useState(false);
 
     const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text).then(r => setShowTooltip(true));
+        navigator.clipboard.writeText(text).then(() => setShowTooltip(true));
 
         setTimeout(() => {
             setShowTooltip(false);
