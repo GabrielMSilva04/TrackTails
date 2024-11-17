@@ -12,6 +12,7 @@ import EditPet from "./pages/EditPet.jsx";
 import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
 
 import './App.css'
+import Notifications from "./pages/Notifications.jsx";
 
 function App() {
   const [selectedAnimal, setSelectedAnimal] = useState('')
@@ -31,6 +32,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<h2>About</h2>} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/mypets" element={<MyPets />} />
 
           {/* 404 Not Found Route */}

@@ -5,6 +5,7 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
+  TimeScale,
   BarElement,
   LineElement,
   PointElement,
@@ -15,10 +16,12 @@ import {
   RadialLinearScale,
   Filler,
 } from "chart.js";
+import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  TimeScale,
   BarElement,
   LineElement,
   PointElement,
