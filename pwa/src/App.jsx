@@ -3,10 +3,11 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
 import Home from './pages/Home'
-import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
+//import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
 import Register from './pages/Register'
 import Login from './pages/Login'
 import './App.css'
+import Notifications from "./pages/Notifications.jsx";
 
 function App() {
   const [selectedAnimal, setSelectedAnimal] = useState('')
@@ -26,12 +27,13 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<h2>About</h2>} />
+          <Route path="/notifications" element={<Notifications />} />
 
           {/* 404 Not Found Route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Route>
         <Route path="/animal" element={<LayoutAnimal />}>
-          <Route path="/animal/historical" element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />} />
+          {/*<Route path="/animal/historical" element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />} />*/}
 
         </Route>
         <Route path="/register" element={<Register />} />
