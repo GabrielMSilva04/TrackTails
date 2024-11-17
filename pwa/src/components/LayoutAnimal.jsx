@@ -38,21 +38,21 @@ export default function LayoutAnimal({ showButtons = "all" }) {
       <div className="h-full pt-20">
         <div className="bg-base-100 w-full h-full rounded-t-3xl flex flex-col pb-36 items-center">
           {showButtons === "all" && (
-              <button className="text-lg text-red-700 border rounded-full border-red-700 w-7 h-7 m-2 ml-auto z-20">
-                <FontAwesomeIcon icon={faTrash} />
-              </button>
+            <button className="text-lg text-red-700 border rounded-full border-red-700 w-7 h-7 m-2 ml-auto z-20">
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
           )}
           {showButtons === "all" ? (
-              <div className="mt-4 text-primary font-bold text-2xl items-center justify-center">
-                {animal.name}
-                <button className="ml-1.5 text-lg text-neutral border rounded-full border-neutral w-7 h-7 items-center justify-center">
-                  <FontAwesomeIcon icon={faEdit} />
-                </button>
-              </div>
+            <div className="mt-4 text-primary font-bold text-2xl items-center justify-center">
+              {animal.name}
+              <button className="ml-1.5 text-lg text-neutral border rounded-full border-neutral w-7 h-7 items-center justify-center">
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
+            </div>
           ) : (
-              <div className="mt-14 text-primary font-bold text-2xl items-center justify-center">
-                {animal.name}
-              </div>
+            <div className="mt-14 text-primary font-bold text-2xl items-center justify-center">
+              {animal.name}
+            </div>
           )}
 
           <div className="overflow-y-auto">
@@ -61,27 +61,6 @@ export default function LayoutAnimal({ showButtons = "all" }) {
         </div>
       </div>
       <NavBar />
-    </div>
-  );
-}
-
-import { faEdit, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
-
-function _LayoutAnimal() {
-
-  return (
-    <div className="bg-primary h-screen flex flex-col">
-      <div className="w-full flex justify-center items-center mt-12">
-        <h1 className="text-3xl text-white font-bold tracking-wide">trackTails.</h1>
-      </div>
-      <div className="avatar placeholder">
-        <div className="bg-neutral border-8 border-white text-neutral-content w-32 rounded-full z-10 mx-auto mt-8">
-          <img src={animal.img} alt={animal.name} />
-        </div>
-      </div>
-      <div className="bg-primary">
-      </div>
-
     </div>
   );
 }
