@@ -8,7 +8,7 @@ import {Login} from './pages/Login'
 import {MyPets} from "./pages/MyPets.jsx";
 import {RegisterPet} from "./pages/RegisterPet.jsx";
 import {EditPet} from "./pages/EditPet.jsx";
-import {HistoricalAnimalsData} from './pages/HistoricalAnimalsData'
+import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
 
 import './App.css'
 
