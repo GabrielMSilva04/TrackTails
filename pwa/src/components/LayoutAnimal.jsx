@@ -11,7 +11,7 @@ export default function LayoutAnimal({ showButtons = "all" }) {
 
     /* Added show button prop to make it possible to use the layout in different pages:
         - showButtons={"all"}: Shows the edit and delete buttons for pet monitoring page
-        - showButtons={"back-only"}: Shows only the back button for the data page
+        - showButtons={"back-only"}: Shows only the back button for the historical data page
         - showButtons={"none"}: Doesn't show any button for finders page
      */
 
