@@ -23,17 +23,24 @@ public class Animal {
     @Column(nullable = false)
     private Long userId;
 
+    @Column(nullable = false)
+    private Long deviceId;
+
+    private String beCarefulWith;
+
     public Animal() {
         super();
     }
 
-    public Animal(String name, String species, char sex,Date birthDate, Long userId) {
+    public Animal(String name, String species, char sex,Date birthDate, Long userId, Long deviceId, String beCarefulWith) {
         super();
         this.name = name;
         this.species = species;
         this.sex = sex;
         this.birthDate = birthDate;
         this.userId = userId;
+        this.deviceId = deviceId;
+        this.beCarefulWith = beCarefulWith;
     }
 
     public Long getId() {
@@ -84,6 +91,22 @@ public class Animal {
         this.userId = userId;
     }
 
+    public Long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(Long deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public String getBeCarefulWith() {
+        return beCarefulWith;
+    }
+
+    public void setBeCarefulWith(String beCarefulWith) {
+        this.beCarefulWith = beCarefulWith;
+    }
+
     @Override
     public String toString() {
         return "Animal{" +
@@ -93,6 +116,8 @@ public class Animal {
                 ", sex'" + sex + '\'' +
                 ", birthDate=" + birthDate +
                 ", userId=" + userId +
+                ", deviceId=" + deviceId +
+                ", beCarefulWith='" + beCarefulWith + '\'' +
                 '}';
     }
 }
