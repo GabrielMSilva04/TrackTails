@@ -1,5 +1,5 @@
 server:
-  port: 8102
+  port: 80
 
 spring:
   application:
@@ -9,24 +9,24 @@ spring:
     gateway:
       routes:
         - id: animalservice
-          uri: http://animalservice
+          uri: http://animalservice:8080
           predicates:
             - Path=/api/v1/animals/**
             - Path=/api/v1/animaldata/**
         - id: notificationservice
-          uri: http://notificationservice
+          uri: http://notificationservice:8080
           predicates:
             - Path=/api/v1/notifications/**
         - id: reportservice
-          uri: http://reportservice
+          uri: http://reportservice:8080
           predicates:
             - Path=/api/v1/reports/**
         - id: userservice
-          uri: http://userservice
+          uri: http://userservice:8080
           predicates:
             - Path=/api/v1/users/**
         - id: pwa
-          uri: http://pwa
+          uri: http://pwa:5173
           predicates:
             - Path=/**
 
