@@ -3,7 +3,7 @@ import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons
 import {Link} from "react-router-dom";
 import {useState} from "react";
 
-export function MyPets() {
+export default function MyPets() {
     const pets = [
         {
             id: 1,

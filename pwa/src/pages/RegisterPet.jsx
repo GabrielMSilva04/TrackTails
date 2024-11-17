@@ -2,7 +2,7 @@ import {InputField} from "../components/InputField.jsx";
 import {Link} from "react-router-dom";
 import {useForm} from "react-hook-form";
 
-export function RegisterPet() {
+export default function RegisterPet() {
     const {
         register,
         handleSubmit,
