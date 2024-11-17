@@ -50,6 +50,7 @@ export function RegisterPet() {
                             </div>
                             <input
                                 type="file"
+                                name="image"
                                 className="file-input file-input-bordered file-input-primary w-full"
                             />
                         </label>
