@@ -11,6 +11,7 @@ const base_url = "http://localhost:8082/api/v1";
 const HistoricalAnimalsData = () => {
   const [chartType, setChartType] = useState("Line");
 	const [range, setRange] = useState("24H");
+	const [dataNotFound, setDataNotFound] = useState(false);
 	const [data, setData] = useState({
     labels: [],
     datasets: [],
@@ -101,7 +102,7 @@ const HistoricalAnimalsData = () => {
 				x: {
 					...prevOptions.scales.x,
 					min: (Date.now() - range_to_timestampe_map[range]),
-					max: Date.now(),
+					max: null,
 				},
 			},
 		}));
@@ -161,25 +162,40 @@ const HistoricalAnimalsData = () => {
 			"3M": "1d",
 			"1Y": "1w",
 		};
+		const range_api_map = {
+			"1H": "1h",
+			"24H": "1d",
+			"1W": "1w",
+			"1M": "1mo",
+			"3M": "3mo",
+			"1Y": "1y",
+		};
 
 		// Fetch data from API
-		const response = await axios.get(`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range.toLowerCase()}&interval=${range_to_interval_map[range]}`);
-		if (response.status !== 200) {
-			console.error("Failed to fetch data from API");
-			return;
-		}
-		console.log(response.data);
-		setLabels(response.data.map((d) => d.timestamp));
-		clearDatasets();
-		console.log(data);
-		addDataset({
-			label: metric,
-			data: response.data.map((d) => d[metric]),
-			backgroundColor: "#4d7c0f",
-			borderColor: "rgba(54, 83, 20, 1)",
-			borderWidth: 2,
-		});
-		console.log(data);
+		await axios.get(`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`)
+			.then((response) => {
+				setDataNotFound(false);
+				console.log(response.data);
+				setLabels(response.data.map((d) => d.timestamp));
+				clearDatasets();
+				console.log(data);
+				addDataset({
+					label: metric,
+					data: response.data.map((d) => d[metric]),
+					backgroundColor: "#4d7c0f",
+					borderColor: "rgba(54, 83, 20, 1)",
+					borderWidth: 2,
+				});
+				console.log(data);
+			})
+				.catch((error) => {
+				console.error("Failed to fetch data from API");
+				if (error.response) {
+					console.error("Error response", error.response);
+				}
+				setDataNotFound(true);
+				return;
+			});
 	}
 
 	useEffect(() => {
@@ -227,14 +243,25 @@ const HistoricalAnimalsData = () => {
 
 
   return (
-    <div className="flex flex-col items-center mt-2">
+    <div className="flex flex-col items-center">
       <select className="select select-sm select-bordered w-full max-w-xs m-auto" onChange={chartTypeSelectorHandler}>
         <option value="1">Instant - Line Chart</option>
         <option value="2">Average - Line Chart</option>
         <option value="3">Distribution - Pie chart</option>
       </select>
-      <div className="h-64">
-        <ChartComponent type={chartType} data={data} options={options} />
+			<div className="flex flex-col h-64">
+				{dataNotFound ? (
+					<div className="my-auto">
+						<p>
+							Data not found
+						</p>
+						<p>
+							Please check the animal tracker device
+						</p>
+					</div>
+				) : (
+        	<ChartComponent type={chartType} data={data} options={options} />
+				)}
       </div>
       <TimeRangeSelector onSelect={timeRangeSelectHandler} />
     </div>
