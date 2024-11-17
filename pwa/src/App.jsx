@@ -1,44 +1,39 @@
-import { useState } from 'react'
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom'
-import Layout from './components/Layout'
-import LayoutAnimal from './components/LayoutAnimal'
-import LayoutMapDetails  from './components/LayoutMapDetails'
-import Home from './pages/Home'
-import Register from './pages/Register'
-import Login from './pages/Login'
-import Map from './pages/Map'
-import './App.css'
-import {LayoutMap} from "./components/LayoutMap.jsx";
-
-import Details from "./pages/Details.jsx";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import LayoutAnimal from './components/LayoutAnimal';
+import LayoutMap from './components/LayoutMap';
+import Home from './pages/Home';
+import Register from './pages/Register';
+import Login from './pages/Login';
+import Map from './pages/MapPage.jsx';
+import LayoutMapDetails from './components/LayoutMapDetails';
+import MapDetails from './pages/MapDetails';
+import './App.css';
 
 function App() {
-
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LayoutMapDetails />}>
-          <Route index element={<Details />} />
-        </Route>
-        <Route path="/" element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/map" element={<Map />} />
+      <Router>
+          <Routes>
 
-          {/* 404 Not Found Route */}
-          <Route path="*" element={<h2>404 - Page Not Found</h2>} />
-        </Route>
-        <Route path="/map" element={<LayoutMap />}>
-          <Route path="" element={<Map />} />
+              <Route path="/" element={<Layout />}>
+                  <Route index element={<Home />} />
+                  <Route path="register" element={<Register />} />
+                  <Route path="login" element={<Login />} />
+              </Route>
 
-        </Route>
-        <Route path="/test" element={<LayoutAnimal />}>
+              <Route path="/map" element={<LayoutMap />}>
+                  <Route index element={<Map />} />
+              </Route>
 
-          </Route>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-      </Routes>
-    </Router>
-  )
+              <Route path="/map/:animalName" element={<LayoutMapDetails />}>
+                  <Route index element={<MapDetails />} />
+              </Route>
+
+              <Route path="*" element={<h2>404 - Page Not Found</h2>} />
+          </Routes>
+      </Router>
+  );
 }
 
-export default App
+export default App;
+

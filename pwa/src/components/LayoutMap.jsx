@@ -1,115 +1,130 @@
-import React, { useState } from 'react';
-import { Link, Outlet } from "react-router-dom";
+import { useState } from 'react';
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faHouse, faLocationDot, faPaw, faBell, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+    faBars,
+    faBell,
+    faHouse,
+    faLocationDot,
+    faPaw,
+    faTimes,
+    faUser,
+} from "@fortawesome/free-solid-svg-icons";
 
-export function LayoutMap() {
-    const [isSidebarOpen, setSidebarOpen] = useState(false);
-    const [search, setSearch] = useState("");
-    const pets = [
-        { name: "Jack", species: "Dog", image: "https://placedog.net/300/300", link: "/map/jack" },
-        { name: "Cookie", species: "Cat", image: "https://placedog.net/300/300", link: "/map/cookie" },
-        { name: "Tico", species: "Bird", image: "https://placedog.net/300/300", link: "/map/tico" },
-        { name: "Milu", species: "Dog", image: "https://placedog.net/300/300", link: "/map/milu" },
-        { name: "Jack", species: "Dog", image: "https://placedog.net/300/300", link: "/map/jack" },
-        { name: "Cookie", species: "Cat", image: "https://placedog.net/300/300", link: "/map/cookie" },
-        { name: "Tico", species: "Bird", image: "https://placedog.net/300/300", link: "/map/tico" },
-        { name: "Milu", species: "Dog", image: "https://placedog.net/300/300", link: "/map/milu" },
-    ];
+export default function LayoutMap() {
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const toggleDrawer = () => {
+        setIsDrawerOpen(!isDrawerOpen);
+    };
+
+    const handleAnimalClick = (animalName) => {
+        navigate(`/map/${animalName.toLowerCase()}`);
+        setIsDrawerOpen(false);
+    };
 
     return (
-        <div className="relative min-h-screen">
-            <main className="w-full h-screen">
-                <Outlet/>
-            </main>
-
-            <header className="fixed top-2 left-0 right-0 w-full h-16 z-40">
-                <div className="flex justify-between items-center px-4 h-full">
-                    <button
-                        onClick={() => setSidebarOpen(!isSidebarOpen)}
-                        className="btn btn-square btn-sm bg-primary text-base-100 border-none hover:bg-primary/90"
-                    >
-                        <FontAwesomeIcon icon={faBars} size="lg"/>
-                    </button>
-
-                    {!isSidebarOpen && (
-                        <h1 className="text-2xl font-bold text-primary mx-auto">
-                            trackTails.
-                        </h1>
+        <>
+            <div className="flex flex-row">
+                <div className="z-50 fixed top-8 left-8">
+                    {/* Botão de abrir */}
+                    {!isDrawerOpen && (
+                        <button
+                            onClick={toggleDrawer}
+                            className="btn btn-primary"
+                        >
+                            <FontAwesomeIcon icon={faBars} />
+                        </button>
                     )}
 
-                    <div className="w-12 h-12 invisible">
-                        <FontAwesomeIcon icon={faBars} size="lg" style={{visibility: 'hidden'}}/>
-                    </div>
-                </div>
-            </header>
-
-            <aside
-                className={`fixed top-16 left-0 w-64 bg-primary shadow-xl transform transition-transform duration-300 ease-in-out z-30 m-4 rounded-xl
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-                style={{height: '60vh'}}
-            >
-                <div className="flex flex-col h-full">
-                    <div className="p-4 bg-primary rounded-t-xl">
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search Pets..."
-                            className="input input-sm w-full bg-base-100/90 placeholder-base-content/50"
-                        />
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto px-4 pb-4">
-                        <div className="space-y-2">
-                            {pets.map((pet, index) => (
-                                <Link
-                                    key={index}
-                                    to={`/map/${pet.name}`}  // Usando o nome do pet como parâmetro na URL
-                                    className="block bg-base-100/90 rounded-lg p-2 hover:bg-base-100 transition-colors"
-                                    onClick={() => setSidebarOpen(false)}
+                    {/* Drawer */}
+                    {isDrawerOpen && (
+                        <div className="bg-primary text-base-content w-60 rounded-lg">
+                            <div className="flex flex-row justify-between mb-4">
+                                <button
+                                    className="btn btn-ghost mt-2"
+                                    onClick={toggleDrawer}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <img src={pet.image} alt={pet.name}
-                                             className="w-10 h-10 rounded-full object-cover"/>
-                                        <h3 className="font-medium">{pet.name}</h3>
+                                    <FontAwesomeIcon icon={faTimes} className="text-white" size="2x"/>
+                                </button>
+                                <div className="form-control">
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        className="input input-bordered w-40 mt-2 mr-2"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="p-2">
+                                <div
+                                    className="bg-white rounded-lg text-primary p-2 flex flex-row items-center cursor-pointer hover:bg-gray-100 transition-colors focus:outline-none"
+                                    onClick={() => handleAnimalClick('Jack')}
+                                >
+                                    <div>
+                                        <img
+                                            src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.espritdog.com%2Fwp-content%2Fuploads%2F2020%2F09%2Fborder-collie-700810_1920.jpg&f=1&nofb=1&ipt=29bc36e03332cdad92cedd625b2d47519ce9c4bda3a261ca261d17cf3d34b5bd&ipo=images"
+                                            alt="Animal Name"
+                                            className="h-8 w-8 rounded-full"
+                                        />
                                     </div>
-                                </Link>
-                            ))}
+                                    <div className="flex flex-col ml-2">
+                                        <div className="text-sm font-semibold">
+                                            Jack
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                            Dog
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {!isDrawerOpen && (
+                    <div className="fixed w-full z-50">
+                        <div className="w-32 mx-auto mt-8">
+                            <h1 className="btn btn-ghost text-xl text-primary fixed left-1/2 z-50 ml-[-4rem]">
+                                trackTails.
+                            </h1>
                         </div>
                     </div>
-                </div>
-            </aside>
+                )}
+            </div>
 
-            <nav className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-3/4 z-50">
-                <div className="btm-nav bg-primary rounded-lg">
-                    <button>
-                        <Link to="/home" className="tooltip" data-tip="Home">
-                            <FontAwesomeIcon icon={faHouse} className="text-base-100"/>
-                        </Link>
-                    </button>
-                    <button>
-                        <Link to="/map" className="tooltip" data-tip="Map">
-                            <FontAwesomeIcon icon={faLocationDot} className="text-base-100"/>
-                        </Link>
-                    </button>
-                    <button>
-                        <Link to="/animals" className="tooltip" data-tip="My Animals">
-                            <FontAwesomeIcon icon={faPaw} className="text-base-100"/>
-                        </Link>
-                    </button>
-                    <button>
-                        <Link to="/notifications" className="tooltip" data-tip="Notifications">
-                            <FontAwesomeIcon icon={faBell} className="text-base-100"/>
-                        </Link>
-                    </button>
-                    <button>
-                        <Link to="/profile" className="tooltip" data-tip="Profile">
-                            <FontAwesomeIcon icon={faUser} className="text-base-100"/>
-                        </Link>
-                    </button>
-                </div>
-            </nav>
-        </div>
+            <div className="absolute right-0 top-0 left-0 bottom-0 z-0">
+                <Outlet/>
+            </div>
+
+            <div className="btm-nav bg-primary rounded-lg mb-3 w-3/4 mx-auto">
+                <button>
+                    <Link to="/" className="tooltip" data-tip="Home">
+                        <FontAwesomeIcon icon={faHouse} color="white"/>
+                    </Link>
+                </button>
+                <button>
+                    <Link to="/map" className="tooltip" data-tip="Map">
+                        <FontAwesomeIcon icon={faLocationDot} color="white"/>
+                    </Link>
+                </button>
+                <button>
+                    <Link to="/animals" className="tooltip" data-tip="My Animals">
+                        <FontAwesomeIcon icon={faPaw} color="white"/>
+                    </Link>
+                </button>
+                <button>
+                    <Link to="/notifications" className="tooltip" data-tip="Notifications">
+                        <FontAwesomeIcon icon={faBell} color="white"/>
+                    </Link>
+                </button>
+                <button>
+                    <Link to="/profile" className="tooltip" data-tip="Profile">
+                        <FontAwesomeIcon icon={faUser} color="white"/>
+                    </Link>
+                </button>
+            </div>
+        </>
     );
 }
