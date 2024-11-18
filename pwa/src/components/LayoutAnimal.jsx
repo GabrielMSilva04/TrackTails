@@ -6,7 +6,8 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const animalsBaseUrl = "http://localhost:8082/api/v1/animals";
+const baseUrl = "http://localhost/api/v1";
+const animalsBaseUrl = `${baseUrl}/animals`;
 
 export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) {
     const [animal, setAnimal] = useState(null);
