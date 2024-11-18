@@ -34,6 +34,8 @@ public class AnimalServiceImpl implements AnimalService {
         existingAnimal.setSex(animal.getSex());
         existingAnimal.setBirthDate(animal.getBirthDate());
         existingAnimal.setUserId(animal.getUserId());
+        existingAnimal.setDeviceId(animal.getDeviceId());
+        existingAnimal.setBeCarefulWith(animal.getBeCarefulWith());
         return animalRepository.save(existingAnimal);
     }
 

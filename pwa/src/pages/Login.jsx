@@ -1,17 +1,18 @@
-const InputField = ({ label, type, placeholder, value, onChange }) => {
-    return (
-        <div className="mb-2">
-            <label className="text-secondary text-sm font-bold">{label}</label>
-            <input
-                type={type}
-                placeholder={placeholder}
-                className="input h-10 bg-base-200 text-primary w-full"
-            />
-        </div>
-    );
-};
+import {InputField} from "../components/InputField.jsx";
+import {useForm} from "react-hook-form";
 
 export default function Login() {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm();
+
+    const onSubmit = (data) => {
+        console.log('Form Data:', data);
+        alert('Pet registered successfully!');
+    };
+
     return (
         <div className="bg-primary h-screen flex flex-col">
             {/* Logo Section */}
@@ -22,16 +23,32 @@ export default function Login() {
             {/* Formulary Section */}
             <div className="bg-white w-full h-3/4 rounded-t-3xl p-8 flex flex-col items-center absolute bottom-0">
                 <h2 className="text-2xl font-bold text-primary mb-4">Welcome Back</h2>
-                <form className="w-3/4 mt-8 flex flex-col">
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="w-3/4 mt-8 flex flex-col gap-2">
                     <InputField
                         label="Email"
+                        name={"email"}
                         type="email"
                         placeholder="Email"
+                        register={register}
+                        required={{
+                            value: true,
+                            message: "This field is required"
+                        }}
+                        error={errors.email?.message}
                     />
                     <InputField
                         label="Password"
+                        name={"password"}
                         type="password"
                         placeholder="********"
+                        register={register}
+                        required={{
+                            value: true,
+                            message: "This field is required"
+                        }}
+                        error={errors.password?.message}
                     />
                     <button className="btn btn-primary text-white w-full mt-6">Log in</button>
                 </form>

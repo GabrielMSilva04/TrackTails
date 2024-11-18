@@ -27,6 +27,8 @@ COPY --from=builder /app/userservice/target/*.jar app.jar
 # Expose the application's port (optional, change to your application's port)
 EXPOSE 8080
 
+COPY .env /app/.env
+
 COPY ./wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
 
