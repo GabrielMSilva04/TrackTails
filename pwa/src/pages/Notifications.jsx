@@ -2,9 +2,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState } from "react";
 import NotificationComponent from "../components/NotificationComponent";
+import axios from "axios";
 
-const notificationsBaseUrl = "http://localhost:8083/api/v1/notifications";
-const animalsBaseUrl = "http://localhost:8082/api/v1/animals";
+const baseUrl = "http://localhost/api/v1";
+const notificationsBaseUrl = `${baseUrl}/notifications`;
+const animalsBaseUrl = `${baseUrl}/animals`;
 
 export default function Notifications() {
     const [notifications, setNotifications] = useState([]);
@@ -12,27 +14,45 @@ export default function Notifications() {
 
     useEffect(() => {
         const fetchNotifications = async () => {
-            try {
-                const response = await fetch(`${notificationsBaseUrl}`);
-                const notificationData = await response.json();
+            const userId = 123; // TODO: Get user ID from auth context
 
+            try {
+                // Fetch notifications
+                const response = await axios.get(`${notificationsBaseUrl}`);
+                const notificationData = response.data;
+                console.log("Notification Data:", notificationData);
+
+                // Enrich notifications with animal data
                 const enrichedNotifications = await Promise.all(
                     notificationData.map(async (notification) => {
-                        const animalResponse = await fetch(`${animalsBaseUrl}/${notification.animalId}`);
-                        const animalData = await animalResponse.json();
+                        try {
+                            const animalResponse = await axios.get(`${animalsBaseUrl}/${notification.animalId}`);
+                            const animalData = animalResponse.data;
 
-                        return {
-                            ...notification,
-                            name: animalData.name || "Unknown",
-                            notification: notification.content.replace("{name}", animalData.name || "Unknown"),
-                            img: animalData.imagePath || "https://via.placeholder.com/150",
-                            highlight: ["Off Limits", "Acceleration"].includes(notification.title),
-                        };
+                            return {
+                                ...notification,
+                                name: animalData.name || "Unknown",
+                                notification: notification.content.replace("{name}", animalData.name || "Unknown"),
+                                img: animalData.imagePath || "https://via.placeholder.com/150",
+                                highlight: ["Off Limits", "Acceleration"].includes(notification.title),
+                            };
+                        } catch (error) {
+                            console.error(`Error fetching animal data for ID ${notification.animalId}:`, error);
+                            // return {
+                            //     ...notification,
+                            //     name: "Unknown",
+                            //     notification: notification.content.replace("{name}", "Unknown"),
+                            //     img: "https://via.placeholder.com/150",
+                            //     highlight: ["Off Limits", "Acceleration"].includes(notification.title),
+                            // };
+                        }
                     })
                 );
 
+                // Update state with enriched notifications
                 setNotifications(enrichedNotifications);
 
+                // Simulate marking notifications as read after a delay
                 setTimeout(() => markNotificationsAsRead(enrichedNotifications), 5000);
             } catch (error) {
                 console.error("Error fetching notifications:", error);
@@ -49,19 +69,16 @@ export default function Notifications() {
         try {
             await Promise.all(
                 notificationList
-                    .filter((notification) => !notification.read)
+                    .filter((notification) => !notification.read) // Filter unread notifications
                     .map((notification) =>
-                        fetch(`${notificationsBaseUrl}/${notification.id}`, {
-                            method: "PUT",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                ...notification,
-                                read: true,
-                            }),
+                        axios.put(`${notificationsBaseUrl}/${notification.id}`, {
+                            ...notification,
+                            read: true,
                         })
                     )
             );
 
+            // Update state to mark notifications as read
             setNotifications((prev) =>
                 prev.map((notification) => ({ ...notification, read: true }))
             );
@@ -74,9 +91,11 @@ export default function Notifications() {
         try {
             await Promise.all(
                 notifications.map((notification) =>
-                    fetch(`${notificationsBaseUrl}/${notification.id}`, { method: "DELETE" })
+                    axios.delete(`${notificationsBaseUrl}/${notification.id}`)
                 )
             );
+
+            // Clear notifications from state
             setNotifications([]);
         } catch (error) {
             console.error("Error clearing notifications:", error);
@@ -97,15 +116,16 @@ export default function Notifications() {
             </div>
 
             {notifications.map((notification) => (
-                <NotificationComponent
-                    key={notification.id}
-                    id={notification.id}
-                    name={notification.name}
-                    notification={notification.notification}
-                    image={notification.img}
-                    highlight={notification.highlight}
-                    onDelete={() => setNotifications((prev) => prev.filter((n) => n.id !== notification.id))}
-                />
+                <div key={notification.id}>
+                    <NotificationComponent
+                        id={notification.id}
+                        name={notification.name}
+                        notification={notification.notification}
+                        image={notification.img}
+                        highlight={notification.highlight}
+                        onDelete={() => setNotifications((prev) => prev.filter((n) => n.id !== notification.id))}
+                    />
+                </div>
             ))}
         </div>
     );
