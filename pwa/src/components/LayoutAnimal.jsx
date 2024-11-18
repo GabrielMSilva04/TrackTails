@@ -6,19 +6,22 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const animalsBaseUrl = "http://localhost:8082/api/v1/animals";
+const baseUrl = "http://localhost/api/v1";
+const animalsBaseUrl = `${baseUrl}/animals`;
 
 export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) {
-    const [animal, setAnimal] = useState({});
+    const [animal, setAnimal] = useState(null);
 
     useEffect(() => {
         if (selectedAnimalId) {
             const fetchAnimal = async () => {
-                axios.get(`${animalsBaseUrl}/${selectedAnimalId}`).then((response) => {
-                    setAnimal(response.data);
-                }).catch((error) => {
-                    console.error("Error fetching animal details:", error);
-                });
+                axios.get(`${animalsBaseUrl}/${selectedAnimalId}`)
+                    .then((response) => {
+                        setAnimal(response.data);
+                    })
+                    .catch((error) => {
+                        console.error("Error fetching animal details:", error);
+                    });
             };
 
             fetchAnimal();
@@ -27,10 +30,10 @@ export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) 
 
     LayoutAnimal.propTypes = {
         showButtons: PropTypes.oneOf(["all", "back-only", "none"]),
-        selectedAnimalId: PropTypes.string.isRequired,
+        selectedAnimalId: PropTypes.number.isRequired, // Changed to number
     };
 
-    if (selectedAnimalId && !animal) {
+    if (!animal) {
         return (
             <div className="text-center text-primary mt-10">
                 <h2>Loading animal data...</h2>
@@ -74,7 +77,8 @@ export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) 
                     )}
 
                     <div className="overflow-y-auto">
-                        <Outlet />
+                        {/* Pass animal data to children via Outlet context */}
+                        <Outlet context={{ animal }} />
                     </div>
                 </div>
             </div>
@@ -82,4 +86,3 @@ export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) 
         </div>
     );
 }
-
