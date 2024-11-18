@@ -3,6 +3,8 @@ import {Link} from "react-router-dom";
 import {useForm} from "react-hook-form";
 import axios from "axios";
 
+const base_url = "http://localhost/api/v1";
+
 export default function RegisterPet() {
     const {
         register,
@@ -13,7 +15,7 @@ export default function RegisterPet() {
     const onSubmit = async (data) => {
         try {
             console.log('Form Data:', data);
-            const response = await axios.post('http://localhost:8085/api/v1/animals', data);
+            const response = await axios.post(`${base_url}/animals`, data);
             alert('Pet registered successfully!');
             console.log('Response:', response.data);
         } catch (error) {
