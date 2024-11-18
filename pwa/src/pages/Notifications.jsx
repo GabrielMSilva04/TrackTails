@@ -1,37 +1,88 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
-import { useState } from "react";
+import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
+import { useEffect, useState } from "react";
 import NotificationComponent from "../components/NotificationComponent";
-import axios from "axios";
 
-const base_url = "http://localhost:8083/api/v1/notifications";
+const notificationsBaseUrl = "http://localhost:8083/api/v1/notifications";
+const animalsBaseUrl = "http://localhost:8082/api/v1/animals";
 
 export default function Notifications() {
-    const initialNotifications = [
-        {
-            name: "Cookie",
-            img: "https://placedog.net/500x500",
-            notification: "Cookie has trespassed his area",
-            warning: 1
-        },
-        {
-            name: "Milu",
-            img: "https://placecats.com/500/500",
-            notification: "Milu's device QR code was scanned by someone",
-            warning: 0
-        },
-        {
-            name: "Jack",
-            img: "https://ilovemydogsomuch.com/wp-content/uploads/2023/02/323839-1600x1066-border-collie-breed-1400x933.jpg",
-            notification: "An abnormal acceleration was detected by Jack's device",
-            warning: 1
+    const [notifications, setNotifications] = useState([]);
+    const [markedAsRead, setMarkedAsRead] = useState(false);
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await fetch(`${notificationsBaseUrl}`);
+                const notificationData = await response.json();
+
+                const enrichedNotifications = await Promise.all(
+                    notificationData.map(async (notification) => {
+                        const animalResponse = await fetch(`${animalsBaseUrl}/${notification.animalId}`);
+                        const animalData = await animalResponse.json();
+
+                        return {
+                            ...notification, // Inclui todos os campos da notificação original
+                            name: animalData.name || "Unknown",
+                            notification: notification.content.replace("{name}", animalData.name || "Unknown"),
+                            img: animalData.imagePath || "https://via.placeholder.com/150",
+                            highlight: ["Off Limits", "Acceleration"].includes(notification.title),
+                        };
+                    })
+                );
+
+                setNotifications(enrichedNotifications);
+
+                // Marcar notificações como lidas após um delay
+                setTimeout(() => markNotificationsAsRead(enrichedNotifications), 5000);
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            }
+        };
+
+        fetchNotifications();
+    }, []);
+
+    const markNotificationsAsRead = async (notificationList) => {
+        if (markedAsRead) return; // Evitar múltiplas marcações
+        setMarkedAsRead(true);
+
+        try {
+            await Promise.all(
+                notificationList
+                    .filter((notification) => !notification.read) // Apenas as não lidas
+                    .map((notification) =>
+                        fetch(`${notificationsBaseUrl}/${notification.id}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                ...notification, // Inclui todos os campos
+                                read: true, // Atualiza apenas o campo `read`
+                            }),
+                        })
+                    )
+            );
+
+            // Atualiza o estado local para refletir que estão lidas
+            setNotifications((prev) =>
+                prev.map((notification) => ({ ...notification, read: true }))
+            );
+        } catch (error) {
+            console.error("Error marking notifications as read:", error);
         }
-    ];
+    };
 
-    const [notifications, setNotifications] = useState(initialNotifications);
-
-    const handleClearAll = () => {
-        setNotifications([]);
+    const handleClearAll = async () => {
+        try {
+            await Promise.all(
+                notifications.map((notification) =>
+                    fetch(`${notificationsBaseUrl}/${notification.id}`, { method: "DELETE" })
+                )
+            );
+            setNotifications([]);
+        } catch (error) {
+            console.error("Error clearing notifications:", error);
+        }
     };
 
     return (
@@ -47,13 +98,15 @@ export default function Notifications() {
                 )}
             </div>
 
-            {notifications.map((animal, index) => (
+            {notifications.map((notification) => (
                 <NotificationComponent
-                    key={index}
-                    name={animal.name}
-                    notification={animal.notification}
-                    image={animal.img}
-                    warning={animal.warning}
+                    key={notification.id}
+                    id={notification.id}
+                    name={notification.name}
+                    notification={notification.notification}
+                    image={notification.img}
+                    highlight={notification.highlight}
+                    onDelete={() => setNotifications((prev) => prev.filter((n) => n.id !== notification.id))}
                 />
             ))}
         </div>

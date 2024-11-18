@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/v1/notifications")
+@CrossOrigin(origins = "http://localhost:5173")
 public class NotificationController {
     private final NotificationService notificationService;
 
