@@ -24,7 +24,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/animals")
-@CrossOrigin(origins = "http://0.0.0.0")
 public class AnimalController {
     private final AnimalService animalService;
     private final JwtTokenProvider jwtTokenProvider;
