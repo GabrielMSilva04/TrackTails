@@ -60,7 +60,7 @@ export default function LayoutAnimal({ showButtons = "all" }) {
           </div>
         </div>
       </div>
-      <NavBar />
+        {showButtons !== "none" && <NavBar />}
     </div>
   );
 }
