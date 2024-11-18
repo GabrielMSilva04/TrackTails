@@ -49,7 +49,6 @@ export default function Notifications() {
                     })
                 );
 
-                // Update state with enriched notifications
                 setNotifications(enrichedNotifications);
 
                 // Simulate marking notifications as read after a delay
