@@ -4,22 +4,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 const animalsBaseUrl = "http://localhost:8082/api/v1/animals";
 
 export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) {
-    const [animal, setAnimal] = useState(null);
+    const [animal, setAnimal] = useState({});
 
     useEffect(() => {
         if (selectedAnimalId) {
             const fetchAnimal = async () => {
-                try {
-                    const response = await fetch(`${animalsBaseUrl}/${selectedAnimalId}`);
-                    const data = await response.json();
-                    setAnimal(data);
-                } catch (error) {
+                axios.get(`${animalsBaseUrl}/${selectedAnimalId}`).then((response) => {
+                    setAnimal(response.data);
+                }).catch((error) => {
                     console.error("Error fetching animal details:", error);
-                }
+                });
             };
 
             fetchAnimal();
@@ -31,7 +30,7 @@ export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) 
         selectedAnimalId: PropTypes.string.isRequired,
     };
 
-    if (!animal) {
+    if (selectedAnimalId && !animal) {
         return (
             <div className="text-center text-primary mt-10">
                 <h2>Loading animal data...</h2>
