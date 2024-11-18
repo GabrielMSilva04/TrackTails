@@ -28,13 +28,12 @@ export default function LayoutMap() {
         <>
             <div className="flex flex-row">
                 <div className="z-50 fixed top-8 left-8">
-                    {/* Botão de abrir */}
                     {!isDrawerOpen && (
                         <button
                             onClick={toggleDrawer}
                             className="btn btn-primary"
                         >
-                            <FontAwesomeIcon icon={faBars} />
+                            <FontAwesomeIcon icon={faBars} color="white" />
                         </button>
                     )}
 
@@ -86,7 +85,7 @@ export default function LayoutMap() {
                 {!isDrawerOpen && (
                     <div className="fixed w-full z-50">
                         <div className="w-32 mx-auto mt-8">
-                            <h1 className="btn btn-ghost text-xl text-primary fixed left-1/2 z-50 ml-[-4rem]">
+                            <h1 className="btn btn-ghost text-2xl text-primary fixed left-1/2 z-50 ml-[-4rem]">
                                 trackTails.
                             </h1>
                         </div>
