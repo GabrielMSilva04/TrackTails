@@ -1,10 +1,11 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons'
 import {Link} from "react-router-dom";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import axios from "axios";
 
 export default function MyPets() {
-    const pets = [
+    const [pets, setPets] = useState([
         {
             id: 1,
             name: 'Fluffy',
@@ -28,10 +29,32 @@ export default function MyPets() {
             sex: 'F',
             // image: '',
         },
-    ]
+    ]); // State for storing pets from the API
+    const [loading, setLoading] = useState(true); // State to track API call status
+    const [error, setError] = useState(null); // State to track errors
 
     // State for filtering
     const [filters, setFilters] = useState({ name: '', species: '' });
+
+    // Fetch pets from the API
+    useEffect(() => {
+        const fetchPets = async () => {
+            try {
+                const response = await axios.get('http://localhost:8085/api/v1/animals'); // Replace with your API URL
+                setPets(response.data); // Assuming the API response is an array of pets
+            } catch (err) {
+                setError('Failed to fetch pets. Please try again later.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPets()
+            .then(() => console.log('Pets fetched successfully!'))
+            .then(() => console.log('Pets:', pets))
+            .catch((err) => console.error('Error fetching pets:', err));
+    }, []);
 
     // Filtered pets
     const filteredPets = pets.filter((pet) => {
