@@ -1,13 +1,11 @@
-package ies.tracktails.userservice.components;
+package ies.tracktails.animalservice.components;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
@@ -19,17 +17,6 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(@Value("${jwt.secret}") String jwtSecret) {
         this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-    }
-
-    public String generateToken(Long userId) {
-        String token = Jwts.builder()
-                .setSubject(String.valueOf(userId))
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
-                .compact();
-
-        return "Bearer " + token;
     }
 
     public boolean validateToken(String token) {
@@ -55,4 +42,3 @@ public class JwtTokenProvider {
         return Long.parseLong(subject);
     }
 }
-

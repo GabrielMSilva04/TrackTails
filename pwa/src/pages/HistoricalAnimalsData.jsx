@@ -1,12 +1,10 @@
 // src/pages/HistoricalAnimalsData.jsx
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import ChartComponent from "../components/Chart";
 import TimeRangeSelector from "../components/TimeRangeSelector"
-import { range2 } from "../utils";
 import axios from "axios";
 
-const base_url = "http://localhost:8082/api/v1";
+const base_url = "http://localhost/api/v1";
 
 const HistoricalAnimalsData = () => {
   const [chartType, setChartType] = useState("Line");

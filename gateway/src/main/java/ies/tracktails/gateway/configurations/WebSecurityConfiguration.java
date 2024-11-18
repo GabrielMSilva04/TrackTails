@@ -3,46 +3,80 @@ package ies.tracktails.gateway.configurations;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity.OAuth2ResourceServerSpec;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
+
+import ies.tracktails.gateway.filters.JwtHeaderFilter;
 
 @Configuration
 @EnableWebFluxSecurity
 public class WebSecurityConfiguration {
+	// CORS Configuration
+	/*
+	 * If necessary, you can configure CORS to allow requests from other domains.
+	 * 
+	 * @Bean
+	 * public CorsConfigurationSource corsConfigurationSource() {
+	 * CorsConfiguration configuration = new CorsConfiguration();
+	 * // Permite que todas as origens acessem o gateway (use com cautela,
+	 * dependendo da sua necessidade)
+	 * configuration.addAllowedOrigin("*");
+	 * configuration.addAllowedMethod("*"); // Permite todos os métodos HTTP (GET,
+	 * POST, etc)
+	 * configuration.addAllowedHeader("*"); // Permite todos os cabeçalhos
+	 * 
+	 * // Ou você pode restringir para um único frontend ou alguns domínios:
+	 * // configuration.addAllowedOrigin("http://example.com");
+	 * 
+	 * UrlBasedCorsConfigurationSource source = new
+	 * UrlBasedCorsConfigurationSource();
+	 * source.registerCorsConfiguration("/**", configuration);
+	 * return source;
+	 * }
+	 */
 
-    // Rota para permitir acesso sem autenticação para o actuator
-    @Order(1)
-    @Bean
-    SecurityWebFilterChain actuatorHttpSecurity(ServerHttpSecurity http) {
-        http
-                .securityMatcher(new PathPatternParserServerWebExchangeMatcher("/actuator/**"))
-                .authorizeExchange((exchanges) -> exchanges
-                        .anyExchange().permitAll());
-        return http.build();
-    }
+	// Define open routes
+	// /api/v1/animaldata/latest
+	// /api/v1/animaldata/history
+	@Bean
+	@Order(1)
+	SecurityWebFilterChain openHttpSecurity(ServerHttpSecurity http) {
+		http
+				.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
+				.authorizeExchange(exchanges -> exchanges
+						.pathMatchers("/api/v1/animaldata/latest/**", "/api/v1/animaldata/historic/**").permitAll()
+						.anyExchange().authenticated());
+		return http.build();
+	}
 
-    // Configuração para autenticação JWT nas rotas que exigem
-    @Bean
-    SecurityWebFilterChain apiHttpSecurity(ServerHttpSecurity http) {
-        http
-                .securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/**"))  // Aplica apenas às rotas "/api/**"
-                .authorizeExchange((exchanges) -> exchanges
-                        .anyExchange().authenticated())  // Exige autenticação JWT
-                .oauth2ResourceServer(OAuth2ResourceServerSpec::jwt)  // Configura o servidor de recursos OAuth2 com JWT
-                .csrf().disable();  // Desabilita CSRF, se necessário
-        return http.build();
-    }
+	// Configure JWT routes
+	@Bean
+	@Order(2)
+	SecurityWebFilterChain apiHttpSecurity(ServerHttpSecurity http) {
+		http
+				.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
+				.authorizeExchange((exchanges) -> exchanges
+						.anyExchange().authenticated())
+				.oauth2ResourceServer((oauth2) -> oauth2
+						.jwt(Customizer.withDefaults()));
 
-    // Rota para permitir acesso sem autenticação por padrão
-    @Bean
-    SecurityWebFilterChain defaultHttpSecurity(ServerHttpSecurity http) {
-        http
-                .authorizeExchange((exchanges) -> exchanges
-                        .anyExchange().permitAll())  // Permite todas as requisições sem autenticação
-                .csrf().disable();  // Desabilita CSRF, se necessário
-        return http.build();
-    }
+		http.addFilterAt(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION); // Add filter to extract and add userId
+
+		return http.build();
+	}
+
+	// By default, permit all requests without authentication
+	@Bean
+	@Order(3)
+	SecurityWebFilterChain defaultHttpSecurity(ServerHttpSecurity http) {
+		http
+				.authorizeExchange((exchanges) -> exchanges
+						.anyExchange().permitAll())
+				.csrf(csrf -> csrf.disable());
+		return http.build();
+	}
 }
