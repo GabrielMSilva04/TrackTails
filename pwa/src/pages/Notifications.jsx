@@ -32,7 +32,7 @@ export default function Notifications() {
                 );
 
                 setNotifications(enrichedNotifications);
-                
+
                 setTimeout(() => markNotificationsAsRead(enrichedNotifications), 5000);
             } catch (error) {
                 console.error("Error fetching notifications:", error);
