@@ -1,7 +1,6 @@
 package ies.tracktails.userservice.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.mindrot.jbcrypt.BCrypt;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -22,20 +21,15 @@ public class User {
     @Column(name = "hash_password", nullable = false)
     public String hashPassword;
 
-    @JsonIgnore
-    @Column(name = "salt", nullable = false)
-    private String salt;
-
     public User() {
         super();
     }
 
-    public User(String displayName, String email, String password) {
+    public User(String displayName, String email, String hashPassword) {
         super();
         this.displayName = displayName;
         this.email = email;
-        this.salt = BCrypt.gensalt(); // Mudar para gerar um salt aleatório
-        this.hashPassword = BCrypt.hashpw(password , salt);
+        this.hashPassword = hashPassword;
     }
 
     public Long getUserId() {
@@ -72,16 +66,6 @@ public class User {
         this.hashPassword = hashPassword;
     }
 
-    @JsonIgnore
-    public String getSalt() {
-        return salt;
-    }
-
-    @JsonProperty
-    public void setSalt(String salt) {
-        this.salt = salt;
-    }
-
     @Override
     public String toString() {
         return "User{" +
@@ -89,7 +73,6 @@ public class User {
                 ", displayName='" + displayName + '\'' +
                 ", email='" + email + '\'' +
                 ", hashPassword='" + hashPassword + '\'' +
-                ", salt='" + salt + '\'' +
                 '}';
     }
 }
