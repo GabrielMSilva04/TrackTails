@@ -11,23 +11,19 @@ spring:
         - id: animalservice-animals
           uri: http://animalservice:8080
           predicates:
-            - Path=/api/v1/animals/**
-        - id: animalservice-data
-          uri: http://animalservice:8080
-          predicates:
-            - Path=/api/v1/animaldata/**
+            - Path=/api/v1/animals/**,  /api/v1/animaldata/**, /api/v1/animaldata
         - id: notificationservice
           uri: http://notificationservice:8080
           predicates:
-            - Path=/api/v1/notifications/**
+            - Path=/api/v1/notifications/**, /api/v1/notifications
         - id: reportservice
           uri: http://reportservice:8080
           predicates:
-            - Path=/api/v1/reports/**
+            - Path=/api/v1/reports/**, /api/v1/reports
         - id: userservice
           uri: http://userservice:8080
           predicates:
-            - Path=/api/v1/users/**
+            - Path=/api/v1/users/**, /api/v1/users
         - id: pwa
           uri: http://pwa:5173
           predicates:

@@ -1,34 +1,104 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleCheck } from '@fortawesome/free-regular-svg-icons';
-import { useState } from "react";
+import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
+import { useEffect, useState } from "react";
 import NotificationComponent from "../components/NotificationComponent";
+import axios from "axios";
+
+const baseUrl = "http://localhost/api/v1";
+const notificationsBaseUrl = `${baseUrl}/notifications`;
+const animalsBaseUrl = `${baseUrl}/animals`;
 
 export default function Notifications() {
-    const initialNotifications = [
-        {
-            name: "Cookie",
-            img: "https://placedog.net/500x500",
-            notification: "Cookie has trespassed his area",
-            warning: 1
-        },
-        {
-            name: "Milu",
-            img: "https://placecats.com/500/500",
-            notification: "Milu's device QR code was scanned by someone",
-            warning: 0
-        },
-        {
-            name: "Jack",
-            img: "https://ilovemydogsomuch.com/wp-content/uploads/2023/02/323839-1600x1066-border-collie-breed-1400x933.jpg",
-            notification: "An abnormal acceleration was detected by Jack's device",
-            warning: 1
+    const [notifications, setNotifications] = useState([]);
+    const [markedAsRead, setMarkedAsRead] = useState(false);
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            const userId = 123; // TODO: Get user ID from auth context
+
+            try {
+                // Fetch notifications
+                const response = await axios.get(`${notificationsBaseUrl}`);
+                const notificationData = response.data;
+                console.log("Notification Data:", notificationData);
+
+                // Enrich notifications with animal data
+                const enrichedNotifications = await Promise.all(
+                    notificationData.map(async (notification) => {
+                        try {
+                            const animalResponse = await axios.get(`${animalsBaseUrl}/${notification.animalId}`);
+                            const animalData = animalResponse.data;
+
+                            return {
+                                ...notification,
+                                name: animalData.name || "Unknown",
+                                notification: notification.content.replace("{name}", animalData.name || "Unknown"),
+                                img: animalData.imagePath || "https://via.placeholder.com/150",
+                                highlight: ["Off Limits", "Acceleration"].includes(notification.title),
+                            };
+                        } catch (error) {
+                            console.error(`Error fetching animal data for ID ${notification.animalId}:`, error);
+                            // return {
+                            //     ...notification,
+                            //     name: "Unknown",
+                            //     notification: notification.content.replace("{name}", "Unknown"),
+                            //     img: "https://via.placeholder.com/150",
+                            //     highlight: ["Off Limits", "Acceleration"].includes(notification.title),
+                            // };
+                        }
+                    })
+                );
+
+                setNotifications(enrichedNotifications);
+
+                // Simulate marking notifications as read after a delay
+                setTimeout(() => markNotificationsAsRead(enrichedNotifications), 5000);
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            }
+        };
+
+        fetchNotifications();
+    }, []);
+
+    const markNotificationsAsRead = async (notificationList) => {
+        if (markedAsRead) return;
+        setMarkedAsRead(true);
+
+        try {
+            await Promise.all(
+                notificationList
+                    .filter((notification) => !notification.read) // Filter unread notifications
+                    .map((notification) =>
+                        axios.put(`${notificationsBaseUrl}/${notification.id}`, {
+                            ...notification,
+                            read: true,
+                        })
+                    )
+            );
+
+            // Update state to mark notifications as read
+            setNotifications((prev) =>
+                prev.map((notification) => ({ ...notification, read: true }))
+            );
+        } catch (error) {
+            console.error("Error marking notifications as read:", error);
         }
-    ];
+    };
 
-    const [notifications, setNotifications] = useState(initialNotifications);
+    const handleClearAll = async () => {
+        try {
+            await Promise.all(
+                notifications.map((notification) =>
+                    axios.delete(`${notificationsBaseUrl}/${notification.id}`)
+                )
+            );
 
-    const handleClearAll = () => {
-        setNotifications([]);
+            // Clear notifications from state
+            setNotifications([]);
+        } catch (error) {
+            console.error("Error clearing notifications:", error);
+        }
     };
 
     return (
@@ -44,14 +114,17 @@ export default function Notifications() {
                 )}
             </div>
 
-            {notifications.map((animal, index) => (
-                <NotificationComponent
-                    key={index}
-                    name={animal.name}
-                    notification={animal.notification}
-                    image={animal.img}
-                    warning={animal.warning}
-                />
+            {notifications.map((notification) => (
+                <div key={notification.id}>
+                    <NotificationComponent
+                        id={notification.id}
+                        name={notification.name}
+                        notification={notification.notification}
+                        image={notification.img}
+                        highlight={notification.highlight}
+                        onDelete={() => setNotifications((prev) => prev.filter((n) => n.id !== notification.id))}
+                    />
+                </div>
             ))}
         </div>
     );

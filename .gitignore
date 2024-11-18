@@ -69,6 +69,8 @@ HELP.md
 
 ### dotenv template
 .env
+.env*
+env
 
 ### Example user template template
 ### Example user template

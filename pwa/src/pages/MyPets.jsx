@@ -1,37 +1,39 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons'
 import {Link} from "react-router-dom";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import axios from "axios";
+
+const base_url = "http://localhost/api/v1";
 
 export default function MyPets() {
-    const pets = [
-        {
-            id: 1,
-            name: 'Fluffy',
-            species: 'Cat',
-            sex: 'F',
-            image: 'https://placecats.com/300/300',
-        },
-        {
-            id: 2,
-            name: 'Cookie',
-            species: 'Dog',
-            breed: 'Golden Retriever',
-            sex: 'M',
-            image: 'https://placedog.net/300/300',
-        },
-        {
-            id: 3,
-            name: 'Bella',
-            species: 'Cat',
-            breed: 'Siamese',
-            sex: 'F',
-            // image: '',
-        },
-    ]
+    const [pets, setPets] = useState([]);
+    const [loading, setLoading] = useState(true); // State to track API call status
+    const [error, setError] = useState(null); // State to track errors
 
     // State for filtering
     const [filters, setFilters] = useState({ name: '', species: '' });
+
+    // Fetch pets from the API
+    useEffect(() => {
+        //TODO: Fetch pets only if the user is logged in and has a token
+        const fetchPets = async () => {
+            try {
+                const response = await axios.get(`${base_url}/animals`);
+                console.log('API Response:', response.data);
+                if (!Array.isArray(response.data)) {
+                    throw new Error('API response is not an array');
+                }
+                setPets(response.data); // Ensure this is an array
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPets();
+    }, []);
 
     // Filtered pets
     const filteredPets = pets.filter((pet) => {
@@ -60,8 +62,10 @@ export default function MyPets() {
                 {/* Pet Image */}
                 <div
                     className="absolute -top-10 rounded-full overflow-hidden h-20 w-20 shadow-md">
-                    <img src={pet.image ? pet.image : 'https://placehold.co/300'}
-                     alt={pet.name} className="object-cover w-full h-full"/>
+                    <img
+                        src={pet.imagePath ? pet.imagePath : 'https://placehold.co/300'}
+                        alt={pet.name}
+                        className="object-cover w-full h-full"/>
                 </div>
 
                 {/* Spacer for the image */}
@@ -120,9 +124,13 @@ export default function MyPets() {
 
             {/* Pet Cards Section */}
             <div className="flex flex-wrap justify-center gap-4">
-                {filteredPets.length > 0 ? (
-                    filteredPets.map((pet, index) => (
-                        <div key={index}>
+                {loading ? (
+                    <p className="text-gray-500 text-center w-full">Loading pets...</p>
+                ) : error ? (
+                    <p className="text-error text-center w-full">{error}</p>
+                ) : filteredPets.length > 0 ? (
+                    filteredPets.map((pet) => (
+                        <div key={pet.id}>
                             {petCard(pet)}
                         </div>
                     ))

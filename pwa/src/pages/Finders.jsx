@@ -1,15 +1,43 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useOutletContext } from "react-router-dom";
+
+const baseUrl = "http://localhost/api/v1";
+const usersBaseUrl = `${baseUrl}/users`;
 
 export default function Finders() {
-    const information = {
-        phone: 987654322,
-        name: "John Doe",
-        description: "The dog is usually scared when with people he doesn't know",
-    };
-
+    const { animal } = useOutletContext();
+    const [information, setInformation] = useState({
+        phone: "",
+        name: "",
+        description: "",
+    });
     const [showTooltip, setShowTooltip] = useState(false);
+
+    useEffect(() => {
+        if (animal) {
+            const { userId, name, beCarefulWith } = animal;
+
+            const fetchOwnerData = async () => {
+                try {
+                    const response = await fetch(`${usersBaseUrl}/${userId}`);
+                    const ownerData = await response.json();
+                    const { phoneNumber, displayName } = ownerData;
+
+                    setInformation({
+                        phone: phoneNumber,
+                        name: displayName,
+                        description: beCarefulWith || "No specific information provided.",
+                    });
+                } catch (error) {
+                    console.error("Error fetching owner data:", error);
+                }
+            };
+
+            fetchOwnerData();
+        }
+    }, [animal]);
 
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => setShowTooltip(true));
@@ -19,9 +47,13 @@ export default function Finders() {
         }, 2000);
     };
 
+    if (!animal) {
+        return <div className="text-center text-primary mt-10">Loading...</div>;
+    }
+
     return (
         <div className="bg-white w-11/12 mx-auto mt-8 p-6 rounded-3xl shadow-lg flex flex-col items-center">
-          <div className="w-full max-w-md mb-5 relative">
+            <div className="w-full max-w-md mb-5 relative">
                 <label className="block text-primary font-bold text-sm mb-1">Owner Phone Number</label>
                 <div className="relative">
                     {showTooltip && (
@@ -34,7 +66,7 @@ export default function Finders() {
                     <input
                         type="text"
                         placeholder="Phone Number"
-                        value={information.phone}
+                        value={information.phone || "Loading..."}
                         className="input input-bordered border-2 input-primary h-8 w-full pr-10"
                         readOnly
                     />
@@ -51,7 +83,7 @@ export default function Finders() {
                 <input
                     type="text"
                     placeholder="Owner Name"
-                    value={information.name}
+                    value={information.name || "Loading..."}
                     className="input input-bordered border-2 input-primary h-8 w-full"
                     readOnly
                 />
@@ -60,7 +92,7 @@ export default function Finders() {
             <div className="w-full max-w-md mb-5">
                 <label className="block text-primary font-bold mb-1 text-sm">Be Careful With This</label>
                 <div className="input input-bordered border-2 input-primary h-20 w-full overflow-y-auto p-2">
-                    {information.description}
+                    {information.description || "Loading..."}
                 </div>
             </div>
 
