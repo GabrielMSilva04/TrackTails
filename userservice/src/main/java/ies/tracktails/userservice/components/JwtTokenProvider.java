@@ -22,12 +22,14 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(Long userId) {
-        return Jwts.builder()
-                .setSubject(String.valueOf(userId)) // Usando o ID como subject
+        String token = Jwts.builder()
+                .setSubject(String.valueOf(userId))
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+
+        return "Bearer " + token;
     }
 
     public boolean validateToken(String token) {

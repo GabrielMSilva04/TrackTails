@@ -10,6 +10,7 @@ import MyPets from "./pages/MyPets.jsx";
 import RegisterPet from "./pages/RegisterPet.jsx";
 import EditPet from "./pages/EditPet.jsx";
 import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
+import Finders from './pages/Finders'
 
 import './App.css'
 import Notifications from "./pages/Notifications.jsx";
@@ -44,6 +45,9 @@ function App() {
         </Route>
         <Route path="/animal/monitoring" element={<LayoutAnimal showButtons='all' selectedAnimalId={3} />}>
           <Route path="/animal/monitoring" element={<Pet />} />
+        </Route>
+        <Route path="/finders" element={<LayoutAnimal showButtons='none' />}>
+            <Route path="/finders" element={<Finders />} />
         </Route>
 
         <Route path="/register" element={<Register />} />

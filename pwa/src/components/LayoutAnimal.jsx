@@ -82,3 +82,4 @@ export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) 
         </div>
     );
 }
+
