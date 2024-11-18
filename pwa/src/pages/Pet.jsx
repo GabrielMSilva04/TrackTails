@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import axios from "axios";
 
-const animalDataBaseUrl = "http://localhost:8082/api/v1/animaldata";
+const baseUrl = "http://localhost/api/v1";
+const animalDataBaseUrl = `${baseUrl}/animal-data`;
 
 const Card = ({ icon, label, value, to, image }) => (
     <Link to={to} className="card bg-primary text-primary-content w-40 h-32 rounded-t-2xl shadow-xl">
