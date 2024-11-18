@@ -6,6 +6,10 @@ import Home from './pages/Home'
 import Pet from './pages/Pet'
 import Register from './pages/Register'
 import Login from './pages/Login'
+import Map from './pages/MapPage.jsx';
+import LayoutMapDetails from './components/LayoutMapDetails';
+import LayoutMap from './components/LayoutMap';
+import MapDetails from './pages/MapDetails';
 import MyPets from "./pages/MyPets.jsx";
 import RegisterPet from "./pages/RegisterPet.jsx";
 import EditPet from "./pages/EditPet.jsx";
@@ -39,13 +43,23 @@ function App() {
           {/* 404 Not Found Route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
         </Route>
+                                   
+        <Route path="/map" element={<LayoutMap />}>
+          <Route index element={<Map />} />
+        </Route>
+
+        <Route path="/map/:animalName" element={<LayoutMapDetails />}>
+          <Route index element={<MapDetails />} />
+        </Route> 
 
         <Route path="/animal/historic" element={<LayoutAnimal showButtons='back-only' />}>
           <Route path="/animal/historic" element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />} />
         </Route>
+
         <Route path="/animal/monitoring" element={<LayoutAnimal showButtons='all' selectedAnimalId={3} />}>
           <Route path="/animal/monitoring" element={<Pet />} />
         </Route>
+
         <Route path="/finders" element={<LayoutAnimal showButtons='none' />}>
             <Route path="/finders" element={<Finders />} />
         </Route>
@@ -59,4 +73,5 @@ function App() {
   )
 }
 
-export default App
+export default App;
+
