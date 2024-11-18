@@ -3,8 +3,6 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-const notificationsBaseUrl = "http://localhost:8083/api/v1/notifications";
-
 export default function NotificationComponent({ id, name, notification, image, highlight, onDelete }) {
     NotificationComponent.propTypes = {
         id: PropTypes.number.isRequired,
@@ -17,14 +15,9 @@ export default function NotificationComponent({ id, name, notification, image, h
 
     const [isVisible, setIsVisible] = useState(true);
 
-    const handleClear = async () => {
-        try {
-            await fetch(`${notificationsBaseUrl}/${id}`, { method: "DELETE" });
-            setIsVisible(false);
-            if (onDelete) onDelete();
-        } catch (error) {
-            console.error("Error deleting notification:", error);
-        }
+    const handleClear = () => {
+        setIsVisible(false);
+        if (onDelete) onDelete();
     };
 
     if (!isVisible) return null;
