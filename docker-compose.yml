@@ -135,6 +135,7 @@ services:
       - notificationservice
       - reportservice
       - userservice
+      - gateway
 
 volumes:
   mariadb_data:

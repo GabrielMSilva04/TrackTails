@@ -48,7 +48,18 @@ public class WebSecurityConfiguration {
 		http
 				.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
 				.authorizeExchange(exchanges -> exchanges
-						.pathMatchers("/api/v1/animaldata/latest/**", "/api/v1/animaldata/historic/**").permitAll()
+						.pathMatchers(
+								"/api/v1/animaldata/latest/**",
+								"/api/v1/animaldata/historic/**",
+								"/api/v1/animals",
+								"/api/v1/animals/**",
+								"/api/v1/notifications",
+								"/api/v1/notifications/**",
+								"/api/v1/reports",
+								"/api/v1/reports/**",
+								"/api/v1/users",
+								"/api/v1/users/**"
+						).permitAll()
 						.anyExchange().authenticated());
 		return http.build();
 	}

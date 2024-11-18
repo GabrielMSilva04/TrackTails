@@ -28,9 +28,9 @@ export default function Navbar() {
                 </NavLink>
             </button>
             <button>
-                <NavLink className="tooltip" data-tip="Notifications">
+                <NavLink to="/notifications" className="tooltip" data-tip="Notifications">
                     {({ isActive }) => (
-                        <FontAwesomeIcon icon={faBell} color="white" />
+                        <FontAwesomeIcon icon={faBell} color={isActive ? '#1cb51c' : 'white'} />
                     )}
                 </NavLink>
             </button>
