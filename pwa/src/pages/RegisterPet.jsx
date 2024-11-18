@@ -1,6 +1,7 @@
 import {InputField} from "../components/InputField.jsx";
 import {Link} from "react-router-dom";
 import {useForm} from "react-hook-form";
+import axios from "axios";
 
 export default function RegisterPet() {
     const {
@@ -9,9 +10,16 @@ export default function RegisterPet() {
         formState: { errors },
     } = useForm();
 
-    const onSubmit = (data) => {
-        console.log('Form Data:', data);
-        alert('Pet registered successfully!');
+    const onSubmit = async (data) => {
+        try {
+            console.log('Form Data:', data);
+            const response = await axios.post('http://localhost:8085/api/v1/animals', data);
+            alert('Pet registered successfully!');
+            console.log('Response:', response.data);
+        } catch (error) {
+            console.error('Error registering pet:', error.response?.data || error.message);
+            alert('Failed to register the pet. Please try again.');
+        }
     };
 
     const speciesOptions = [
@@ -38,7 +46,6 @@ export default function RegisterPet() {
                     <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
                 </div>
 
-                {/* Form Section */}
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     className="flex flex-col gap-2 h-full w-full">
