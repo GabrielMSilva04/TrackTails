@@ -8,10 +8,13 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: animalservice
+        - id: animalservice-animals
           uri: http://animalservice:8080
           predicates:
             - Path=/api/v1/animals/**
+        - id: animalservice-data
+          uri: http://animalservice:8080
+          predicates:
             - Path=/api/v1/animaldata/**
         - id: notificationservice
           uri: http://notificationservice:8080
