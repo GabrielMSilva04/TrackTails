@@ -42,7 +42,7 @@ function App() {
         <Route path="/animal/historic" element={<LayoutAnimal showButtons='back-only' />}>
           <Route path="/animal/historic" element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />} />
         </Route>
-        <Route path="/animal/monitoring" element={<LayoutAnimal showButtons='all' />}>
+        <Route path="/animal/monitoring" element={<LayoutAnimal showButtons='all' selectedAnimalId={3} />}>
           <Route path="/animal/monitoring" element={<Pet />} />
         </Route>
 
