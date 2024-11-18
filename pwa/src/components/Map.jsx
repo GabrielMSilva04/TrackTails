@@ -1,31 +1,37 @@
-import React, { useEffect } from 'react';
-import L from 'leaflet';
+import React from 'react';
+import { MapContainer, TileLayer, Polygon, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-function Map() {
-    const defaultCenter = [40.633039, -8.659193];
-    const defaultZoom = 13;
-
-    useEffect(() => {
-        const map = L.map('map', {
-            center: defaultCenter,
-            zoom: defaultZoom,
-            zoomControl: false
+function Map({ fence, setFence, addingFence, showFence }) {
+    const MapEvents = () => {
+        useMapEvents({
+            click(e) {
+                if (addingFence) {
+                    const newFence = [...fence, e.latlng];
+                    setFence(newFence);
+                }
+            },
         });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            minZoom: 2
-        }).addTo(map);
-
-        return () => {
-            map.remove();
-        };
-    }, []);
+        return null;
+    };
 
     return (
-        <div id="map" style={{ height: '100vh', width: '100%' }} />
+        <MapContainer center={[40.7128, -74.0060]} zoom={13} style={{ height: '500px', width: '100%' }}>
+            <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {showFence && fence.length > 0 && (
+                <Polygon positions={fence} color="green" />
+            )}
+            <MapEvents />
+        </MapContainer>
     );
 }
 
 export default Map;
+
+
+
+
+
