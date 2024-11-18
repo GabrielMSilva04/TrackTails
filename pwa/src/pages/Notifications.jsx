@@ -22,7 +22,7 @@ export default function Notifications() {
                         const animalData = await animalResponse.json();
 
                         return {
-                            ...notification, // Inclui todos os campos da notificação original
+                            ...notification,
                             name: animalData.name || "Unknown",
                             notification: notification.content.replace("{name}", animalData.name || "Unknown"),
                             img: animalData.imagePath || "https://via.placeholder.com/150",
@@ -32,8 +32,7 @@ export default function Notifications() {
                 );
 
                 setNotifications(enrichedNotifications);
-
-                // Marcar notificações como lidas após um delay
+                
                 setTimeout(() => markNotificationsAsRead(enrichedNotifications), 5000);
             } catch (error) {
                 console.error("Error fetching notifications:", error);
@@ -44,26 +43,25 @@ export default function Notifications() {
     }, []);
 
     const markNotificationsAsRead = async (notificationList) => {
-        if (markedAsRead) return; // Evitar múltiplas marcações
+        if (markedAsRead) return;
         setMarkedAsRead(true);
 
         try {
             await Promise.all(
                 notificationList
-                    .filter((notification) => !notification.read) // Apenas as não lidas
+                    .filter((notification) => !notification.read)
                     .map((notification) =>
                         fetch(`${notificationsBaseUrl}/${notification.id}`, {
                             method: "PUT",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
-                                ...notification, // Inclui todos os campos
-                                read: true, // Atualiza apenas o campo `read`
+                                ...notification,
+                                read: true,
                             }),
                         })
                     )
             );
 
-            // Atualiza o estado local para refletir que estão lidas
             setNotifications((prev) =>
                 prev.map((notification) => ({ ...notification, read: true }))
             );
