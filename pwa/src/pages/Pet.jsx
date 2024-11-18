@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeartPulse, faMapLocationDot, faGauge, faSyringe, faLungs, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faHeartPulse, faMapLocationDot, faGauge, faSyringe, faLungs } from "@fortawesome/free-solid-svg-icons";
 import { faFilePdf } from "@fortawesome/free-regular-svg-icons";
 import sleepLogo from "../assets/sleep.png";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
+import axios from "axios";
+
+const animalDataBaseUrl = "http://localhost:8082/api/v1/animaldata";
 
 const Card = ({ icon, label, value, to, image }) => (
     <Link to={to} className="card bg-primary text-primary-content w-40 h-32 rounded-t-2xl shadow-xl">
@@ -39,6 +42,15 @@ export default function Pet() {
         age: "Calculating...",
     });
 
+    const [latestData, setLatestData] = useState({
+        weight: "Unknown",
+        height: "Unknown",
+        heartRate: "Unknown",
+        breathRate: "Unknown",
+        speed: "Unknown",
+        location: { latitude: "Unknown", longitude: "Unknown" },
+    });
+
     useEffect(() => {
         if (animal) {
             const calculateAge = (birthDate) => {
@@ -64,14 +76,37 @@ export default function Pet() {
                 birthDate: formatDate(animal.birthDate),
                 age: `${calculateAge(animal.birthDate)} (${formatDate(animal.birthDate)})`,
             });
+
+            // Fetch latest data for the animal
+            const fetchLatestData = async () => {
+                try {
+                    const response = await axios.get(`${animalDataBaseUrl}/latest/${animal.id}`);
+                    const data = response.data;
+
+                    setLatestData({
+                        weight: data.weight?.toFixed(2) || "Unknown",
+                        height: data.height?.toFixed(2) || "Unknown",
+                        heartRate: data.heartRate?.toFixed(0) || "Unknown",
+                        breathRate: data.breathRate?.toFixed(0) || "Unknown",
+                        speed: data.speed?.toFixed(2) || "Unknown",
+                        location: {
+                            latitude: data.latitude?.toFixed(6) || "Unknown",
+                            longitude: data.longitude?.toFixed(6) || "Unknown",
+                        },
+                    });
+                } catch (error) {
+                    console.error("Error fetching latest animal data:", error);
+                }
+            };
+
+            fetchLatestData();
         }
     }, [animal]);
 
     const stats = [
-        { icon: faHeartPulse, label: "Heart Rate", value: "120 BPM", to: "/", image: null },
-        { icon: null, label: "Sleep", value: "2H20MIN", to: "/", image: sleepLogo },
-        { icon: faGauge, label: "Speed", value: "5 HM/H", to: "/", image: null },
-        { icon: faLungs, label: "Breathing", value: "50 Breaths/M", to: "/", image: null },
+        { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, to: "/", image: null },
+        { icon: faGauge, label: "Speed", value: `${latestData.speed} HM/H`, to: "/", image: null },
+        { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, to: "/", image: null },
         { icon: faMapLocationDot, label: "Location", value: "Location", to: "/", image: null },
         { icon: faSyringe, label: "Vaccines", value: "Vaccines", to: "/", image: null },
         { icon: faFilePdf, label: "Generate Report", value: "Generate", to: "/", image: null },
@@ -83,7 +118,7 @@ export default function Pet() {
                 Age: {animalData.age}, {animalData.species}, Sex: {animalData.sex}
             </div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                Last Weight: 30 kg, Last Height: 50 cm
+                Last Weight: {latestData.weight} kg, Last Height: {latestData.height} cm
             </div>
             <div className="flex flex-wrap justify-between px-4 mt-4 gap-4">
                 {stats.map((stat, index) => (
