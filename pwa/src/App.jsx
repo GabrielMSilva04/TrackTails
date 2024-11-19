@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
@@ -20,34 +20,61 @@ import './App.css'
 import Notifications from "./pages/Notifications.jsx";
 
 const ProtectedRoute = ({ loggedIn, children }) => {
-  return loggedIn ? children : <Navigate to="/login" />;
+    return loggedIn ? children : <Navigate to="/login" />;
 };
 
 export default function App() {
-  const loggedUser = localStorage.getItem('loggedUser');
+    const [loggedUser, setLoggedUser] = useState(false);
+    const [loading, setLoading] = useState(true); // Add loading state
 
-  return (
-      <Router>
-        <Routes>
-          {/* Public Pages */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    useEffect(() => {
+        // For testing purposes, we will use a mock JWT token
+        //localStorage.setItem("loggedUser", JSON.stringify({ token: "mock-jwt-token" }));
 
-          {/* Protected Pages */}
-          <Route
-              path="*"
-              element={
-                <ProtectedRoute loggedIn={loggedUser}>
-                  <AppRoutes />
-                </ProtectedRoute>
-              }
-          />
-        </Routes>
-      </Router>
-  );
+        const user = JSON.parse(localStorage.getItem("loggedUser"));
+        if (user) {
+            setLoggedUser(true);
+        }
+        setLoading(false); // Mark loading as complete
+    }, []);
+
+    if (loading) {
+        return <div>Loading...</div>; // Show a loading indicator while checking authentication
+    }
+
+    return (
+        <Router>
+            <Routes>
+                {/* Public Pages */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+
+                {/* Protected Pages */}
+                <Route
+                    path="*"
+                    element={
+                        <ProtectedRoute loggedIn={loggedUser}>
+                            <AppRoutes />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </Router>
+    );
 }
 
 function AppRoutes() {
+    const [selectedAnimal, setSelectedAnimal] = useState('')
+    const [selectedMetric, setSelectedMetric] = useState('')
+
+    const handleSelectAnimal = (animal) => {
+        setSelectedAnimal(animal)
+    }
+
+    const handleSelectMetric = (metric) => {
+        setSelectedMetric(metric)
+    }
+
   return (
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -82,9 +109,8 @@ function AppRoutes() {
           <Route path="/finders" element={<Finders />} />
         </Route>
 
-        {/* 404 Not Found Route */}
-        <Route path="*" element={<h2>404 - Page Not Found</h2>} />
-      </Routes>
-  );
+            {/* 404 Not Found Route */}
+            <Route path="*" element={<h2>404 - Page Not Found</h2>} />
+        </Routes>
+    );
 }
-
