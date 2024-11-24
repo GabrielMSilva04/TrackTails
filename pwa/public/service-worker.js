@@ -36,26 +36,28 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event: return from cache (if cached) or fetch from network (if not cached)
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      // If the resource is cached, return it
-      //if (cachedResponse) {
-        //return cachedResponse;
-      //}
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            caches.match(event.request).then((cachedResponse) => {
+                // If the resource is cached, return it
+                //if (cachedResponse) {
+                //return cachedResponse;
+                //}
 
-      // If not, fetch from the network
-      return fetch(event.request)
-        .then((networkResponse) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            // Cache the fetched resource
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        })
-        .catch(() => {
-          // If offline, return the offline page
-          return caches.match('/offline.html');
-        });
-    })
-  );
+                // If not, fetch from the network
+                return fetch(event.request)
+                    .then((networkResponse) => {
+                        return caches.open(CACHE_NAME).then((cache) => {
+                            // Cache the fetched resource
+                            cache.put(event.request, networkResponse.clone());
+                            return networkResponse;
+                        });
+                    })
+                    .catch(() => {
+                        // If offline, return the offline page
+                        return caches.match('/offline.html');
+                    });
+            })
+        );
+    }
 });
