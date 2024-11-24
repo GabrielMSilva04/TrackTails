@@ -1,6 +1,9 @@
 import {InputField} from "../components/InputField.jsx";
 import {useForm} from "react-hook-form";
 
+const base_url = "http://localhost/api/v1";
+const login_url = `${base_url}/users/login`;
+
 export default function Login() {
     const {
         register,
@@ -9,8 +12,28 @@ export default function Login() {
     } = useForm();
 
     const onSubmit = (data) => {
+        function login() {
+            return fetch(login_url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+        }
+
         console.log('Form Data:', data);
-        alert('Pet registered successfully!');
+        login().then((response) => {
+            if (!response.ok) {
+                throw new Error('Login failed');
+            }
+            alert('Login successful!');
+            return response.json();
+        }).then((data) => {
+            console.log('Login Response:', data);
+        }).catch((error) => {
+            console.error('Login Error:', error);
+        });
     };
 
     return (

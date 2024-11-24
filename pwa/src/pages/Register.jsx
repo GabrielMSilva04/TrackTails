@@ -1,5 +1,9 @@
 import {InputField} from "../components/InputField.jsx";
 import {useForm} from "react-hook-form";
+import axios from "axios";
+
+const base_url = "http://localhost/api/v1";
+const register_url = `${base_url}/users`;
 
 export default function Register() {
     const {
@@ -9,9 +13,27 @@ export default function Register() {
         formState: { errors },
     } = useForm();
 
-    const onSubmit = (data) => {
-        console.log('Form Data:', data);
-        alert('Pet registered successfully!');
+    const onSubmit = async (data) => {
+        const payload = {
+            displayName: data.displayName,
+            email: data.email,
+            password: data.password,
+        };
+
+        console.log("Payload to send:", payload);
+
+        try {
+            const response = await axios.post(register_url, payload, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            alert("Registration successful!");
+            console.log("Registration Response:", response.data);
+        } catch (error) {
+            console.error("Registration Error:", error);
+            alert("Registration failed. Please try again.");
+        }
     };
 
     return (
