@@ -60,7 +60,8 @@ public class WebSecurityConfiguration {
 								"/api/v1/users",
 								"/api/v1/users/**"
 						).permitAll()
-						.anyExchange().authenticated());
+						.anyExchange().authenticated())
+						.csrf(csrf -> csrf.disable());
 		return http.build();
 	}
 
@@ -72,6 +73,7 @@ public class WebSecurityConfiguration {
 				.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
 				.authorizeExchange((exchanges) -> exchanges
 						.anyExchange().authenticated())
+				.csrf(csrf -> csrf.disable())
 				.oauth2ResourceServer((oauth2) -> oauth2
 						.jwt(Customizer.withDefaults()));
 
