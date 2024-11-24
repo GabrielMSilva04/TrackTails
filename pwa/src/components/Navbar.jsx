@@ -13,31 +13,32 @@ export default function Navbar() {
             {/*        )}*/}
             {/*    </NavLink>*/}
             {/*</button>*/}
+
             <button className="w-100% h-100%">
-                <NavLink to="/map" className="tooltip" data-tip="Map">
-                    {({ isActive }) => (
-                        <FontAwesomeIcon icon={faLocationDot} color={isActive ? '#1cb51c' : 'white'} />
+                <NavLink to="/mypets" className="tooltip" data-tip="My Animals">
+                    {({isActive}) => (
+                        <FontAwesomeIcon icon={faPaw} color={isActive ? '#1cb51c' : 'white'}/>
                     )}
                 </NavLink>
             </button>
             <button className="w-100% h-100%">
-                <NavLink to="/mypets" className="tooltip" data-tip="My Animals">
-                    {({ isActive }) => (
-                        <FontAwesomeIcon icon={faPaw} color={isActive ? '#1cb51c' : 'white'} />
+                <NavLink to="/map" className="tooltip" data-tip="Map">
+                    {({isActive}) => (
+                        <FontAwesomeIcon icon={faLocationDot} color={isActive ? '#1cb51c' : 'white'}/>
                     )}
                 </NavLink>
             </button>
             <button className="w-100% h-100%">
                 <NavLink to="/notifications" className="tooltip" data-tip="Notifications">
-                    {({ isActive }) => (
-                        <FontAwesomeIcon icon={faBell} color={isActive ? '#1cb51c' : 'white'} />
+                    {({isActive}) => (
+                        <FontAwesomeIcon icon={faBell} color={isActive ? '#1cb51c' : 'white'}/>
                     )}
                 </NavLink>
             </button>
             <button className="w-100% h-100%">
                 <NavLink className="tooltip" data-tip="Profile">
-                    {({ isActive }) => (
-                        <FontAwesomeIcon icon={faUser} color="white" />
+                    {({isActive}) => (
+                        <FontAwesomeIcon icon={faUser} color="white"/>
                     )}
                 </NavLink>
             </button>

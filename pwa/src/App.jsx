@@ -25,21 +25,21 @@ const ProtectedRoute = ({ loggedIn, children }) => {
 
 export default function App() {
     const [loggedUser, setLoggedUser] = useState(false);
-    const [loading, setLoading] = useState(true); // Add loading state
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // For testing purposes, we will use a mock JWT token
-        //localStorage.setItem("loggedUser", JSON.stringify({ token: "mock-jwt-token" }));
+        localStorage.setItem("loggedUser", JSON.stringify({ token: "mock-jwt-token" }));
 
         const user = JSON.parse(localStorage.getItem("loggedUser"));
         if (user) {
             setLoggedUser(true);
         }
-        setLoading(false); // Mark loading as complete
+        setLoading(false);
     }, []);
 
     if (loading) {
-        return <div>Loading...</div>; // Show a loading indicator while checking authentication
+        return <div>Loading...</div>;
     }
 
     return (
