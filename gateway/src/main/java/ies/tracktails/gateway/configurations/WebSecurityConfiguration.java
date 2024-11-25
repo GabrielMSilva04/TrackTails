@@ -7,6 +7,9 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity.OAuth2ResourceServerSpec;
+import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
+import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 
@@ -43,25 +46,30 @@ public class WebSecurityConfiguration {
 	// /api/v1/animaldata/latest
 	// /api/v1/animaldata/history
 	@Bean
-	@Order(1)
+	@Order(2)
 	SecurityWebFilterChain openHttpSecurity(ServerHttpSecurity http) {
-		http
-				.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
-				.authorizeExchange(exchanges -> exchanges
-						.pathMatchers(
-								"/api/v1/animaldata/latest/**",
-								"/api/v1/animaldata/historic/**",
-								"/api/v1/animals",
-								"/api/v1/animals/**",
-								"/api/v1/notifications",
-								"/api/v1/notifications/**",
-								"/api/v1/reports",
-								"/api/v1/reports/**",
-								"/api/v1/users",
-								"/api/v1/users/**"
-						).permitAll()
-						.anyExchange().authenticated());
-		return http.build();
+		@Bean
+		@Order(1)
+		public SecurityWebFilterChain permitSpecificPaths(ServerHttpSecurity http) {
+			String[] pathsToPermit = {
+				"/api/v1/animaldata/latest/**",
+				"/api/v1/animaldata/historic/**",
+				"/api/v1/animals",
+				"/api/v1/animals/**",
+				"/api/v1/reports",
+				"/api/v1/reports/**",
+				"/api/v1/users",
+				"/api/v1/users/**"
+			};
+		
+			ServerHttpSecurity security = http.csrf(ServerHttpSecurity.CsrfSpec::disable);
+		
+			for (String path : pathsToPermit) {
+				security = security.securityMatcher(new PathPatternParserServerWebExchangeMatcher(path))
+									.authorizeExchange(exchanges -> exchanges.anyExchange().permitAll());
+			}
+		
+			return security.build();
 	}
 
 	// Configure JWT routes
@@ -90,4 +98,12 @@ public class WebSecurityConfiguration {
 				.csrf(csrf -> csrf.disable());
 		return http.build();
 	}
+
+	/*
+	@Bean
+	public ReactiveJwtDecoder jwtDecoder() {
+		System.out.println("Initializing ReactiveJwtDecoder with JWK Set URI...");
+		return NimbusReactiveJwtDecoder.withJwkSetUri("http://userservice:8080/api/v1/pub_key").build();
+	}
+		*/
 }
