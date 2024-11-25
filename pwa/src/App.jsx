@@ -28,11 +28,8 @@ export default function App() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // For testing purposes, we will use a mock JWT token
-        localStorage.setItem("loggedUser", JSON.stringify({ token: "mock-jwt-token" }));
-
-        const user = JSON.parse(localStorage.getItem("loggedUser"));
-        if (user) {
+        const authToken = localStorage.getItem('authToken');
+        if (authToken) {
             setLoggedUser(true);
         }
         setLoading(false);

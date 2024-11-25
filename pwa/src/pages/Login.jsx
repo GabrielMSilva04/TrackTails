@@ -1,5 +1,7 @@
 import {InputField} from "../components/InputField.jsx";
 import {useForm} from "react-hook-form";
+import axios from "axios";
+// import {navigate} from "@reach/router";
 
 const base_url = "http://localhost/api/v1";
 const login_url = `${base_url}/users/login`;
@@ -11,29 +13,43 @@ export default function Login() {
         formState: { errors },
     } = useForm();
 
-    const onSubmit = (data) => {
-        function login() {
-            return fetch(login_url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
+    const onSubmit = async (data) => {
+        try {
+            // Send login request
+            const response = await axios.post(login_url, {
+                email: data.email,
+                password: data.password,
             });
-        }
 
-        console.log('Form Data:', data);
-        login().then((response) => {
-            if (!response.ok) {
-                throw new Error('Login failed');
-            }
-            alert('Login successful!');
-            return response.json();
-        }).then((data) => {
-            console.log('Login Response:', data);
-        }).catch((error) => {
-            console.error('Login Error:', error);
-        });
+            // Store token in localStorage
+            const token = response.data.token;
+            localStorage.setItem("authToken", token);
+            alert("Login successful!");
+
+            // Fetch user information
+            const userResponse = await fetchUserInfo(token);
+            console.log("User Info:", userResponse);
+
+            // navigate("/dashboard");
+        } catch (error) {
+            console.error("Login Error:", error);
+            alert("Login failed. Please try again.");
+        }
+    };
+
+    // Fetch user information using the token
+    const fetchUserInfo = async (token) => {
+        try {
+            const response = await axios.get(user_info_url, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data; // Return user info
+        } catch (error) {
+            console.error("Error fetching user information:", error);
+            throw error;
+        }
     };
 
     return (
