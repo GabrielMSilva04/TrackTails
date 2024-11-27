@@ -15,7 +15,7 @@ import RegisterPet from "./pages/RegisterPet.jsx";
 import EditPet from "./pages/EditPet.jsx";
 import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
 import Finders from './pages/Finders'
-
+import {checkToken} from "./utils.js";
 import './App.css'
 import Notifications from "./pages/Notifications.jsx";
 
@@ -28,11 +28,7 @@ export default function App() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // For testing purposes, we will use a mock JWT token
-        localStorage.setItem("loggedUser", JSON.stringify({ token: "mock-jwt-token" }));
-
-        const user = JSON.parse(localStorage.getItem("loggedUser"));
-        if (user) {
+        if ( checkToken() ) {
             setLoggedUser(true);
         }
         setLoading(false);

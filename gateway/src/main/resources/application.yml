@@ -34,7 +34,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://userservice/api/v1/pub_key # URL do servidor de autorização jwk
+          jwk-set-uri: http://userservice:8080/api/v1/pub_key # URL do servidor de autorização jwk
 
 # JWK deve ter uma estrutura com a informação mínima de chave pública
 # {
@@ -46,3 +46,13 @@ spring:
 #     }
 #   ]
 # }
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    org.springframework.security.oauth2.jwt: DEBUG
+    org.springframework.security.oauth2.client: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.oauth2.resourceserver: DEBUG
