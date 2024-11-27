@@ -46,7 +46,9 @@ public class WebSecurityConfiguration {
 	@Bean
 	@Order(1)
 	SecurityWebFilterChain apiHttpSecurity(ServerHttpSecurity http) {
-		http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+		http
+		.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
+		.csrf(ServerHttpSecurity.CsrfSpec::disable)
         .authorizeExchange(exchanges -> exchanges
             // Regras públicas
             .pathMatchers(
