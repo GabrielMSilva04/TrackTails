@@ -17,42 +17,43 @@ public class JwtHeaderFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         System.out.println("JwtHeaderFilter");
 
-        // Obtém o contexto de segurança reativo
         return ReactiveSecurityContextHolder.getContext()
-            .flatMap(securityContext -> {
-                System.out.println("SecurityContext: " + securityContext);
-                var authentication = securityContext.getAuthentication();
-                System.out.println("Authentication: " + authentication);
+                .flatMap(securityContext -> {
+                    System.out.println("SecurityContext: " + securityContext);
 
-                // Se o token for do tipo JWT, extraímos o 'sub' (userId)
-                if (authentication instanceof JwtAuthenticationToken) {
-                    System.out.println("JwtAuthenticationToken");
-                    Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
-                    String userId = jwt.getSubject();
-                    System.out.println("UserId: " + userId);
+                    var authentication = securityContext.getAuthentication();
+                    System.out.println("Authentication: " + authentication);
 
-                    // Cria uma nova instância de HttpHeaders e adiciona o cabeçalho 'X-User-Id'
-                    HttpHeaders modifiedHeaders = new HttpHeaders();
-                    modifiedHeaders.putAll(exchange.getRequest().getHeaders());
-                    modifiedHeaders.add("X-User-Id", userId); // Adiciona o cabeçalho
+                    // Check if the authentication token is a JWT
+                    if (authentication instanceof JwtAuthenticationToken) {
+                        System.out.println("JwtAuthenticationToken");
 
-                    // Cria a requisição modificada com os cabeçalhos alterados
-                    ServerHttpRequestDecorator modifiedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
-                        @Override
-                        public HttpHeaders getHeaders() {
-                            return modifiedHeaders;  // Retorna os cabeçalhos modificados
-                        }
-                    };
+                        Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+                        String userId = jwt.getSubject();
+                        System.out.println("UserId: " + userId);
 
-                    // Cria um novo ServerWebExchange com a requisição modificada
-                    ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
+                        // Create new HttpHeaders with the original headers + X-User-Id
+                        HttpHeaders modifiedHeaders = new HttpHeaders();
+                        exchange.getRequest().getHeaders().forEach(modifiedHeaders::addAll);
+                        modifiedHeaders.add("X-User-Id", userId);
 
-                    // Prossegue com a requisição modificada
-                    return chain.filter(modifiedExchange);
-                }
+                        // Create a modified request with updated headers
+                        ServerHttpRequestDecorator modifiedRequest = new ServerHttpRequestDecorator(exchange.getRequest()) {
+                            @Override
+                            public HttpHeaders getHeaders() {
+                                return modifiedHeaders;
+                            }
+                        };
 
-                // Caso o token não seja um JWT, passa a requisição original
-                return chain.filter(exchange);
-            });
+                        // Create a new exchange with the modified request
+                        ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
+
+                        return chain.filter(modifiedExchange);
+                    }
+
+                    // If not a JWT, proceed with the original exchange
+                    return chain.filter(exchange);
+                })
+                .switchIfEmpty(chain.filter(exchange));
     }
 }
