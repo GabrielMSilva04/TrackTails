@@ -16,4 +16,7 @@ COPY --from=builder /app/gateway/target/*.jar app.jar
 EXPOSE 8080
 COPY .env /app/.env
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY ./wait-for-it.sh /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
+
+ENTRYPOINT ["/app/wait-for-it.sh", "userservice:8080", "--", "java", "-jar", "app.jar"]
