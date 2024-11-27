@@ -2,7 +2,7 @@
 FROM maven:3.8.5-openjdk-17 AS builder
 
 # Set the working directory in the container
-WORKDIR /app/reportservice
+WORKDIR /app
 
 # Uncomment this line if you are using AnimalDataCore as a dependency
 #COPY AnimalsDataCore /app/AnimalsDataCore
@@ -10,9 +10,9 @@ WORKDIR /app/reportservice
 #RUN mvn dependency:go-offline -B
 #RUN mvn clean install
 
-COPY reportservice/pom.xml /app/reportservice/pom.xml
+COPY reportservice /app/reportservice
+WORKDIR /app/reportservice
 RUN mvn dependency:go-offline -B
-COPY reportservice/src /app/reportservice/src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application

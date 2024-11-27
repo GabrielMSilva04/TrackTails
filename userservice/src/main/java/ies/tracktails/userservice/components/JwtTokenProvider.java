@@ -43,21 +43,31 @@ public class JwtTokenProvider {
     
     private PrivateKey getPrivateKey(String filePath) throws Exception {
         String privateKeyPEM = new String(Files.readAllBytes(Paths.get(filePath)));
+    
+        // Remover as linhas de delimitadores
         privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----", "")
                                      .replace("-----END PRIVATE KEY-----", "")
                                      .replaceAll("\\s+", "");
+    
+        // Decodificar a chave de Base64
         byte[] keyBytes = Base64.getDecoder().decode(privateKeyPEM);
+    
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(spec);
     }
-    
+
     private PublicKey getPublicKey(String filePath) throws Exception {
         String publicKeyPEM = new String(Files.readAllBytes(Paths.get(filePath)));
+        
+        // Remover os delimitadores PEM
         publicKeyPEM = publicKeyPEM.replace("-----BEGIN PUBLIC KEY-----", "")
                                    .replace("-----END PUBLIC KEY-----", "")
                                    .replaceAll("\\s+", "");
+        
+        // Decodificar Base64
         byte[] keyBytes = Base64.getDecoder().decode(publicKeyPEM);
+        
         X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePublic(spec);
@@ -65,12 +75,12 @@ public class JwtTokenProvider {
 
     public String generateToken(Long userId) {
         return Jwts.builder()
-            .setSubject(userId.toString())
-            .setIssuedAt(new Date())
-            .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
-            .setHeaderParam("kid", "tracktails-key-id")  // Aqui adicionamos o 'kid'
-            .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
-            .compact();    }
+                .setSubject(String.valueOf(userId))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .compact();
+    }
 
     public boolean validateToken(String token) {
         try {
