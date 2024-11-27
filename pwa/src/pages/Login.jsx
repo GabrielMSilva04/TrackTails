@@ -22,34 +22,18 @@ export default function Login() {
                 password: data.password,
             });
 
+            console.log("Login Response:", response.data);
             // Store token in localStorage
             const token = response.data.token;
             localStorage.setItem("authToken", token);
             alert("Login successful!");
 
-            // Fetch user information
-            const userResponse = await fetchUserInfo(token);
-            console.log("User Info:", userResponse);
+            console.log("Token:", token);
 
             navigate("/mypets");
         } catch (error) {
             console.error("Login Error:", error);
             alert("Login failed. Please try again.");
-        }
-    };
-
-    // Fetch user information using the token
-    const fetchUserInfo = async (token) => {
-        try {
-            const response = await axios.get(user_info_url, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            return response.data; // Return user info
-        } catch (error) {
-            console.error("Error fetching user information:", error);
-            throw error;
         }
     };
 

@@ -15,7 +15,7 @@ import RegisterPet from "./pages/RegisterPet.jsx";
 import EditPet from "./pages/EditPet.jsx";
 import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
 import Finders from './pages/Finders'
-
+import {checkToken} from "./utils.js";
 import './App.css'
 import Notifications from "./pages/Notifications.jsx";
 
@@ -28,8 +28,7 @@ export default function App() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const authToken = localStorage.getItem('authToken');
-        if (authToken) {
+        if ( checkToken() ) {
             setLoggedUser(true);
         }
         setLoading(false);
