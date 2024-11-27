@@ -10,7 +10,6 @@ import {
     faTimes,
     faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import Navbar from "./Navbar.jsx";
 
 export default function LayoutMap() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -98,7 +97,33 @@ export default function LayoutMap() {
                 <Outlet/>
             </div>
 
-            <Navbar/>
+            <div className="btm-nav bg-primary rounded-lg mb-3 w-3/4 mx-auto">
+                <button>
+                    <Link to="/" className="tooltip" data-tip="Home">
+                        <FontAwesomeIcon icon={faHouse} color="white"/>
+                    </Link>
+                </button>
+                <button>
+                    <Link to="/map" className="tooltip" data-tip="Map">
+                        <FontAwesomeIcon icon={faLocationDot} color="white"/>
+                    </Link>
+                </button>
+                <button>
+                    <Link to="/animals" className="tooltip" data-tip="My Animals">
+                        <FontAwesomeIcon icon={faPaw} color="white"/>
+                    </Link>
+                </button>
+                <button>
+                    <Link to="/notifications" className="tooltip" data-tip="Notifications">
+                        <FontAwesomeIcon icon={faBell} color="white"/>
+                    </Link>
+                </button>
+                <button>
+                    <Link to="/profile" className="tooltip" data-tip="Profile">
+                        <FontAwesomeIcon icon={faUser} color="white"/>
+                    </Link>
+                </button>
+            </div>
         </>
     );
 }

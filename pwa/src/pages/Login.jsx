@@ -1,40 +1,16 @@
 import {InputField} from "../components/InputField.jsx";
 import {useForm} from "react-hook-form";
-import axios from "axios";
-import {useNavigate} from "react-router-dom";
-
-const base_url = "http://localhost/api/v1";
-const login_url = `${base_url}/users/login`;
 
 export default function Login() {
-    const navigate = useNavigate();
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm();
 
-    const onSubmit = async (data) => {
-        try {
-            // Send login request
-            const response = await axios.post(login_url, {
-                email: data.email,
-                password: data.password,
-            });
-
-            console.log("Login Response:", response.data);
-            // Store token in localStorage
-            const token = response.data.token;
-            localStorage.setItem("authToken", token);
-            alert("Login successful!");
-
-            console.log("Token:", token);
-
-            navigate("/mypets");
-        } catch (error) {
-            console.error("Login Error:", error);
-            alert("Login failed. Please try again.");
-        }
+    const onSubmit = (data) => {
+        console.log('Form Data:', data);
+        alert('Pet registered successfully!');
     };
 
     return (
