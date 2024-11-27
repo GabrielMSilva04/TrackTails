@@ -1,12 +1,13 @@
 import {InputField} from "../components/InputField.jsx";
 import {useForm} from "react-hook-form";
 import axios from "axios";
-// import {navigate} from "@reach/router";
+import {useNavigate} from "react-router-dom";
 
 const base_url = "http://localhost/api/v1";
 const login_url = `${base_url}/users/login`;
 
 export default function Login() {
+    const navigate = useNavigate();
     const {
         register,
         handleSubmit,
@@ -30,7 +31,7 @@ export default function Login() {
             const userResponse = await fetchUserInfo(token);
             console.log("User Info:", userResponse);
 
-            // navigate("/dashboard");
+            navigate("/mypets");
         } catch (error) {
             console.error("Login Error:", error);
             alert("Login failed. Please try again.");
