@@ -42,56 +42,35 @@ public class WebSecurityConfiguration {
 	 * }
 	 */
 
-	// Define open routes
-	// /api/v1/animaldata/latest
-	// /api/v1/animaldata/history
+	 // Configure JWT routes
 	@Bean
 	@Order(1)
-	SecurityWebFilterChain openHttpSecurity(ServerHttpSecurity http) {
-		@Bean
-		@Order(1)
-		public SecurityWebFilterChain permitSpecificPaths(ServerHttpSecurity http) {
-			String[] pathsToPermit = {
-				"/api/v1/animaldata/latest/**",
-				"/api/v1/animaldata/historic/**",
-				"/api/v1/animals",
-				"/api/v1/animals/**",
-				"/api/v1/reports",
-				"/api/v1/reports/**",
-				"/api/v1/users",
-				"/api/v1/users/**"
-			};
-
-			ServerHttpSecurity security = http.csrf(ServerHttpSecurity.CsrfSpec::disable);
-
-			for (String path : pathsToPermit) {
-				security = security.securityMatcher(new PathPatternParserServerWebExchangeMatcher(path))
-									.authorizeExchange(exchanges -> exchanges.anyExchange().permitAll());
-			}
-
-			return security.build();
-	}
-
-	// Configure JWT routes
-	@Bean
-	@Order(2)
 	SecurityWebFilterChain apiHttpSecurity(ServerHttpSecurity http) {
-		http
-				.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
-				.authorizeExchange((exchanges) -> exchanges
-						.anyExchange().authenticated())
-				.csrf(csrf -> csrf.disable())
-				.oauth2ResourceServer((oauth2) -> oauth2
-						.jwt(Customizer.withDefaults()));
+		http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+        .authorizeExchange(exchanges -> exchanges
+            // Regras públicas
+            .pathMatchers(
+                "/api/v1/animaldata/latest/**",
+                "/api/v1/animaldata/historic/**",
+                "/api/v1/animals/**",
+                "/api/v1/reports/**",
+                "/api/v1/users/**"
+            ).permitAll()
+            // Regras autenticadas
+            .pathMatchers("/api/v1/**").authenticated()
+            // Qualquer outra rota
+            .anyExchange().permitAll())
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
-		http.addFilterAt(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION); // Add filter to extract and add userId
+		// Adiciona o filtro de JWT (caso necessário)
+		http.addFilterAfter(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION);														// add userId
 
 		return http.build();
 	}
 
 	// By default, permit all requests without authentication
 	@Bean
-	@Order(3)
+	@Order(2)
 	SecurityWebFilterChain defaultHttpSecurity(ServerHttpSecurity http) {
 		http
 				.authorizeExchange((exchanges) -> exchanges
@@ -101,10 +80,11 @@ public class WebSecurityConfiguration {
 	}
 
 	/*
-	@Bean
-	public ReactiveJwtDecoder jwtDecoder() {
-		System.out.println("Initializing ReactiveJwtDecoder with JWK Set URI...");
-		return NimbusReactiveJwtDecoder.withJwkSetUri("http://userservice:8080/api/v1/pub_key").build();
-	}
-		*/
+	 * @Bean
+	 * public ReactiveJwtDecoder jwtDecoder() {
+	 * System.out.println("Initializing ReactiveJwtDecoder with JWK Set URI...");
+	 * return NimbusReactiveJwtDecoder.withJwkSetUri(
+	 * "http://userservice:8080/api/v1/pub_key").build();
+	 * }
+	 */
 }
