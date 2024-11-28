@@ -7,25 +7,22 @@ import { useAnimalContext } from '../contexts/AnimalContext'; // Import the cont
 import Map from './Map';
 
 export default function LayoutMapDetails() {
-    const { selectedAnimal } = useAnimalContext(); // Access the selected animal from context
+    const { selectedAnimal } = useAnimalContext();
     const navigate = useNavigate();
 
-    // If no animal is selected or animal data is missing, redirect to /map
     useEffect(() => {
         if (!selectedAnimal || !selectedAnimal.latitude || !selectedAnimal.longitude) {
-            navigate("/map"); // Redirect to the map page if no valid animal is selected
+            navigate("/map");
         }
-        console.log("Selected animal:", selectedAnimal); // Debug log
-    }, [selectedAnimal, navigate]); // Only run when selectedAnimal changes
+        console.log("Selected animal:", selectedAnimal);
+    }, [selectedAnimal, navigate]);
 
-    // States for map interaction and toggles
     const [fence, setFence] = useState([]);
     const [addingFence, setAddingFence] = useState(false);
     const [showFence, setShowFence] = useState(true);
     const [showRoute, setShowRoute] = useState(false);
     const [showFenceControls, setShowFenceControls] = useState(false);
 
-    // Predefined routeData for demonstration
     const routeData = selectedAnimal?.routeData || [
         [40.633039, -8.659193],
         [40.633139, -8.659293],
@@ -33,14 +30,14 @@ export default function LayoutMapDetails() {
     ];
 
     if (!selectedAnimal) {
-        return <div>Loading...</div>; // Show loading if selectedAnimal is still undefined
+        return <div>Loading...</div>;
     }
 
     return (
         <>
             {/* Top Bar */}
-            <div className="fixed top-0 left-0 right-0 bg-primary p-3 w-full h-24 -z-10 flex items-center">
-                <div className="max-w-7xl flex justify-between w-full mx-2">
+            <div className="fixed top-0 left-0 right-0 bg-primary p-3 w-full h-28 z-20 flex flex-col items-center">
+                <div className="max-w-7xl mx-auto flex justify-between w-full">
                     <button>
                         <Link to="/map" className="tooltip" data-tip="Back to Map">
                             <FontAwesomeIcon icon={faArrowLeft} color="white" />
@@ -50,31 +47,27 @@ export default function LayoutMapDetails() {
                         <span className="text-white font-semibold text-sm">Battery: {selectedAnimal.battery * 100}%</span>
                     </div>
                 </div>
-            </div>
 
-            {/* Animal Info */}
-            <div className="fixed top-4 w-full flex flex-col items-center z-10">
-                <div className="flex-1 text-center flex flex-col items-center">
-                    <span className="text-white font-semibold text-lg">
-                        {selectedAnimal.name}
-                    </span>
+                {/* Animal Info */}
+                <div className="flex flex-col items-center">
+                    <span className="text-white font-semibold text-lg">{selectedAnimal.name}</span>
+                    <img
+                        src={selectedAnimal?.image || "https://placedog.net/300/300"}
+                        alt={selectedAnimal?.name || "Unknown Animal"}
+                        className="h-20 w-20 rounded-full border-4 border-primary mt-2"
+                    />
                 </div>
-                <img
-                    src={selectedAnimal?.image || "https://placedog.net/300/300"} // Default image fallback
-                    alt={selectedAnimal?.name || "Unknown Animal"}
-                    className="h-20 w-20 rounded-full border-4 border-primary mt-2"
-                />
             </div>
 
             {/* Map Section */}
             <div className="absolute right-0 top-26 left-0 bottom-28 -z-20 overflow-auto">
                 <Map
-                    animals={[selectedAnimal]} // Display only the selected animal
+                    animals={[selectedAnimal]}
                     fence={fence}
                     setFence={setFence}
                     addingFence={addingFence}
                     showFence={showFence}
-                    routeData={showRoute ? routeData : []} // Conditionally show route data
+                    routeData={showRoute ? routeData : []}
                 />
             </div>
 
@@ -87,7 +80,7 @@ export default function LayoutMapDetails() {
                                 <>
                                     <button
                                         onClick={() => {
-                                            setFence([]); // Reset fence
+                                            setFence([]);
                                             setAddingFence(true);
                                             setShowFence(true);
                                         }}

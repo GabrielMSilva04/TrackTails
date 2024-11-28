@@ -84,13 +84,13 @@ function LayoutMap() {
             {/* Map Component */}
             <div className="absolute top-0 bottom-0 left-0 right-0 z-0">
                 <Map
-                    animals={animals} // Pass animals data to the Map component
-                    fence={[]} // Example props, replace or modify as needed
-                    setFence={() => {}} // Example props, replace or modify as needed
-                    addingFence={false} // Example props, replace or modify as needed
-                    showFence={false} // Example props, replace or modify as needed
-                    showRoute={false} // Example props, replace or modify as needed
-                    routeData={[]} // Example props, replace or modify as needed
+                    animals={animals}
+                    fence={[]}
+                    setFence={() => {}}
+                    addingFence={false}
+                    showFence={false}
+                    showRoute={false}
+                    routeData={[]}
                 />
             </div>
         </>
