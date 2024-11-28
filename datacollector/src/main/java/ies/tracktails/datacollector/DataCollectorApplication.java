@@ -1,4 +1,4 @@
-package ies.tracktails.reportservice;
+package ies.tracktails.datacollector;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
