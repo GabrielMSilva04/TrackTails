@@ -78,9 +78,10 @@ function AppRoutes() {
           <Route path="/about" element={<h2>About</h2>} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/mypets" element={<MyPets />} />
+        </Route>
+
           <Route path="/registerpet" element={<RegisterPet />} />
           <Route path="/editpet" element={<EditPet />} />
-        </Route>
 
         <Route path="/map" element={<LayoutMap />}>
           <Route index element={<Map />} />

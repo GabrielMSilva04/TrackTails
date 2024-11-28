@@ -31,11 +31,13 @@ public class AnimalServiceImpl implements AnimalService {
         Animal existingAnimal = animalRepository.findById(animal.getId()).get();
         existingAnimal.setName(animal.getName());
         existingAnimal.setSpecies(animal.getSpecies());
+        existingAnimal.setBreed(animal.getBreed());
         existingAnimal.setSex(animal.getSex());
-        existingAnimal.setBirthDate(animal.getBirthDate());
+        existingAnimal.setBirthday(animal.getBirthday());
         existingAnimal.setUserId(animal.getUserId());
         existingAnimal.setDeviceId(animal.getDeviceId());
         existingAnimal.setBeCarefulWith(animal.getBeCarefulWith());
+        existingAnimal.setImagePath(animal.getImagePath());
         return animalRepository.save(existingAnimal);
     }
 

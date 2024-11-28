@@ -1,6 +1,6 @@
-import {InputField} from "../components/InputField.jsx";
-import {Link} from "react-router-dom";
-import {useForm} from "react-hook-form";
+import { InputField } from "../components/InputField.jsx";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import axios from "axios";
 
 const base_url = "http://localhost/api/v1";
@@ -14,8 +14,24 @@ export default function RegisterPet() {
 
     const onSubmit = async (data) => {
         try {
-            console.log('Form Data:', data);
-            const response = await axios.post(`${base_url}/animals`, data);
+            const token = localStorage.getItem('authToken'); // Get JWT token from localStorage
+            if (!token) {
+                alert('No authentication token found. Please log in.');
+                return;
+            }
+
+            console.log('Form data:', data);
+
+            const response = await axios.post(
+                `${base_url}/animals`,
+                data,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                }
+            );
+
             alert('Pet registered successfully!');
             console.log('Response:', response.data);
         } catch (error) {
@@ -30,8 +46,8 @@ export default function RegisterPet() {
     ];
 
     const sexOptions = [
-        { value: 'male', label: 'Male' },
-        { value: 'female', label: 'Female' },
+        { value: 'm', label: 'Male' },
+        { value: 'f', label: 'Female' },
     ];
 
     return (
@@ -48,9 +64,7 @@ export default function RegisterPet() {
                     <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
                 </div>
 
-                <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="flex flex-col gap-2 h-full w-full">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2 h-full w-full">
                     {/* Scrollable Content */}
                     <div className="flex-grow overflow-y-auto space-y-4 px-4">
                         <label className="form-control w-full">
@@ -91,7 +105,7 @@ export default function RegisterPet() {
                                     message: 'Species is required',
                                 }}
                                 options={[
-                                    {value: '', label: 'Select a species'},
+                                    { value: '', label: 'Select a species' },
                                     ...speciesOptions,
                                 ]}
                                 error={errors.species && errors.species.message}
@@ -106,7 +120,7 @@ export default function RegisterPet() {
                                 register={register}
                                 required={false}
                                 options={[
-                                    {value: '', label: 'Select the sex'},
+                                    { value: '', label: 'Select the sex' },
                                     ...sexOptions,
                                 ]}
                                 error={errors.sex && errors.sex.message}
@@ -170,6 +184,18 @@ export default function RegisterPet() {
                             }}
                             error={errors.deviceId && errors.deviceId.message}
                         />
+
+                        {/* Be Careful With */}
+                        <InputField
+                            label="Be Careful With"
+                            name="beCarefulWith"
+                            type="textarea"
+                            placeholder="Enter any special care instructions"
+                            register={register}
+                            required={false}  // As this field is optional
+                            error={errors.beCarefulWith && errors.beCarefulWith.message}
+                        />
+
                     </div>
 
                     {/* Register Button */}
