@@ -10,7 +10,7 @@ const base_url = "http://localhost/api/v1";
 export default function Profile() {
     const [pets, setPets] = useState([]);
     const [user, setUser] = useState(null);
-    const [editMode, setEditMode] = useState(false); // Modo de edição
+    const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
         displayName: '',
         email: '',
@@ -45,7 +45,6 @@ export default function Profile() {
         fetchUser();
     }, []);
 
-
     useEffect(() => {
         const fetchPets = async () => {
             const token = localStorage.getItem('authToken');
@@ -77,7 +76,7 @@ export default function Profile() {
     const handleLogout = () => {
         console.log('Logout clicked');
         localStorage.removeItem('authToken');
-        window.location.href = '/login';
+        window.location.href = '/';
     };
 
     const handleUpdateUser = async (userId) => {
@@ -111,7 +110,6 @@ export default function Profile() {
         }
     };
 
-
     const speciesIcon = {
         Cat: <FontAwesomeIcon icon={faCat} />,
         Dog: <FontAwesomeIcon icon={faDog} />,
@@ -144,97 +142,105 @@ export default function Profile() {
     }
 
     return (
-        <div className="profile-page">
-            <div className="flex space-x-4 p-4 relative">
-                {editMode ? (
-                    <div className="flex flex-col items-center mt-4 z-10">
-                        <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
-                        <form className="flex flex-col items-center">
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium">Display Name</label>
-                                <input
-                                    type="text"
-                                    name="displayName"
-                                    value={formData.displayName}
-                                    onChange={handleInputChange}
-                                    className="input input-bordered w-full max-w-xs"
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium">Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    className="input input-bordered w-full max-w-xs"
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium">Password</label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    value={formData.password}
-                                    onChange={handleInputChange}
-                                    className="input input-bordered w-full max-w-xs"
-                                />
-                            </div>
-                            <div className="flex space-x-4">
-                                <button
-                                    type="button"
-                                    onClick={() => handleUpdateUser(user.userId)}
-                                    className="btn btn-primary"
-                                >
-                                    Save Changes
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setEditMode(false)}
-                                    className="btn btn-secondary"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
+        <div className="profile-page flex flex-col items-center space-y-6 p-4">
+            <div className="flex flex-col items-center">
+                <div className="avatar placeholder">
+                    <div
+                        className="bg-neutral text-neutral-content w-32 h-32 rounded-full flex items-center justify-center shadow-lg"
+                    >
+                        <span className="text-4xl font-bold">
+                            {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'U'}
+                        </span>
                     </div>
-                ) : (
-                    <div className="flex flex-col items-center mt-4 z-10">
-                        <div className="avatar placeholder">
-                            <div
-                                className="bg-neutral text-neutral-content w-20 h-20 rounded-full flex items-center justify-center shadow-lg">
-                                <span className="text-3xl font-bold">MS</span>
-                            </div>
-                        </div>
-                        <div className="text-gray-600 mb-4 text-sm">{user.displayName || "User"}</div>
-                        <div className="text-gray-600 mb-4 text-sm">{user.email}</div>
-                        <div className="flex flex-col justify-center z-0">
-                            <button
-                                className="btn btn-primary text-white mb-3 w-40"
-                                onClick={() => setEditMode(true)}
-                            >
-                                Edit Profile
-                            </button>
-                            <button className="btn btn-secondary text-white mt-6 w-40" onClick={handleLogout}>Logout</button>
-                        </div>
-                    </div>
-                )}
+                </div>
+                <div className="text-gray-600 text-lg font-medium mt-4">{user.displayName || "User"}</div>
+                <div className="text-gray-600 text-sm">{user.email}</div>
             </div>
 
-            <div className="p-6">
-                <h2 className="text-2xl font-bold text-primary mb-6">My Pets</h2>
-                {pets.length > 0 ? (
-                    <Swiper spaceBetween={40} slidesPerView={2} className="w-full pt-8">
-                        {pets.map((pet) => (
-                            <SwiperSlide key={pet.id}>
-                                <PetCard pet={pet} />
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-                ) : (
-                    <p className="text-gray-500">You have no pets registered.</p>
-                )}
-            </div>
+            {editMode ? (
+                <div className="flex flex-col items-center mt-4 z-10">
+                    <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
+                    <form className="flex flex-col items-center">
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium">Display Name</label>
+                            <input
+                                type="text"
+                                name="displayName"
+                                value={formData.displayName}
+                                onChange={handleInputChange}
+                                className="input input-bordered w-full max-w-xs"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                className="input input-bordered w-full max-w-xs"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium">Password</label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                className="input input-bordered w-full max-w-xs"
+                            />
+                        </div>
+                        <div className="flex space-x-4">
+                            <button
+                                type="button"
+                                onClick={() => handleUpdateUser(user.userId)}
+                                className="btn btn-primary text-white"
+                            >
+                                Save Changes
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setEditMode(false)}
+                                className="btn btn-secondary"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            ) : (
+                <>
+                    <div className="w-full max-w-lg">
+                        {pets.length > 0 ? (
+                            <Swiper spaceBetween={40} slidesPerView={2} className="w-full">
+                                {pets.map((pet) => (
+                                    <SwiperSlide key={pet.id}>
+                                        <PetCard pet={pet} />
+                                    </SwiperSlide>
+                                ))}
+                            </Swiper>
+                        ) : (
+                            <p className="text-gray-500 text-center">You have no pets registered.</p>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col items-center space-y-4">
+                        <button
+                            className="btn btn-primary text-white w-40"
+                            onClick={() => setEditMode(true)}
+                        >
+                            Edit Profile
+                        </button>
+                        <button
+                            className="btn btn-secondary text-white w-40"
+                            onClick={handleLogout}
+                        >
+                            Logout
+                        </button>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

@@ -83,6 +83,7 @@ function AppRoutes() {
 
           {/* 404 Not Found Route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
+
           <Route path="/registerpet" element={<RegisterPet />} />
           <Route path="/editpet" element={<EditPet />} />
         </Route>
