@@ -1,137 +1,149 @@
-import React, { useState } from 'react';
-import { useParams, Link } from "react-router-dom";
+import React, { useState, useMemo, useEffect } from 'react';
+import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faLightbulb, faRoute, faVolumeHigh } from "@fortawesome/free-solid-svg-icons";
 import { PiBoundingBoxFill } from "react-icons/pi";
-import Map from './Map'; // Ajuste este caminho se necessário
+import { useAnimalContext } from '../contexts/AnimalContext'; // Import the context hook
+import Map from './Map';
 
 export default function LayoutMapDetails() {
-    const { animalName } = useParams();
+    const { selectedAnimal } = useAnimalContext(); // Access the selected animal from context
+    const navigate = useNavigate();
+
+    // If no animal is selected or animal data is missing, redirect to /map
+    useEffect(() => {
+        if (!selectedAnimal || !selectedAnimal.latitude || !selectedAnimal.longitude) {
+            navigate("/map"); // Redirect to the map page if no valid animal is selected
+        }
+        console.log("Selected animal:", selectedAnimal); // Debug log
+    }, [selectedAnimal, navigate]); // Only run when selectedAnimal changes
+
+    // States for map interaction and toggles
     const [fence, setFence] = useState([]);
     const [addingFence, setAddingFence] = useState(false);
     const [showFence, setShowFence] = useState(true);
-    const [showFenceControls, setShowFenceControls] = useState(false);
     const [showRoute, setShowRoute] = useState(false);
+    const [showFenceControls, setShowFenceControls] = useState(false);
 
-    const routeData = [
+    // Predefined routeData for demonstration
+    const routeData = selectedAnimal?.routeData || [
         [40.633039, -8.659193],
         [40.633139, -8.659293],
         [40.633239, -8.659393],
-        [40.633339, -8.659493],
-        [40.633439, -8.659593],
-        [40.633539, -8.659693]
     ];
 
-
-    const startAddingFence = () => {
-        setFence([]);
-        setAddingFence(true);
-        setShowFence(true);
-    };
-
-    const closeCurrentFence = () => {
-        setAddingFence(false);
-    };
-
-    const toggleFenceVisibility = () => {
-        setShowFence(!showFence);
-    };
-
-    const toggleFenceControls = () => {
-        setShowFenceControls(!showFenceControls);
-    };
-
-    const toggleRouteVisibility = () => {
-        console.log('Current state before toggle:', showRoute);
-        setShowRoute(!showRoute);
-        console.log('State after toggle:', !showRoute);
-    };
-
-    const undoLastVertex = () => {
-        if (fence.length > 0) {
-            setFence(fence.slice(0, -1));  // Remove o último ponto do array de vértices
-        }
-    };
+    if (!selectedAnimal) {
+        return <div>Loading...</div>; // Show loading if selectedAnimal is still undefined
+    }
 
     return (
         <>
+            {/* Top Bar */}
             <div className="fixed top-0 left-0 right-0 bg-primary p-3 w-full h-24 -z-10 flex items-center">
-                <div className="max-w-7xl mx-auto flex justify-between w-full">
-                    <button style={{zIndex: 1010}}>
-                        <Link to="/map" className="tooltip z-20" data-tip="Back Map"
-                              style={{position: 'relative', zIndex: 1020}}>
-                            <FontAwesomeIcon icon={faArrowLeft} color="white"/>
+                <div className="max-w-7xl flex justify-between w-full mx-2">
+                    <button>
+                        <Link to="/map" className="tooltip" data-tip="Back to Map">
+                            <FontAwesomeIcon icon={faArrowLeft} color="white" />
                         </Link>
                     </button>
                     <div>
-                        <span className="text-white font-semibold text-sm">Battery</span>
+                        <span className="text-white font-semibold text-sm">Battery: {selectedAnimal.battery * 100}%</span>
                     </div>
                 </div>
             </div>
 
-            <div className="w-full flex flex-col items-center mt-4 z-20">
+            {/* Animal Info */}
+            <div className="fixed top-4 w-full flex flex-col items-center z-10">
                 <div className="flex-1 text-center flex flex-col items-center">
-                    <span className="text-white font-semibold text-lg">{animalName}</span>
+                    <span className="text-white font-semibold text-lg">
+                        {selectedAnimal.name}
+                    </span>
                 </div>
                 <img
-                    src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.espritdog.com%2Fwp-content%2Fuploads%2F2020%2F09%2Fborder-collie-700810_1920.jpg&f=1&nofb=1&ipt=29bc36e03332cdad92cedd625b2d47519ce9c4bda3a261ca261d17cf3d34b5bd&ipo=images"
-                    alt="Dog Avatar"
-                    className="h-20 w-20 rounded-full border-4 border-primary mt-2"/>
+                    src={selectedAnimal?.image || "https://placedog.net/300/300"} // Default image fallback
+                    alt={selectedAnimal?.name || "Unknown Animal"}
+                    className="h-20 w-20 rounded-full border-4 border-primary mt-2"
+                />
             </div>
 
-            <div className="absolute right-0 top-20 left-0 bottom-28 -z-10 overflow-auto">
-                <Map fence={fence} setFence={setFence} addingFence={addingFence} showFence={showFence}
-                     routeData={routeData} showRoute={showRoute}/>
+            {/* Map Section */}
+            <div className="absolute right-0 top-26 left-0 bottom-28 -z-20 overflow-auto">
+                <Map
+                    animals={[selectedAnimal]} // Display only the selected animal
+                    fence={fence}
+                    setFence={setFence}
+                    addingFence={addingFence}
+                    showFence={showFence}
+                    routeData={showRoute ? routeData : []} // Conditionally show route data
+                />
             </div>
 
-            <div className="fixed bottom-0 left-0 right-0 bg-primary p-3 w-full h-28 z-10 flex items-center">
-                <div className="max-w-7xl mx-4 flex justify-around w-full">
+            {/* Bottom Controls */}
+            <div className="fixed bottom-0 left-0 right-0 bg-primary p-3 w-full h-28 z-20 flex items-center">
+                <div className="max-w-7xl mx-auto flex justify-around w-full">
                     {showFenceControls ? (
                         <>
                             {!addingFence && (
                                 <>
-                                    <button onClick={startAddingFence}
-                                            className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg">Start
-                                        Fence
+                                    <button
+                                        onClick={() => {
+                                            setFence([]); // Reset fence
+                                            setAddingFence(true);
+                                            setShowFence(true);
+                                        }}
+                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                    >
+                                        Start Fence
                                     </button>
-                                    <button onClick={toggleFenceVisibility}
-                                            className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg">
-                                        {showFence ? 'Hide Fence' : 'Show Fence'}
+                                    <button
+                                        onClick={() => setShowFence((prev) => !prev)}
+                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                    >
+                                        {showFence ? "Hide Fence" : "Show Fence"}
                                     </button>
                                 </>
                             )}
                             {addingFence && (
                                 <>
-                                    <button onClick={closeCurrentFence}
-                                            className="bg-white text-primary text-sm font-bold p-2 rounded-lg">Close
-                                        Fence
+                                    <button
+                                        onClick={() => setAddingFence(false)}
+                                        className="bg-white text-primary text-sm font-bold p-2 rounded-lg"
+                                    >
+                                        Close Fence
                                     </button>
-                                    <button onClick={undoLastVertex}
-                                            className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg">Undo
-                                        Last Vertex
+                                    <button
+                                        onClick={() => setFence((prevFence) => prevFence.slice(0, -1))}
+                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                    >
+                                        Undo Last Vertex
                                     </button>
                                 </>
                             )}
-                            <button onClick={toggleFenceControls}
-                                    className="bg-white text-primary text-sm font-bold p-2 rounded-lg">Go Back
+                            <button
+                                onClick={() => setShowFenceControls((prev) => !prev)}
+                                className="bg-white text-primary text-sm font-bold p-2 rounded-lg"
+                            >
+                                Go Back
                             </button>
                         </>
                     ) : (
                         <>
                             <Link to="/" className="tooltip" data-tip="Home">
-                                <FontAwesomeIcon icon={faLightbulb} color="white" size="lg"/>
+                                <FontAwesomeIcon icon={faLightbulb} color="white" size="lg" />
                                 <div className="text-white text-sm mt-1">Light</div>
                             </Link>
                             <Link to="/map" className="tooltip" data-tip="Map">
-                                <FontAwesomeIcon icon={faVolumeHigh} color="white" size="lg"/>
+                                <FontAwesomeIcon icon={faVolumeHigh} color="white" size="lg" />
                                 <div className="text-white text-sm mt-1">Sound</div>
                             </Link>
-                            <button onClick={toggleRouteVisibility}>
-                                <FontAwesomeIcon icon={faRoute} color="white" size="lg"/>
-                                <div className="text-white text-sm mt-1">{showRoute ? 'Hide Route' : 'Show Route'}</div>
+                            <button onClick={() => setShowRoute((prev) => !prev)}>
+                                <FontAwesomeIcon icon={faRoute} color="white" size="lg" />
+                                <div className="text-white text-sm mt-1">
+                                    {showRoute ? "Hide Route" : "Show Route"}
+                                </div>
                             </button>
-                            <button onClick={toggleFenceControls}>
-                                <PiBoundingBoxFill className="ml-7" style={{color: 'white', fontSize: '24px'}}/>
+                            <button onClick={() => setShowFenceControls((prev) => !prev)}>
+                                <PiBoundingBoxFill className="ml-7" style={{ color: 'white', fontSize: '24px' }} />
                                 <div className="text-white text-sm mt-1">Fence Control</div>
                             </button>
                         </>
@@ -141,14 +153,3 @@ export default function LayoutMapDetails() {
         </>
     );
 }
-
-
-
-
-
-
-
-
-
-
-
