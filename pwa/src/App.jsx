@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
+import Profile from './pages/Profile'
 import Home from './pages/Home'
 import Pet from './pages/Pet'
 import Register from './pages/Register'
@@ -39,6 +40,7 @@ function App() {
           <Route path="/about" element={<h2>About</h2>} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/mypets" element={<MyPets />} />
+          <Route path="/profile" element={<Profile/>}/>
 
           {/* 404 Not Found Route */}
           <Route path="*" element={<h2>404 - Page Not Found</h2>} />
