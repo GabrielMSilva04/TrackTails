@@ -91,6 +91,7 @@ function LayoutMap() {
                     showFence={false}
                     showRoute={false}
                     routeData={[]}
+                    clickHandler={handleAnimalClick}
                 />
             </div>
         </>

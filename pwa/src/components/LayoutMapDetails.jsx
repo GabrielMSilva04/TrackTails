@@ -23,11 +23,31 @@ export default function LayoutMapDetails() {
     const [showRoute, setShowRoute] = useState(false);
     const [showFenceControls, setShowFenceControls] = useState(false);
 
-    const routeData = selectedAnimal?.routeData || [
-        [40.633039, -8.659193],
-        [40.633139, -8.659293],
-        [40.633239, -8.659393],
-    ];
+    const closeCurrentFence = () => {
+        setAddingFence(false);
+    };
+
+    const undoLastVertex = () => {
+        if (fence.length > 0) {
+            setFence(fence.slice(0, -1));
+        }
+    };
+
+    const routeData = useMemo(() => {
+        if (!selectedAnimal) return [];
+
+        const { latitude, longitude } = selectedAnimal;
+
+        const generatedRoute = [
+            [latitude, longitude],
+            [latitude + 0.0001, longitude + 0.0001],
+            [latitude + 0.0002, longitude - 0.0001],
+            [latitude + 0.0001, longitude - 0.0002],
+            [latitude, longitude + 0.0003]
+        ];
+
+        return generatedRoute;
+    }, [selectedAnimal]);
 
     if (!selectedAnimal) {
         return <div>Loading...</div>;
@@ -68,6 +88,8 @@ export default function LayoutMapDetails() {
                     addingFence={addingFence}
                     showFence={showFence}
                     routeData={showRoute ? routeData : []}
+                    showRoute={showRoute}
+                    clickHandler={() => {}}
                 />
             </div>
 
@@ -99,13 +121,13 @@ export default function LayoutMapDetails() {
                             {addingFence && (
                                 <>
                                     <button
-                                        onClick={() => setAddingFence(false)}
-                                        className="bg-white text-primary text-sm font-bold p-2 rounded-lg"
+                                        onClick={closeCurrentFence}
+                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
                                     >
                                         Close Fence
                                     </button>
                                     <button
-                                        onClick={() => setFence((prevFence) => prevFence.slice(0, -1))}
+                                        onClick={undoLastVertex}
                                         className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
                                     >
                                         Undo Last Vertex
@@ -121,14 +143,14 @@ export default function LayoutMapDetails() {
                         </>
                     ) : (
                         <>
-                            <Link to="/" className="tooltip" data-tip="Home">
+                            <div className="tooltip" data-tip="Light">
                                 <FontAwesomeIcon icon={faLightbulb} color="white" size="lg" />
                                 <div className="text-white text-sm mt-1">Light</div>
-                            </Link>
-                            <Link to="/map" className="tooltip" data-tip="Map">
+                            </div>
+                            <div className="tooltip" data-tip="Sound">
                                 <FontAwesomeIcon icon={faVolumeHigh} color="white" size="lg" />
                                 <div className="text-white text-sm mt-1">Sound</div>
-                            </Link>
+                            </div>
                             <button onClick={() => setShowRoute((prev) => !prev)}>
                                 <FontAwesomeIcon icon={faRoute} color="white" size="lg" />
                                 <div className="text-white text-sm mt-1">
