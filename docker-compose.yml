@@ -137,6 +137,17 @@ services:
       - userservice
       - gateway
 
+  datacollector:
+    build:
+      context: ./
+      dockerfile: ./datacollector/Dockerfile
+    container_name: datacollector
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+      - influxdb
+
 volumes:
   mariadb_data:
   influxdb_data:
