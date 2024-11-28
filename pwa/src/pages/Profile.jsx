@@ -15,7 +15,7 @@ export default function Profile() {
     useEffect(() => {
         const fecthUser = async () => {
             try{
-                const response = await axios.get(`${base_url}/users`);
+                const response = await axios.get(`${base_url}/users/me`);
                 console.log('API Response:', response.data);
                 if (!Array.isArray(response.data)) {
                     throw new Error('API response is not an array');
