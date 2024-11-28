@@ -16,6 +16,45 @@ export default function LayoutMap() {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const navigate = useNavigate();
 
+    const animals = [
+        {
+            animalId: 1,
+            name: "Buddy",
+            image: "https://placedog.net/300/300",
+            weight: 40.5,
+            height: 40,
+            latitude: 40.63316,
+            longitude: -8.65939,
+            speed: 12.3,
+            heartRate: 78,
+            breathRate: 15,
+            battery: 0.8,
+            additionalTags: {
+                species: "Dog",
+                status: "Healthy",
+            },
+            timestamp: new Date().toISOString(),
+        },
+        {
+            animalId: 2,
+            name: "Whiskers",
+            image: "https://placecats.com/300/300",
+            weight: 55.2,
+            height: 50,
+            latitude: 40.73415,
+            longitude: -8.37021,
+            speed: 8.5,
+            heartRate: 90,
+            breathRate: 20,
+            battery: 0.5,
+            additionalTags: {
+                species: "Cat",
+                status: "Running",
+            },
+            timestamp: new Date().toISOString(),
+        },
+    ];
+
     const toggleDrawer = () => {
         setIsDrawerOpen(!isDrawerOpen);
     };
@@ -57,27 +96,32 @@ export default function LayoutMap() {
                                 </div>
                             </div>
 
-                            <div className="p-2">
-                                <div
-                                    className="bg-white rounded-lg text-primary p-2 flex flex-row items-center cursor-pointer hover:bg-gray-100 transition-colors focus:outline-none"
-                                    onClick={() => handleAnimalClick('Jack')}
-                                >
-                                    <div>
-                                        <img
-                                            src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.espritdog.com%2Fwp-content%2Fuploads%2F2020%2F09%2Fborder-collie-700810_1920.jpg&f=1&nofb=1&ipt=29bc36e03332cdad92cedd625b2d47519ce9c4bda3a261ca261d17cf3d34b5bd&ipo=images"
-                                            alt="Animal Name"
-                                            className="h-8 w-8 rounded-full"
-                                        />
-                                    </div>
-                                    <div className="flex flex-col ml-2">
-                                        <div className="text-sm font-semibold">
-                                            Jack
+                            <div className="flex flex-col gap-2 p-2">
+                                {animals.map((animal) => (
+                                    <div
+                                        key={animal.animalId}
+                                        className="bg-white rounded-lg text-primary p-2 flex flex-row items-center cursor-pointer hover:bg-gray-100 transition-colors focus:outline-none"
+                                        onClick={() =>
+                                            handleAnimalClick(animal.name)
+                                        }
+                                    >
+                                        <div>
+                                            <img
+                                                src={animal.image ?? "https://placehold.co/100x100"}
+                                                alt={animal.name}
+                                                className="h-8 w-8 rounded-full"
+                                            />
                                         </div>
-                                        <div className="text-xs text-gray-500">
-                                            Dog
+                                        <div className="flex flex-col ml-2">
+                                            <div className="text-sm font-semibold">
+                                                {animal.name}
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                {animal.type}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     )}
