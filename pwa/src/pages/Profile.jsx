@@ -10,6 +10,12 @@ const base_url = "http://localhost/api/v1";
 export default function Profile() {
     const [pets, setPets] = useState([]);
     const [user, setUser] = useState(null);
+    const [editMode, setEditMode] = useState(false); // Modo de edição
+    const [formData, setFormData] = useState({
+        displayName: '',
+        email: '',
+        password: '',
+    });
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -26,6 +32,11 @@ export default function Profile() {
                 });
                 console.log('User API Response:', response.data);
                 setUser(response.data);
+                setFormData({
+                    displayName: response.data.displayName || '',
+                    email: response.data.email || '',
+                    password: '',
+                });
             } catch (err) {
                 console.error('Error fetching user:', err);
             }
@@ -33,6 +44,7 @@ export default function Profile() {
 
         fetchUser();
     }, []);
+
 
     useEffect(() => {
         const fetchPets = async () => {
@@ -56,6 +68,49 @@ export default function Profile() {
 
         fetchPets();
     }, []);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleLogout = () => {
+        console.log('Logout clicked');
+        localStorage.removeItem('authToken');
+        window.location.href = '/login';
+    };
+
+    const handleUpdateUser = async (userId) => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+            console.warn('No token found. User is not logged in.');
+            return;
+        }
+
+        if (!userId) {
+            console.error('User ID is undefined.');
+            return;
+        }
+
+        console.log(formData);
+
+        try {
+            const response = await axios.put(`${base_url}/users/${userId}`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            console.log('User updated:', response.data);
+            setUser(response.data);
+            setEditMode(false);
+            alert('Profile updated successfully!');
+        } catch (err) {
+            console.error('Error updating user:', err);
+            alert('Failed to update the profile. Please try again.');
+        }
+    };
+
 
     const speciesIcon = {
         Cat: <FontAwesomeIcon icon={faCat} />,
@@ -84,21 +139,6 @@ export default function Profile() {
         </div>
     );
 
-    const UserCard = ({ user }) => (
-        <div className="flex flex-col items-center mt-4 z-10">
-            <div className="avatar placeholder">
-                <div className="bg-neutral text-neutral-content w-20 h-20 rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-3xl font-bold">{user.displayName || "User"}</span>
-                </div>
-            </div>
-            <div className="text-gray-600 mb-4 text-sm">{user.email}</div>
-            <div className="flex flex-col justify-center z-0">
-                <button className="btn btn-primary text-white mb-3 w-40">Edit Profile</button>
-                <button className="btn btn-secondary text-white mt-6 w-40">Logout</button>
-            </div>
-        </div>
-    );
-
     if (!user) {
         return <div>Loading user profile...</div>;
     }
@@ -106,7 +146,79 @@ export default function Profile() {
     return (
         <div className="profile-page">
             <div className="flex space-x-4 p-4 relative">
-                <UserCard user={user} />
+                {editMode ? (
+                    <div className="flex flex-col items-center mt-4 z-10">
+                        <h2 className="text-2xl font-bold mb-4">Edit Profile</h2>
+                        <form className="flex flex-col items-center">
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium">Display Name</label>
+                                <input
+                                    type="text"
+                                    name="displayName"
+                                    value={formData.displayName}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-full max-w-xs"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-full max-w-xs"
+                                />
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium">Password</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    className="input input-bordered w-full max-w-xs"
+                                />
+                            </div>
+                            <div className="flex space-x-4">
+                                <button
+                                    type="button"
+                                    onClick={() => handleUpdateUser(user.userId)}
+                                    className="btn btn-primary"
+                                >
+                                    Save Changes
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setEditMode(false)}
+                                    className="btn btn-secondary"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                ) : (
+                    <div className="flex flex-col items-center mt-4 z-10">
+                        <div className="avatar placeholder">
+                            <div
+                                className="bg-neutral text-neutral-content w-20 h-20 rounded-full flex items-center justify-center shadow-lg">
+                                <span className="text-3xl font-bold">MS</span>
+                            </div>
+                        </div>
+                        <div className="text-gray-600 mb-4 text-sm">{user.displayName || "User"}</div>
+                        <div className="text-gray-600 mb-4 text-sm">{user.email}</div>
+                        <div className="flex flex-col justify-center z-0">
+                            <button
+                                className="btn btn-primary text-white mb-3 w-40"
+                                onClick={() => setEditMode(true)}
+                            >
+                                Edit Profile
+                            </button>
+                            <button className="btn btn-secondary text-white mt-6 w-40" onClick={handleLogout}>Logout</button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="p-6">
@@ -126,6 +238,7 @@ export default function Profile() {
         </div>
     );
 }
+
 
 
 
