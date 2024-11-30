@@ -204,11 +204,11 @@ const HistoricalAnimalsData = ({ animal }) => {
   useEffect(() => {
     showScales();
     console.log("Fetching data for animal", animalId);
-    fetchAnimalData("12345", "weight");
+    fetchAnimalData(animal, "weight");
   }, []);
 
   useEffect(() => {
-    fetchAnimalData("12345", "weight");
+    fetchAnimalData(animal, "weight");
   }, [range]);
 
   const timeRangeSelectHandler = (range) => {
