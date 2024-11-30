@@ -35,10 +35,10 @@ export default function Navbar() {
                     )}
                 </NavLink>
             </button>
-            <button className="w-100% h-100%">
-                <NavLink className="tooltip" data-tip="Profile">
-                    {({isActive}) => (
-                        <FontAwesomeIcon icon={faUser} color="white"/>
+            <button>
+                <NavLink to="/profile" className="tooltip" data-tip="Profile">
+                    {({ isActive }) => (
+                        <FontAwesomeIcon icon={faUser} color={isActive ? '#1cb51c' : 'white'} />
                     )}
                 </NavLink>
             </button>

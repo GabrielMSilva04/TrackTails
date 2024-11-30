@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
+import Profile from './pages/Profile'
 import Home from './pages/Home'
 import Pet from './pages/Pet'
 import Register from './pages/Register'
@@ -79,6 +80,10 @@ function AppRoutes() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/mypets" element={<MyPets />} />
         </Route>
+          <Route path="/profile" element={<Profile/>}/>
+
+          {/* 404 Not Found Route */}
+          <Route path="*" element={<h2>404 - Page Not Found</h2>} />
 
           <Route path="/registerpet" element={<RegisterPet />} />
           <Route path="/editpet" element={<EditPet />} />
