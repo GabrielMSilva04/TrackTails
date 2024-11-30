@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
+import Profile from './pages/Profile'
 import Home from './pages/Home'
 import Pet from './pages/Pet'
 import Register from './pages/Register'
@@ -59,17 +60,32 @@ export default function App() {
 }
 
 function AppRoutes() {
+    const [selectedAnimal, setSelectedAnimal] = useState('')
+    const [selectedMetric, setSelectedMetric] = useState('')
+
+    const handleSelectAnimal = (animal) => {
+        setSelectedAnimal(animal)
+    }
+
+    const handleSelectMetric = (metric) => {
+        setSelectedMetric(metric)
+    }
+      
     return (
         <AnimalProvider>
             <Routes>
                 {/* Public Layout */}
                 <Route path="/" element={<Layout />}>
-                    <Route index element={<Home />} />
-                    <Route path="/about" element={<h2>About</h2>} />
-                    <Route path="/notifications" element={<Notifications />} />
-                    <Route path="/mypets" element={<MyPets />} />
-                    <Route path="/registerpet" element={<RegisterPet />} />
-                    <Route path="/editpet" element={<EditPet />} />
+                  <Route index element={<Home />} />
+                  <Route path="/about" element={<h2>About</h2>} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/mypets" element={<MyPets />} />
+                  <Route path="/profile" element={<Profile/>}/>
+                  <Route path="/registerpet" element={<RegisterPet />} />
+                  <Route path="/editpet" element={<EditPet />} />
+
+                  {/* 404 Not Found Route */}
+                  <Route path="*" element={<h2>404 - Page Not Found</h2>} />
                 </Route>
 
                 {/* Map and Details */}
@@ -98,9 +114,6 @@ function AppRoutes() {
                 <Route path="/finders" element={<LayoutAnimal showButtons="none"/>}>
                     <Route path="/finders" element={<Finders />} />
                 </Route>
-
-                {/* 404 Not Found */}
-                <Route path="*" element={<h2>404 - Page Not Found</h2>} />
             </Routes>
         </AnimalProvider>
     );

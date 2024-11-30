@@ -16,17 +16,30 @@ export default function MyPets() {
 
     // Fetch pets from the API
     useEffect(() => {
-        //TODO: Fetch pets only if the user is logged in and has a token
         const fetchPets = async () => {
+            const token = localStorage.getItem('authToken'); // Retrieve token from localStorage
+            if (!token) {
+                console.warn('No token found. User is not logged in.');
+                setLoading(false);
+                return;
+            }
+
             try {
-                const response = await axios.get(`${base_url}/animals`);
+                const response = await axios.get(`${base_url}/animals`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Add Authorization header
+                    },
+                });
+
                 console.log('API Response:', response.data);
+
                 if (!Array.isArray(response.data)) {
                     throw new Error('API response is not an array');
                 }
-                setPets(response.data); // Ensure this is an array
+
+                setPets(response.data);
             } catch (err) {
-                console.error(err);
+                console.error('Error fetching pets:', err);
             } finally {
                 setLoading(false);
             }

@@ -20,4 +20,4 @@ COPY .env /app/.env
 COPY ./wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
 
-ENTRYPOINT ["/app/wait-for-it.sh", "userservice:8080", "--", "java", "-jar", "app.jar"]
+ENTRYPOINT ["/app/wait-for-it.sh", "-t", "60", "userservice:8080", "--", "java", "-jar", "app.jar"]
