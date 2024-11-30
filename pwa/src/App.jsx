@@ -65,10 +65,14 @@ function AppRoutes() {
 
     const handleSelectAnimal = (animal) => {
         setSelectedAnimal(animal)
+        // go to the monitoring page
+        window.location.href = '/animal/monitoring'
     }
 
     const handleSelectMetric = (metric) => {
         setSelectedMetric(metric)
+        // go to the historic page
+        window.location.href = '/animal/historic'
     }
 
   return (
@@ -77,7 +81,7 @@ function AppRoutes() {
           <Route index element={<Home />} />
           <Route path="/about" element={<h2>About</h2>} />
           <Route path="/notifications" element={<Notifications />} />
-          <Route path="/mypets" element={<MyPets />} />
+          <Route path="/mypets" element={<MyPets onAnimalSelect={handleSelectAnimal} />} />
           <Route path="/registerpet" element={<RegisterPet />} />
           <Route path="/editpet" element={<EditPet />} />
         </Route>
@@ -90,7 +94,7 @@ function AppRoutes() {
           <Route index element={<MapDetails />} />
         </Route>
 
-        <Route path="/animal/historic" element={<LayoutAnimal showButtons="back-only" />}>
+        <Route path="/animal/historic" element={<LayoutAnimal showButtons="back-only" selectedAnimalId={3} />}>
           <Route
               path="/animal/historic"
               element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />}
@@ -98,7 +102,7 @@ function AppRoutes() {
         </Route>
 
         <Route path="/animal/monitoring" element={<LayoutAnimal showButtons="all" selectedAnimalId={3} />}>
-          <Route path="/animal/monitoring" element={<Pet />} />
+          <Route path="/animal/monitoring" element={<Pet onMetricSelect={handleSelectMetric} />} />
         </Route>
 
         <Route path="/finders" element={<LayoutAnimal showButtons="none" />}>

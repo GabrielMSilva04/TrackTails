@@ -13,16 +13,21 @@ export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) 
     const [animal, setAnimal] = useState(null);
 
     useEffect(() => {
+        console.log("Selected animal ID:", selectedAnimalId);
         if (selectedAnimalId) {
             const fetchAnimal = async () => {
-                axios.get(`${animalsBaseUrl}/${selectedAnimalId}`)
+                axios.get(`${animalsBaseUrl}/${selectedAnimalId}`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    },
+                })
                     .then((response) => {
                         setAnimal(response.data);
                     })
                     .catch((error) => {
                         console.error("Error fetching animal details:", error);
                     });
-            };
+                }
 
             fetchAnimal();
         }

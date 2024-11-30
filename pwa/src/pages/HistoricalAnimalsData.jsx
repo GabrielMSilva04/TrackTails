@@ -6,10 +6,11 @@ import axios from "axios";
 
 const base_url = "http://localhost/api/v1";
 
-const HistoricalAnimalsData = () => {
+const HistoricalAnimalsData = ({ animal }) => {
   const [chartType, setChartType] = useState("Line");
   const [range, setRange] = useState("24H");
   const [dataNotFound, setDataNotFound] = useState(false);
+  const [animalId, setAnimalId] = useState(animal);
   const [data, setData] = useState({
     labels: [],
     datasets: [],
@@ -170,7 +171,11 @@ const HistoricalAnimalsData = () => {
     };
 
     // Fetch data from API
-    await axios.get(`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`)
+    await axios.get(`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      })
       .then((response) => {
         setDataNotFound(false);
         console.log(response.data);
@@ -198,6 +203,8 @@ const HistoricalAnimalsData = () => {
 
   useEffect(() => {
     showScales();
+    console.log("Fetching data for animal", animalId);
+    fetchAnimalData("12345", "weight");
   }, []);
 
   useEffect(() => {

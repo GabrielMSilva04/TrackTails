@@ -6,7 +6,7 @@ import axios from "axios";
 
 const base_url = "http://localhost/api/v1";
 
-export default function MyPets() {
+export default function MyPets({ onAnimalSelect }) {
     const [pets, setPets] = useState([]);
     const [loading, setLoading] = useState(true); // State to track API call status
     const [error, setError] = useState(null); // State to track errors
@@ -143,9 +143,9 @@ export default function MyPets() {
                     <p className="text-error text-center w-full">{error}</p>
                 ) : filteredPets.length > 0 ? (
                     filteredPets.map((pet) => (
-                        <div key={pet.id}>
+                        <button key={pet.id} onClick={() => onAnimalSelect(pet)} className="focus:outline-none">
                             {petCard(pet)}
-                        </div>
+                        </button>
                     ))
                 ) : (
                     <p className="text-gray-500 text-center w-full">No pets found.</p>
