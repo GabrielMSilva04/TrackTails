@@ -98,9 +98,9 @@ function AppRoutes() {
           />
         </Route>
 
-        <Route path="/animal/monitoring" element={<LayoutAnimal showButtons="all" selectedAnimalId={3} />}>
-          <Route path="/animal/monitoring" element={<Pet />} />
-        </Route>
+          <Route path="/animal/monitoring" element={<LayoutAnimal showButtons="all" />}>
+              <Route index element={<Pet />} />
+          </Route>
 
         <Route path="/finders" element={<LayoutAnimal showButtons="none" />}>
           <Route path="/finders" element={<Finders />} />
