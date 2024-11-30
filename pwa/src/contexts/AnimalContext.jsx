@@ -1,64 +1,29 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AnimalContext = createContext();
 
+const base_url = "http://localhost/api/v1";
+
 export const AnimalProvider = ({ children }) => {
-    const [animals, setAnimals] = useState([
-        {
-            animalId: 1,
-            species: "Dog",
-            name: "Rex",
-            image: "https://placedog.net/300/300",
-            weight: 40.5,
-            height: 40,
-            latitude: 40.63316,
-            longitude: -8.65939,
-            speed: 12.3,
-            heartRate: 78,
-            breathRate: 15,
-            battery: 0.8,
-            additionalTags: {
-                species: "Dog",
-                status: "Healthy",
-            },
-            timestamp: new Date().toISOString(),
-        },
-        {
-            animalId: 2,
-            species: "Cat",
-            name: "Whiskers",
-            image: "https://placecats.com/300/300",
-            weight: 55.2,
-            height: 50,
-            latitude: 40.73415,
-            longitude: -8.37021,
-            speed: 8.5,
-            heartRate: 90,
-            breathRate: 20,
-            battery: 0.5,
-            additionalTags: {
-                species: "Cat",
-                status: "Running",
-            },
-            timestamp: new Date().toISOString
-        },
-    ]);
+    const [animals, setAnimals] = useState([]);
     const [selectedAnimal, setSelectedAnimal] = useState(null);
 
-    // useEffect(() => {
-    //     // Fetch or initialize animals (example)
-    //     const fetchAnimals = async () => {
-    //         try {
-    //             const response = await fetch("/api/v1/animals");
-    //             const data = await response.json();
-    //             setAnimals(data);
-    //         } catch (error) {
-    //             console.error("Error fetching animals:", error);
-    //         }
-    //     };
-    //     fetchAnimals();
-    // }, []);
+    useEffect(() => {
+        const fetchAnimals = async () => {
+            try {
+                const response = await axios.get(`${base_url}/animals`);
+                console.log('API Response (AnimalContext):', response.data);
+                if (!Array.isArray(response.data)) {
+                    throw new Error('API response is not an array');
+                }
+                setAnimals(response.data); // Ensure this is an array
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        fetchAnimals();
+    }, []);
 
     return (
         <AnimalContext.Provider value={{ animals, selectedAnimal, setSelectedAnimal }}>
@@ -67,6 +32,4 @@ export const AnimalProvider = ({ children }) => {
     );
 };
 
-export const useAnimalContext = () => {
-    return useContext(AnimalContext);
-};
+export const useAnimalContext = () => useContext(AnimalContext);

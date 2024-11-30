@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import Map from './Map';
 import { useAnimalContext } from '../contexts/AnimalContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
+import Navbar from "./Navbar.jsx";
+import axios from "axios";
+
+const base_url = "http://localhost/api/v1";
 
 function LayoutMap() {
     const { animals, setSelectedAnimal } = useAnimalContext();
     const navigate = useNavigate();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+    // Conditional rendering to avoid passing empty animals to Map
+    // if (!animals || animals.length === 0) {
+    //     return <div>Loading animals...</div>;
+    // }
 
     const handleAnimalClick = (animal) => {
         setSelectedAnimal(animal);
@@ -54,7 +63,7 @@ function LayoutMap() {
                             <div className="flex flex-col gap-2 p-2">
                                 {animals.map((animal) => (
                                     <div
-                                        key={animal.animalId}
+                                        key={animal.id}
                                         className="bg-white rounded-lg text-primary p-2 flex flex-row items-center cursor-pointer hover:bg-gray-100 transition-colors focus:outline-none"
                                         onClick={() => handleAnimalClick(animal)}
                                     >
@@ -94,6 +103,8 @@ function LayoutMap() {
                     clickHandler={handleAnimalClick}
                 />
             </div>
+
+            <Navbar />
         </>
     );
 }
