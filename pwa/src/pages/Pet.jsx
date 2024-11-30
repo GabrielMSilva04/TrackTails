@@ -114,7 +114,7 @@ export default function Pet() {
     const stats = [
         { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, to: "/", image: null },
         { icon: null, label: "Sleep", value: "Sleep", to: "/", image: sleepLogo },
-        { icon: faGauge, label: "Speed", value: `${latestData.speed} HM/H`, to: "/", image: null },
+        { icon: faGauge, label: "Speed", value: `${latestData.speed} KM/H`, to: "/", image: null },
         { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, to: "/", image: null },
         { icon: faMapLocationDot, label: "Location", value: "Location", to: "/", image: null },
         { icon: faSyringe, label: "Vaccines", value: "Vaccines", to: "/", image: null },
