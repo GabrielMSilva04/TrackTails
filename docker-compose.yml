@@ -172,14 +172,20 @@ services:
       context: ./
       dockerfile: ./pwa/Dockerfile
     container_name: pwa
-    env_file:
-      - .env
+    ports:
+      - "8080:8080" # Expose the port used by the development server
+    volumes:
+      - ./pwa:/app  # Mount the local `pwa` directory into the container
+      - /app/node_modules  # Avoid overwriting node_modules inside the container
     depends_on:
       - animalservice
       - notificationservice
       - reportservice
       - userservice
       - gateway
+    environment:
+      NODE_ENV: development
+
 
   datacollector:
     build:
