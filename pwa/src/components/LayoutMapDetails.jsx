@@ -5,10 +5,20 @@ import { faArrowLeft, faLightbulb, faRoute, faVolumeHigh } from "@fortawesome/fr
 import { PiBoundingBoxFill } from "react-icons/pi";
 import { useAnimalContext } from '../contexts/AnimalContext'; // Import the context hook
 import Map from './Map';
+import axios from 'axios';
+
+const base_url = "http://localhost/api/v1";
 
 export default function LayoutMapDetails() {
     const { selectedAnimal } = useAnimalContext();
+    const [latestAnimalData, setLatestAnimalData] = useState(null);
     const navigate = useNavigate();
+    const [fence, setFence] = useState([]);
+    const [addingFence, setAddingFence] = useState(false);
+    const [showFence, setShowFence] = useState(true);
+    const [showRoute, setShowRoute] = useState(false);
+    const [showFenceControls, setShowFenceControls] = useState(false);
+    const [routeData, setRouteData] = useState([]);
 
     useEffect(() => {
         if (!selectedAnimal || !selectedAnimal.latitude || !selectedAnimal.longitude) {
@@ -17,11 +27,77 @@ export default function LayoutMapDetails() {
         console.log("Selected animal:", selectedAnimal);
     }, [selectedAnimal, navigate]);
 
-    const [fence, setFence] = useState([]);
-    const [addingFence, setAddingFence] = useState(false);
-    const [showFence, setShowFence] = useState(true);
-    const [showRoute, setShowRoute] = useState(false);
-    const [showFenceControls, setShowFenceControls] = useState(false);
+    useEffect(() => {
+        const fetchAnimalData = async () => {
+            if (!selectedAnimal) return;
+
+            try {
+                const headers = {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Replace with your token retrieval logic
+                };
+
+                // Fetch latitude, longitude, and battery data
+                const [latitudeResponse, longitudeResponse, latestResponse] = await Promise.all([
+                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.animalId}/latitude`, {
+                        params: {
+                            start: "-1d",
+                            end: "now()",
+                            interval: "15m",
+                            aggregate: "last",
+                        },
+                        headers,
+                    }),
+                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.animalId}/longitude`, {
+                        params: {
+                            start: "-1d",
+                            end: "now()",
+                            interval: "15m",
+                            aggregate: "last",
+                        },
+                        headers,
+                    }),
+                    axios.get(`${base_url}/animaldata/latest/${selectedAnimal.animalId}`, {
+                        headers,
+                    }),
+                ]);
+
+                const latitudeData = latitudeResponse.data;
+                const longitudeData = longitudeResponse.data;
+                const latestData = latestResponse.data;
+
+                console.log("Latitude data:", latitudeData);
+                console.log("Longitude data:", longitudeData);
+                console.log("Latest data (battery):", latestData);
+
+                const combinedData = latitudeData.map(latPoint => {
+                    const matchingLonPoint = longitudeData.find(
+                        lonPoint => lonPoint.timestamp === latPoint.timestamp
+                    );
+                    if (matchingLonPoint) {
+                        return [latPoint.latitude, matchingLonPoint.longitude];
+                    }
+                    return null;
+                }).filter(point => point !== null);
+
+                console.log("Combined Route Data:", combinedData);
+
+                setRouteData(combinedData);
+
+                if (latestData.battery) {
+                    setLatestAnimalData(prevAnimal => ({
+                        ...prevAnimal,
+                        battery: latestData.battery,
+                    }));
+                }
+            } catch (error) {
+                console.error("Failed to fetch animal data:", error);
+                setRouteData([]); // Clear route data on error
+            }
+        };
+
+        fetchAnimalData();
+    }, [selectedAnimal]);
+
 
     const closeCurrentFence = () => {
         setAddingFence(false);
@@ -33,21 +109,6 @@ export default function LayoutMapDetails() {
         }
     };
 
-    const routeData = useMemo(() => {
-        if (!selectedAnimal) return [];
-
-        const { latitude, longitude } = selectedAnimal;
-
-        const generatedRoute = [
-            [latitude, longitude],
-            [latitude + 0.0001, longitude + 0.0001],
-            [latitude + 0.0002, longitude - 0.0001],
-            [latitude + 0.0001, longitude - 0.0002],
-            [latitude, longitude + 0.0003]
-        ];
-
-        return generatedRoute;
-    }, [selectedAnimal]);
 
     if (!selectedAnimal) {
         return <div>Loading...</div>;
@@ -64,7 +125,7 @@ export default function LayoutMapDetails() {
                         </Link>
                     </button>
                     <div>
-                        <span className="text-white font-semibold text-sm">Battery: {selectedAnimal.battery * 100}%</span>
+                        <span className="text-white font-semibold text-sm">Battery: {latestAnimalData?.battery * 100 || "Unknown"}</span>
                     </div>
                 </div>
 
