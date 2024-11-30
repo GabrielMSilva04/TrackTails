@@ -1,27 +1,77 @@
-import React from 'react';
-import {MapContainer, TileLayer, Polygon, useMapEvents, Polyline, Marker} from 'react-leaflet';
+import React, { useEffect, useState, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import pin from '../assets/pin.png';
+import axios from 'axios';
+import { useWebSocket } from '../useWebSocket';
 
+const base_url = 'http://localhost/api/v1';
 
-const customIcon = L.divIcon({
-    html: `
-        <div style="position: relative; width: 75px; height: 70px;">
-            <img src="${pin}" style="width: 100%; height: 100%;" />
-            <img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.espritdog.com%2Fwp-content%2Fuploads%2F2020%2F09%2Fborder-collie-700810_1920.jpg&f=1&nofb=1&ipt=29bc36e03332cdad92cedd625b2d47519ce9c4bda3a261ca261d17cf3d34b5bd&ipo=images" 
-                 style="width: 30px; height: 30px; border-radius: 50%; position: absolute; top: 11px; left: 22.3px;" />
-        </div>
-    `,
-    iconAnchor: [37.5, 70], // Ajuste conforme necessário para centralizar corretamente o ícone
-    className: ''
-});
+function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
+    const [myPetsData, setMyPetsData] = useState([]);
+    useWebSocket(1);
 
+    useEffect(() => {
+        console.log('Map Page Rendered with Animals:', animals);
+    }, [animals]);
 
-function Map({ fence, setFence, addingFence, showFence, showRoute, routeData }) {
+    useEffect(() => {
+        const fetchDynamicData = async () => {
+            try {
+                const updatedAnimals = await Promise.all(
+                    animals.map(async (animal) => {
+                        const response = await axios.get(`${base_url}/animaldata/latest/${animal.id}`);
+                        return { ...animal, ...response.data }; // Merge permanent and dynamic data
+                    })
+                );
+                setMyPetsData(updatedAnimals);
+            } catch (error) {
+                console.error('Failed to fetch dynamic data:', error);
+            }
+        };
+
+        if (animals && animals.length > 0) {
+            fetchDynamicData();
+        }
+    }, [animals]);
+
+    // useEffect(() => {
+    //     // Set up WebSocket for real-time updates
+    //     const socket = new WebSocket('ws://localhost:8080/realtime/updates');
+    //
+    //     socket.onopen = () => {
+    //         console.log('WebSocket connection established.');
+    //     };
+    //
+    //     socket.onmessage = (event) => {
+    //         const updatedAnimal = JSON.parse(event.data);
+    //
+    //         // Update the specific animal's data
+    //         setMyPetsData((prevData) =>
+    //             prevData.map((animal) =>
+    //                 animal.id === updatedAnimal.id ? { ...animal, ...updatedAnimal } : animal
+    //             )
+    //         );
+    //     };
+    //
+    //     socket.onerror = (error) => {
+    //         console.error('WebSocket error:', error);
+    //     };
+    //
+    //     socket.onclose = () => {
+    //         console.log('WebSocket connection closed.');
+    //     };
+    //
+    //     return () => {
+    //         socket.close(); // Clean up WebSocket on component unmount
+    //     };
+    // }, []);
+
     const MapEvents = () => {
         useMapEvents({
             click(e) {
-                if (addingFence) {
+                if (addingFence && fence.length < 4) {
                     const newFence = [...fence, e.latlng];
                     setFence(newFence);
                 }
@@ -31,31 +81,53 @@ function Map({ fence, setFence, addingFence, showFence, showRoute, routeData }) 
         return null;
     };
 
-    const position = [40.633039, -8.659193];
+    const centerPosition = useMemo(() => {
+        if (myPetsData.length > 0 && myPetsData[0].latitude && myPetsData[0].longitude) {
+            return [myPetsData[0].latitude, myPetsData[0].longitude];
+        }
+        return [40.63316, -8.65939];
+    }, [myPetsData]);
+
+    const customIcon = L.divIcon({
+        html: `
+        <div style="position: relative; width: 75px; height: 70px;">
+            <img src="${pin}" style="width: 100%; height: 100%;" />
+            <img src="https://placedog.net/300/300" 
+                 style="width: 30px; height: 30px; border-radius: 50%; position: absolute; top: 11px; left: 22.3px;" />
+        </div>
+    `,
+        iconAnchor: [37.5, 70],
+        className: '',
+    });
 
     return (
-        <MapContainer center={position} zoom={17} zoomControl={false} style={{ height: '100vh', width: '100%' }}>
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {showFence && fence.length > 0 && (
-                <Polygon positions={fence} color="green" />
-            )}
-            {showRoute && routeData.length > 0 && (
-                <Polyline positions={routeData} color="green" />
-            )}
-            <Marker position={position} icon={customIcon}>
-                Jack
-            </Marker>
-            <MapEvents />
-        </MapContainer>
+        <MapContainer center={centerPosition} zoom={17} zoomControl={false} style={{ height: "100vh", width: "100%" }}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
+            {/* Render Fence if showFence is true */}
+            {showFence && fence.length > 0 && <Polygon positions={fence} color="green" />}
+
+            {/* Render Routes if showRoute is true */}
+            {showRoute && routeData.length > 0 && <Polyline positions={routeData} color="blue" className="z-30" />}
+
+            {/* Render Animal Markers */}
+            {myPetsData.map(animal =>
+                animal.latitude && animal.longitude ? (
+                    <Marker
+                        key={animal.id}
+                        position={[animal.latitude, animal.longitude]}
+                        icon={customIcon}
+                        eventHandlers={{
+                            click: () => clickHandler(animal),
+                        }}
+                    />
+                ) : null
+            )}
+
+            {/* Use Leaflet Events for adding a fence */}
+            {addingFence && <MapEvents />}
+        </MapContainer>
     );
 }
 
 export default Map;
-
-
-
-
-

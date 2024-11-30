@@ -7,10 +7,8 @@ import Home from './pages/Home'
 import Pet from './pages/Pet'
 import Register from './pages/Register'
 import Login from './pages/Login'
-import Map from './pages/MapPage.jsx';
 import LayoutMapDetails from './components/LayoutMapDetails';
 import LayoutMap from './components/LayoutMap';
-import MapDetails from './pages/MapDetails';
 import MyPets from "./pages/MyPets.jsx";
 import RegisterPet from "./pages/RegisterPet.jsx";
 import EditPet from "./pages/EditPet.jsx";
@@ -19,6 +17,7 @@ import Finders from './pages/Finders'
 import {checkToken} from "./utils.js";
 import './App.css'
 import Notifications from "./pages/Notifications.jsx";
+import { AnimalProvider } from './contexts/AnimalContext';
 
 const ProtectedRoute = ({ loggedIn, children }) => {
     return loggedIn ? children : <Navigate to="/login" />;
@@ -71,48 +70,51 @@ function AppRoutes() {
     const handleSelectMetric = (metric) => {
         setSelectedMetric(metric)
     }
+      
+    return (
+        <AnimalProvider>
+            <Routes>
+                {/* Public Layout */}
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Home />} />
+                  <Route path="/about" element={<h2>About</h2>} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/mypets" element={<MyPets />} />
+                  <Route path="/profile" element={<Profile/>}/>
+                  <Route path="/registerpet" element={<RegisterPet />} />
+                  <Route path="/editpet" element={<EditPet />} />
 
-  return (
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="/about" element={<h2>About</h2>} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/mypets" element={<MyPets />} />
-          <Route path="/profile" element={<Profile/>}/>
+                  {/* 404 Not Found Route */}
+                  <Route path="*" element={<h2>404 - Page Not Found</h2>} />
+                </Route>
 
-          {/* 404 Not Found Route */}
-          <Route path="*" element={<h2>404 - Page Not Found</h2>} />
+                {/* Map and Details */}
+                <Route path="/map" element={<LayoutMap />} />
+                <Route path="/map/details" element={<LayoutMapDetails />} />
 
-          <Route path="/registerpet" element={<RegisterPet />} />
-          <Route path="/editpet" element={<EditPet />} />
-        </Route>
+                {/* Animal Historic and Monitoring */}
+                <Route
+                    path="/animal/historic"
+                    element={
+                        <LayoutAnimal showButtons="back-only">
+                            <HistoricalAnimalsData />
+                        </LayoutAnimal>
+                    }
+                />
+                <Route
+                    path="/animal/monitoring"
+                    element={
+                        <LayoutAnimal showButtons="all">
+                            <Pet />
+                        </LayoutAnimal>
+                    }
+                />
 
-        <Route path="/map" element={<LayoutMap />}>
-          <Route index element={<Map />} />
-        </Route>
-
-        <Route path="/map/:animalName" element={<LayoutMapDetails />}>
-          <Route index element={<MapDetails />} />
-        </Route>
-
-        <Route path="/animal/historic" element={<LayoutAnimal showButtons="back-only" />}>
-          <Route
-              path="/animal/historic"
-              element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />}
-          />
-        </Route>
-
-        <Route path="/animal/monitoring" element={<LayoutAnimal showButtons="all" selectedAnimalId={3} />}>
-          <Route path="/animal/monitoring" element={<Pet />} />
-        </Route>
-
-        <Route path="/finders" element={<LayoutAnimal showButtons="none" />}>
-          <Route path="/finders" element={<Finders />} />
-        </Route>
-
-            {/* 404 Not Found Route */}
-            <Route path="*" element={<h2>404 - Page Not Found</h2>} />
-        </Routes>
+                {/* Finder Page */}
+                <Route path="/finders" element={<LayoutAnimal showButtons="none"/>}>
+                    <Route path="/finders" element={<Finders />} />
+                </Route>
+            </Routes>
+        </AnimalProvider>
     );
 }
