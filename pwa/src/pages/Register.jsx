@@ -18,6 +18,7 @@ export default function Register() {
         const payload = {
             displayName: data.displayName,
             email: data.email,
+            phoneNumber: data.phoneNumber,
             password: data.password,
         };
 
@@ -93,6 +94,21 @@ export default function Register() {
                             message: "This field is required"
                         }}
                         error={errors.email?.message}
+                    />
+                    <InputField
+                        label="Phone Number"
+                        name="phoneNumber"
+                        type="text"
+                        placeholder="123456789"
+                        register={register}
+                        required={{
+                            value: true,
+                            message: "This field is required",
+                        }}
+                        validate={(value) =>
+                            /^\d{5,15}$/.test(value) || "Phone number must be 5-15 digits"
+                        }
+                        error={errors.phoneNumber?.message}
                     />
                     <InputField
                         label="Password"
