@@ -1,38 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import { useAnimalContext } from '../contexts/AnimalContext';
+import React, { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import pin from '../assets/pin.png';
 import axios from 'axios';
+import { useWebSocket } from '../useWebSocket';
 
 const base_url = 'http://localhost/api/v1';
 
 function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
     const [myPetsData, setMyPetsData] = useState([]);
+    useWebSocket(1);
+
+    useEffect(() => {
+        console.log('Map Page Rendered with Animals:', animals);
+    }, [animals]);
 
     useEffect(() => {
         const fetchDynamicData = async () => {
             try {
-                if (!animals || animals.length === 0) {
-                    console.log('No animals to fetch');
-                } else {
-                    const updatedAnimals = await Promise.all(
-                        animals.map(async (animal) => {
-                            console.log('Fetching dynamic data for:', animal);
-                            const response = await axios.get(`${base_url}/animaldata/latest/${animal.id}`);
-                            return { ...animal, ...response.data }; // Merge permanent and dynamic data
-                        })
-                    );
-                    setMyPetsData(updatedAnimals);
-                }
+                const updatedAnimals = await Promise.all(
+                    animals.map(async (animal) => {
+                        const response = await axios.get(`${base_url}/animaldata/latest/${animal.id}`);
+                        return { ...animal, ...response.data }; // Merge permanent and dynamic data
+                    })
+                );
+                setMyPetsData(updatedAnimals);
             } catch (error) {
                 console.error('Failed to fetch dynamic data:', error);
             }
         };
 
-        fetchDynamicData();
+        if (animals && animals.length > 0) {
+            fetchDynamicData();
+        }
     }, [animals]);
+
+    // useEffect(() => {
+    //     // Set up WebSocket for real-time updates
+    //     const socket = new WebSocket('ws://localhost:8080/realtime/updates');
+    //
+    //     socket.onopen = () => {
+    //         console.log('WebSocket connection established.');
+    //     };
+    //
+    //     socket.onmessage = (event) => {
+    //         const updatedAnimal = JSON.parse(event.data);
+    //
+    //         // Update the specific animal's data
+    //         setMyPetsData((prevData) =>
+    //             prevData.map((animal) =>
+    //                 animal.id === updatedAnimal.id ? { ...animal, ...updatedAnimal } : animal
+    //             )
+    //         );
+    //     };
+    //
+    //     socket.onerror = (error) => {
+    //         console.error('WebSocket error:', error);
+    //     };
+    //
+    //     socket.onclose = () => {
+    //         console.log('WebSocket connection closed.');
+    //     };
+    //
+    //     return () => {
+    //         socket.close(); // Clean up WebSocket on component unmount
+    //     };
+    // }, []);
 
     const MapEvents = () => {
         useMapEvents({
@@ -47,11 +81,12 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
         return null;
     };
 
-    // Default center position if no animals
-    const centerPosition =
-        myPetsData.length > 0 && myPetsData[0].latitude && myPetsData[0].longitude
-            ? [myPetsData[0].latitude, myPetsData[0].longitude]
-            : [40.63316, -8.65939]; // Default fallback position
+    const centerPosition = useMemo(() => {
+        if (myPetsData.length > 0 && myPetsData[0].latitude && myPetsData[0].longitude) {
+            return [myPetsData[0].latitude, myPetsData[0].longitude];
+        }
+        return [40.63316, -8.65939];
+    }, [myPetsData]);
 
     const customIcon = L.divIcon({
         html: `
@@ -85,15 +120,7 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
                         eventHandlers={{
                             click: () => clickHandler(animal),
                         }}
-                    >
-                        <Popup>
-                            <strong>{animal.name}</strong>
-                            <br />
-                            Species: {animal.species}
-                            <br />
-                            Speed: {animal.speed || 'N/A'} km/h
-                        </Popup>
-                    </Marker>
+                    />
                 ) : null
             )}
 
