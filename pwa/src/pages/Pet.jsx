@@ -5,14 +5,14 @@ import { faFilePdf } from "@fortawesome/free-regular-svg-icons";
 import sleepLogo from "../assets/sleep.png";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useAnimalContext } from '../contexts/AnimalContext';
 import axios from "axios";
 
 const baseUrl = "http://localhost/api/v1";
-const animalDataBaseUrl = `${baseUrl}/animal-data`;
+const animalDataBaseUrl = `${baseUrl}/animaldata`;
 
-const Card = ({ icon, label, value, to, image }) => (
-    <Link to={to} className="card bg-primary text-primary-content w-40 h-32 rounded-t-2xl shadow-xl">
+const Card = ({ icon, label, value, trigger, image }) => (
+    <button onClick={trigger} className="card bg-primary text-primary-content w-40 h-32 rounded-t-2xl shadow-xl">
         <div className="card-body flex flex-col justify-between p-4">
             <h2 className="card-title text-5xl relative text-white">
                 {image ? (
@@ -23,19 +23,19 @@ const Card = ({ icon, label, value, to, image }) => (
             </h2>
             <div className="text-xl font-bold text-white">{value}</div>
         </div>
-    </Link>
+    </button>
 );
 
 Card.propTypes = {
     icon: PropTypes.object,
     label: PropTypes.string.isRequired,
     value: PropTypes.string.isRequired,
-    to: PropTypes.string.isRequired,
+    trigger: PropTypes.func,
     image: PropTypes.string,
 };
 
-export default function Pet() {
-    const { animal } = useOutletContext();
+export default function Pet({ onMetricSelect }) {
+    const { selectedAnimal } = useAnimalContext();
     const [animalData, setAnimalData] = useState({
         species: "Unknown",
         sex: "Unknown",
@@ -53,7 +53,8 @@ export default function Pet() {
     });
 
     useEffect(() => {
-        if (animal) {
+        console.log("Selected animal in Pet:", selectedAnimal);
+        if (selectedAnimal) {
             const calculateAge = (birthDate) => {
                 if (!birthDate) return "Unknown";
                 const birth = new Date(birthDate);
@@ -72,16 +73,20 @@ export default function Pet() {
             };
 
             setAnimalData({
-                species: animal.species || "Unknown",
-                sex: animal.sex === "m" ? "Male" : "Female",
-                birthDate: formatDate(animal.birthDate),
-                age: `${calculateAge(animal.birthDate)} (${formatDate(animal.birthDate)})`,
+                species: selectedAnimal.species || "Unknown",
+                sex: selectedAnimal.sex === "m" ? "Male" : "Female",
+                birthDate: formatDate(selectedAnimal.birthDate),
+                age: `${calculateAge(selectedAnimal.birthDate)} (${formatDate(selectedAnimal.birthDate)})`,
             });
 
             // Fetch latest data for the animal
             const fetchLatestData = async () => {
                 try {
-                    const response = await axios.get(`${animalDataBaseUrl}/latest/${animal.id}`);
+                    const response = await axios.get(`${animalDataBaseUrl}/latest/${selectedAnimal.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                        },
+                    });
                     const data = response.data;
 
                     setLatestData({
@@ -102,16 +107,16 @@ export default function Pet() {
 
             fetchLatestData();
         }
-    }, [animal]);
+    }, [selectedAnimal]);
 
     const stats = [
-        { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, to: "/", image: null },
-        {icon: null, label: "Sleep", value: "Sleep", to: "/", image: sleepLogo},
-        { icon: faGauge, label: "Speed", value: `${latestData.speed} HM/H`, to: "/", image: null },
-        { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, to: "/", image: null },
-        { icon: faMapLocationDot, label: "Location", value: "Location", to: "/", image: null },
-        { icon: faSyringe, label: "Vaccines", value: "Vaccines", to: "/", image: null },
-        { icon: faFilePdf, label: "Generate Report", value: "Generate", to: "/", image: null },
+        { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, trigger: (() => onMetricSelect("heartRate")), image: null },
+        {icon: null, label: "Sleep", value: "Sleep", trigger: (() => null), image: sleepLogo},
+        { icon: faGauge, label: "Speed", value: `${latestData.speed} HM/H`, trigger: (() => onMetricSelect("speed")), image: null },
+        { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, trigger: (() => onMetricSelect("breathRate")), image: null },
+        { icon: faMapLocationDot, label: "Location", value: "Location", trigger: (() => null), image: null },
+        { icon: faSyringe, label: "Vaccines", value: "Vaccines", trigger: (() => null), image: null },
+        { icon: faFilePdf, label: "Generate Report", value: "Generate", trigger: (() => null), image: null },
     ];
 
     return (
@@ -126,10 +131,10 @@ export default function Pet() {
                 {stats.map((stat, index) => (
                     <Card
                         key={index}
+                        trigger={stat.trigger}
                         icon={stat.icon}
                         label={stat.label}
                         value={stat.value}
-                        to={stat.to}
                         image={stat.image}
                     />
                 ))}

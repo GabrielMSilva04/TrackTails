@@ -3,13 +3,18 @@ import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
+import { useAnimalContext } from "../contexts/AnimalContext";
+import { useNavigate } from 'react-router-dom';
+
 
 const base_url = "http://localhost/api/v1";
 
-export default function MyPets() {
+export default function MyPets({ onAnimalSelect }) {
     const [pets, setPets] = useState([]);
     const [loading, setLoading] = useState(true); // State to track API call status
     const [error, setError] = useState(null); // State to track errors
+    const { setSelectedAnimal } = useAnimalContext();
+    const navigate = useNavigate();
 
     // State for filtering
     const [filters, setFilters] = useState({ name: '', species: '' });
@@ -47,6 +52,13 @@ export default function MyPets() {
 
         fetchPets();
     }, []);
+
+    const selectHandle = (pet) => {
+        onAnimalSelect(pet.id);
+        console.log("SET SELECTED ANIMAL", pet);
+        setSelectedAnimal(pet);
+        navigate(`/animal/monitoring`);
+    }
 
     // Filtered pets
     const filteredPets = pets.filter((pet) => {
@@ -143,9 +155,9 @@ export default function MyPets() {
                     <p className="text-error text-center w-full">{error}</p>
                 ) : filteredPets.length > 0 ? (
                     filteredPets.map((pet) => (
-                        <div key={pet.id}>
+                        <button key={pet.id} onClick={() => selectHandle(pet)} className="focus:outline-none">
                             {petCard(pet)}
-                        </div>
+                        </button>
                     ))
                 ) : (
                     <p className="text-gray-500 text-center w-full">No pets found.</p>
