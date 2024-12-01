@@ -74,7 +74,7 @@ export default function Pet({ onMetricSelect }) {
             };
 
             setAnimalData({
-                species: selectedAnimal.species || "Unknown",
+                species: selectedAnimal.species ? selectedAnimal.species.charAt(0).toUpperCase() + selectedAnimal.species.slice(1) : "Unknown",
                 breed: selectedAnimal.breed || "Unknown",
                 sex: selectedAnimal.sex === "m" ? "Male" : "Female",
                 birthday: formatDate(selectedAnimal.birthday),
@@ -124,10 +124,17 @@ export default function Pet({ onMetricSelect }) {
     return (
         <div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                Age: {animalData.age}, {animalData.species}, Sex: {animalData.sex}
+                {[
+                    animalData.age !== "Unknown" ? `Age: ${animalData.age}` : null,
+                    animalData.species !== "Unknown" ? `${animalData.species}${animalData.breed !== "Unknown" ? `: ${animalData.breed}` : ""}` : null,
+                    animalData.sex !== "Unknown" ? `${animalData.sex}` : null,
+                ]
+                    .filter(Boolean)
+                    .join(", ")}
             </div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                Last Weight: {latestData.weight} kg, Last Height: {latestData.height} cm
+                {latestData.weight !== "Unknown" && `Last Weight: ${latestData.weight} kg`}
+                {latestData.height !== "Unknown" && `, Last Height: ${latestData.height} cm`}
             </div>
             <div className="flex flex-wrap justify-between px-4 mt-4 gap-4">
                 {stats.map((stat, index) => (
