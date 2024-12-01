@@ -14,8 +14,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 COPY --from=builder /app/gateway/target/*.jar app.jar
-EXPOSE 8080
-COPY .env /app/.env
+EXPOSE 80
 
 COPY ./wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh

@@ -3,6 +3,7 @@ package ies.tracktails.userservice.dtos;
 public class RegisterRequest {
     private String displayName;
     private String email;
+    private int phoneNumber;
     private String password;
 
     public String getEmail() {
@@ -19,6 +20,14 @@ public class RegisterRequest {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public int getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(int phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getPassword() {

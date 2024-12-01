@@ -1,73 +1,34 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import NavBar from "./Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { set } from "react-hook-form";
+import { useAnimalContext } from "../contexts/AnimalContext";
 
 const baseUrl = "http://localhost/api/v1";
 const animalsBaseUrl = `${baseUrl}/animals`;
 
 export default function LayoutAnimal({ showButtons = "all" }) {
-    const location = useLocation();
-    const { animal: passedAnimal } = location.state || {}; // Get animal data from state
-    const [animal, setAnimal] = useState(passedAnimal || null);
-    const [imageUrl, setImageUrl] = useState(null); // State for the animal image URL
-
-    // Fetch animal details if not passed via state
-    useEffect(() => {
-        if (!passedAnimal && animal?.id) {
-            const fetchAnimal = async () => {
-                const token = localStorage.getItem("authToken");
-                try {
-                    const response = await axios.get(`${animalsBaseUrl}/${animal.id}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    setAnimal(response.data);
-                } catch (error) {
-                    console.error("Error fetching animal details:", error);
-                }
-            };
-
-            fetchAnimal();
-        }
-    }, [animal, passedAnimal]);
-
-    console.log(animal);
-
-    // Fetch animal image if not passed
-    useEffect(() => {
-        const fetchImage = async () => {
-            if (animal?.id) {
-                const token = localStorage.getItem("authToken");
-                try {
-                    const response = await axios.get(`${animalsBaseUrl}/${animal.id}/image`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                        responseType: "blob", // Get binary data for the image
-                    });
-                    setImageUrl(URL.createObjectURL(response.data)); // Convert blob to URL
-                } catch (error) {
-                    console.error("Error fetching animal image:", error);
-                    setImageUrl("https://placehold.co/300"); // Fallback image
-                }
-            }
-        };
-
-        if (animal && !imageUrl) fetchImage();
-    }, [animal, imageUrl]);
+    const { selectedAnimal } = useAnimalContext();
 
     LayoutAnimal.propTypes = {
-        showButtons: PropTypes.oneOf(["all", "back-only", "none"]),
+        showButtons: PropTypes.oneOf(["all", "back-only", "none"])
     };
 
-    if (!animal) {
+    if (!selectedAnimal) {
         return (
             <div className="text-center text-primary mt-10">
                 <h2>Loading animal data...</h2>
             </div>
         );
     }
+
+    useEffect(() => {
+        console.log("Selected animal in LayoutAnimal:", selectedAnimal);
+    }, [selectedAnimal]);
 
     return (
         <div className="bg-primary h-screen flex flex-col overflow-hidden">
@@ -81,7 +42,7 @@ export default function LayoutAnimal({ showButtons = "all" }) {
             </div>
             <div className="avatar placeholder justify-center">
                 <div className="bg-neutral border-8 border-base-100 text-neutral-content w-32 rounded-full z-10 mx-auto mt-4 absolute">
-                    <img src={imageUrl || "https://via.placeholder.com/150"} alt={animal.name} />
+                    <img src={selectedAnimal.imagePath || "https://via.placeholder.com/150"} alt={selectedAnimal.name} />
                 </div>
             </div>
             <div className="h-full pt-20">
@@ -93,19 +54,20 @@ export default function LayoutAnimal({ showButtons = "all" }) {
                     )}
                     {showButtons === "all" ? (
                         <div className="mt-4 text-primary font-bold text-2xl items-center justify-center">
-                            {animal.name}
+                            {selectedAnimal.name}
                             <button className="ml-1.5 text-lg text-neutral border rounded-full border-neutral w-7 h-7 items-center justify-center">
                                 <FontAwesomeIcon icon={faEdit} />
                             </button>
                         </div>
                     ) : (
                         <div className="mt-14 text-primary font-bold text-2xl items-center justify-center">
-                            {animal.name}
+                            {selectedAnimal.name}
                         </div>
                     )}
 
                     <div className="overflow-y-auto">
-                        <Outlet context={{ animal }} />
+                        {/* Pass selectedAnimal data to children via Outlet context */}
+                        <Outlet context={{ selectedAnimal }} />
                     </div>
                 </div>
             </div>

@@ -3,13 +3,15 @@ import { useState, useEffect } from "react";
 import ChartComponent from "../components/Chart";
 import TimeRangeSelector from "../components/TimeRangeSelector"
 import axios from "axios";
+import { useAnimalContext } from "../contexts/AnimalContext";
 
 const base_url = "http://localhost/api/v1";
 
-const HistoricalAnimalsData = () => {
+const HistoricalAnimalsData = ({ metric }) => {
   const [chartType, setChartType] = useState("Line");
   const [range, setRange] = useState("24H");
   const [dataNotFound, setDataNotFound] = useState(false);
+  const { selectedAnimal } = useAnimalContext();
   const [data, setData] = useState({
     labels: [],
     datasets: [],
@@ -170,7 +172,11 @@ const HistoricalAnimalsData = () => {
     };
 
     // Fetch data from API
-    await axios.get(`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`)
+    await axios.get(`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      })
       .then((response) => {
         setDataNotFound(false);
         console.log(response.data);
@@ -198,10 +204,11 @@ const HistoricalAnimalsData = () => {
 
   useEffect(() => {
     showScales();
+    fetchAnimalData(selectedAnimal.id, metric);
   }, []);
 
   useEffect(() => {
-    fetchAnimalData("12345", "weight");
+    fetchAnimalData(selectedAnimal.id, metric);
   }, [range]);
 
   const timeRangeSelectHandler = (range) => {
