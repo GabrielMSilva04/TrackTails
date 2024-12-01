@@ -161,6 +161,7 @@ const HistoricalAnimalsData = ({ metric }) => {
       "1M": "1d",
       "3M": "1d",
       "1Y": "1w",
+      "MAX": "1mo"
     };
     const range_api_map = {
       "1H": "1h",
@@ -171,8 +172,13 @@ const HistoricalAnimalsData = ({ metric }) => {
       "1Y": "1y",
     };
 
+    let endpoint = `${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`;
+    if (range === "MAX") {
+      endpoint = `${base_url}/animaldata/historic/${animal}/${metric}?&interval=${range_to_interval_map[range]}`;
+    }
+
     // Fetch data from API
-    await axios.get(`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`, {
+    await axios.get(endpoint, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
