@@ -10,7 +10,7 @@ const base_url = 'http://localhost/api/v1';
 
 function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
     const [myPetsData, setMyPetsData] = useState([]);
-    useWebSocket(1);
+    // useWebSocket(1);
 
     useEffect(() => {
         console.log('Map Page Rendered with Animals:', animals);
