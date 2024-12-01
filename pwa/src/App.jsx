@@ -18,6 +18,7 @@ import {checkToken} from "./utils.js";
 import './App.css'
 import Notifications from "./pages/Notifications.jsx";
 import { AnimalProvider } from './contexts/AnimalContext';
+import { useNavigate } from 'react-router-dom'
 
 const ProtectedRoute = ({ loggedIn, children }) => {
     return loggedIn ? children : <Navigate to="/login" />;
@@ -60,15 +61,20 @@ export default function App() {
 }
 
 function AppRoutes() {
+    const navigate = useNavigate()
     const [selectedAnimal, setSelectedAnimal] = useState('')
     const [selectedMetric, setSelectedMetric] = useState('')
 
     const handleSelectAnimal = (animal) => {
+        console.log('Selected animal:', animal)
         setSelectedAnimal(animal)
+        // go to the monitoring page
     }
 
     const handleSelectMetric = (metric) => {
         setSelectedMetric(metric)
+        // go to the historic page
+        navigate('/animal/historic')
     }
       
     return (
@@ -79,10 +85,11 @@ function AppRoutes() {
                   <Route index element={<Home />} />
                   <Route path="/about" element={<h2>About</h2>} />
                   <Route path="/notifications" element={<Notifications />} />
-                  <Route path="/mypets" element={<MyPets />} />
+                  <Route path="/mypets" element={<MyPets onAnimalSelect={handleSelectAnimal} />} />
                   <Route path="/profile" element={<Profile/>}/>
                   <Route path="/registerpet" element={<RegisterPet />} />
                   <Route path="/editpet" element={<EditPet />} />
+
 
                   {/* 404 Not Found Route */}
                   <Route path="*" element={<h2>404 - Page Not Found</h2>} />
@@ -95,20 +102,23 @@ function AppRoutes() {
                 {/* Animal Historic and Monitoring */}
                 <Route
                     path="/animal/historic"
-                    element={
-                        <LayoutAnimal showButtons="back-only">
-                            <HistoricalAnimalsData />
-                        </LayoutAnimal>
-                    }
-                />
+                    element={<LayoutAnimal showButtons="back-only" />}
+                    >
+                        <Route
+                            path="/animal/historic"
+                            element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />}
+                        />
+                </Route>
+
                 <Route
                     path="/animal/monitoring"
-                    element={
-                        <LayoutAnimal showButtons="all">
-                            <Pet />
-                        </LayoutAnimal>
-                    }
-                />
+                    element={<LayoutAnimal showButtons="all" />}
+                >
+                    <Route
+                        path="/animal/monitoring"
+                        element={<Pet onMetricSelect={handleSelectMetric} />}
+                    />
+                </Route>
 
                 {/* Finder Page */}
                 <Route path="/finders" element={<LayoutAnimal showButtons="none"/>}>
