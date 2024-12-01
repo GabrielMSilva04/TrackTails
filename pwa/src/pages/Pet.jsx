@@ -5,7 +5,7 @@ import { faFilePdf } from "@fortawesome/free-regular-svg-icons";
 import sleepLogo from "../assets/sleep.png";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useAnimalContext } from '../contexts/AnimalContext';
 import axios from "axios";
 
 const baseUrl = "http://localhost/api/v1";
@@ -35,7 +35,7 @@ Card.propTypes = {
 };
 
 export default function Pet({ onMetricSelect }) {
-    const { animal } = useOutletContext();
+    const { selectedAnimal } = useAnimalContext();
     const [animalData, setAnimalData] = useState({
         species: "Unknown",
         sex: "Unknown",
@@ -53,7 +53,8 @@ export default function Pet({ onMetricSelect }) {
     });
 
     useEffect(() => {
-        if (animal) {
+        console.log("Selected animal in Pet:", selectedAnimal);
+        if (selectedAnimal) {
             const calculateAge = (birthDate) => {
                 if (!birthDate) return "Unknown";
                 const birth = new Date(birthDate);
@@ -72,16 +73,16 @@ export default function Pet({ onMetricSelect }) {
             };
 
             setAnimalData({
-                species: animal.species || "Unknown",
-                sex: animal.sex === "m" ? "Male" : "Female",
-                birthDate: formatDate(animal.birthDate),
-                age: `${calculateAge(animal.birthDate)} (${formatDate(animal.birthDate)})`,
+                species: selectedAnimal.species || "Unknown",
+                sex: selectedAnimal.sex === "m" ? "Male" : "Female",
+                birthDate: formatDate(selectedAnimal.birthDate),
+                age: `${calculateAge(selectedAnimal.birthDate)} (${formatDate(selectedAnimal.birthDate)})`,
             });
 
             // Fetch latest data for the animal
             const fetchLatestData = async () => {
                 try {
-                    const response = await axios.get(`${animalDataBaseUrl}/latest/${animal.id}`, {
+                    const response = await axios.get(`${animalDataBaseUrl}/latest/${selectedAnimal.id}`, {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                         },
@@ -106,7 +107,7 @@ export default function Pet({ onMetricSelect }) {
 
             fetchLatestData();
         }
-    }, [animal]);
+    }, [selectedAnimal]);
 
     const stats = [
         { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, trigger: (() => onMetricSelect("heartRate")), image: null },

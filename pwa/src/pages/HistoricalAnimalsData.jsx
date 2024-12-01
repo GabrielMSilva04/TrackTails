@@ -3,14 +3,15 @@ import { useState, useEffect } from "react";
 import ChartComponent from "../components/Chart";
 import TimeRangeSelector from "../components/TimeRangeSelector"
 import axios from "axios";
+import { useAnimalContext } from "../contexts/AnimalContext";
 
 const base_url = "http://localhost/api/v1";
 
-const HistoricalAnimalsData = ({ animal }) => {
+const HistoricalAnimalsData = ({ metric }) => {
   const [chartType, setChartType] = useState("Line");
   const [range, setRange] = useState("24H");
   const [dataNotFound, setDataNotFound] = useState(false);
-  const [animalId, setAnimalId] = useState(animal);
+  const { selectedAnimal } = useAnimalContext();
   const [data, setData] = useState({
     labels: [],
     datasets: [],
@@ -203,12 +204,11 @@ const HistoricalAnimalsData = ({ animal }) => {
 
   useEffect(() => {
     showScales();
-    console.log("Fetching data for animal", animalId);
-    fetchAnimalData(animal, "weight");
+    fetchAnimalData(selectedAnimal.id, metric);
   }, []);
 
   useEffect(() => {
-    fetchAnimalData(animal, "weight");
+    fetchAnimalData(selectedAnimal.id, metric);
   }, [range]);
 
   const timeRangeSelectHandler = (range) => {

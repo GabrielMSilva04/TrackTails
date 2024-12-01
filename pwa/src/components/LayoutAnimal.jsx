@@ -5,46 +5,30 @@ import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons"
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { set } from "react-hook-form";
+import { useAnimalContext } from "../contexts/AnimalContext";
 
 const baseUrl = "http://localhost/api/v1";
 const animalsBaseUrl = `${baseUrl}/animals`;
 
-export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) {
-    const [animal, setAnimal] = useState(null);
-
-    useEffect(() => {
-        console.log("Selected animal ID:", selectedAnimalId);
-        if (selectedAnimalId) {
-            const fetchAnimal = async () => {
-                axios.get(`${animalsBaseUrl}/${selectedAnimalId}`, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-                    },
-                })
-                    .then((response) => {
-                        setAnimal(response.data);
-                    })
-                    .catch((error) => {
-                        console.error("Error fetching animal details:", error);
-                    });
-                }
-
-            fetchAnimal();
-        }
-    }, [selectedAnimalId]);
+export default function LayoutAnimal({ showButtons = "all" }) {
+    const { selectedAnimal } = useAnimalContext();
 
     LayoutAnimal.propTypes = {
-        showButtons: PropTypes.oneOf(["all", "back-only", "none"]),
-        selectedAnimalId: PropTypes.number.isRequired, // Changed to number
+        showButtons: PropTypes.oneOf(["all", "back-only", "none"])
     };
 
-    if (!animal) {
+    if (!selectedAnimal) {
         return (
-            <div className="text-center text-primary mt-10">
+            <div className="text-center text-pr imary mt-10">
                 <h2>Loading animal data...</h2>
             </div>
         );
     }
+
+    useEffect(() => {
+        console.log("Selected animal in LayoutAnimal:", selectedAnimal);
+    }, [selectedAnimal]);
 
     return (
         <div className="bg-primary h-screen flex flex-col overflow-hidden">
@@ -58,7 +42,7 @@ export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) 
             </div>
             <div className="avatar placeholder justify-center">
                 <div className="bg-neutral border-8 border-base-100 text-neutral-content w-32 rounded-full z-10 mx-auto mt-4 absolute">
-                    <img src={animal.imagePath || "https://via.placeholder.com/150"} alt={animal.name} />
+                    <img src={selectedAnimal.imagePath || "https://via.placeholder.com/150"} alt={selectedAnimal.name} />
                 </div>
             </div>
             <div className="h-full pt-20">
@@ -70,20 +54,20 @@ export default function LayoutAnimal({ showButtons = "all", selectedAnimalId }) 
                     )}
                     {showButtons === "all" ? (
                         <div className="mt-4 text-primary font-bold text-2xl items-center justify-center">
-                            {animal.name}
+                            {selectedAnimal.name}
                             <button className="ml-1.5 text-lg text-neutral border rounded-full border-neutral w-7 h-7 items-center justify-center">
                                 <FontAwesomeIcon icon={faEdit} />
                             </button>
                         </div>
                     ) : (
                         <div className="mt-14 text-primary font-bold text-2xl items-center justify-center">
-                            {animal.name}
+                            {selectedAnimal.name}
                         </div>
                     )}
 
                     <div className="overflow-y-auto">
-                        {/* Pass animal data to children via Outlet context */}
-                        <Outlet context={{ animal }} />
+                        {/* Pass selectedAnimal data to children via Outlet context */}
+                        <Outlet context={{ selectedAnimal }} />
                     </div>
                 </div>
             </div>

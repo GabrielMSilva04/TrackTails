@@ -18,6 +18,7 @@ import {checkToken} from "./utils.js";
 import './App.css'
 import Notifications from "./pages/Notifications.jsx";
 import { AnimalProvider } from './contexts/AnimalContext';
+import { useNavigate } from 'react-router-dom'
 
 const ProtectedRoute = ({ loggedIn, children }) => {
     return loggedIn ? children : <Navigate to="/login" />;
@@ -60,19 +61,20 @@ export default function App() {
 }
 
 function AppRoutes() {
+    const navigate = useNavigate()
     const [selectedAnimal, setSelectedAnimal] = useState('')
     const [selectedMetric, setSelectedMetric] = useState('')
 
     const handleSelectAnimal = (animal) => {
+        console.log('Selected animal:', animal)
         setSelectedAnimal(animal)
         // go to the monitoring page
-        window.location.href = '/animal/monitoring'
     }
 
     const handleSelectMetric = (metric) => {
         setSelectedMetric(metric)
         // go to the historic page
-        window.location.href = '/animal/historic'
+        navigate('/animal/historic')
     }
       
     return (
@@ -100,20 +102,23 @@ function AppRoutes() {
                 {/* Animal Historic and Monitoring */}
                 <Route
                     path="/animal/historic"
-                    element={
-                        <LayoutAnimal showButtons="back-only" selectedAnimalId={3}>
-                            <HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />
-                        </LayoutAnimal>
-                    }
-                />
+                    element={<LayoutAnimal showButtons="back-only" />}
+                    >
+                        <Route
+                            path="/animal/historic"
+                            element={<HistoricalAnimalsData animal={selectedAnimal} metric={selectedMetric} />}
+                        />
+                </Route>
+
                 <Route
                     path="/animal/monitoring"
-                    element={
-                        <LayoutAnimal showButtons="all" selectedAnimalId={3}>
-                            <Pet onMetricSelect={handleSelectMetric} />
-                        </LayoutAnimal>
-                    }
-                />
+                    element={<LayoutAnimal showButtons="all" />}
+                >
+                    <Route
+                        path="/animal/monitoring"
+                        element={<Pet onMetricSelect={handleSelectMetric} />}
+                    />
+                </Route>
 
                 {/* Finder Page */}
                 <Route path="/finders" element={<LayoutAnimal showButtons="none"/>}>
