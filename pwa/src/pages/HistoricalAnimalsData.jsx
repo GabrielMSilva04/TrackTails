@@ -11,6 +11,7 @@ const HistoricalAnimalsData = ({ metric }) => {
   const [chartType, setChartType] = useState("Line");
   const [range, setRange] = useState("24H");
   const [dataNotFound, setDataNotFound] = useState(false);
+  const [aggregateMode, setAggregateMode] = useState(false);
   const { selectedAnimal } = useAnimalContext();
   const [data, setData] = useState({
     labels: [],
@@ -172,50 +173,63 @@ const HistoricalAnimalsData = ({ metric }) => {
       "1Y": "1y",
     };
 
-    let endpoint = `${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`;
+    const colors = [["#4d7c0f", "rgba(54, 83, 20, 1)"], ["#f6ad55", "#f6ad55"], ["#80C4E9", "#80C4E9"], ["#f3722c", "#f3722c"], ["#f94144", "#f94144"]];
+    let color_index = 0;
+
+    let endpoints = [`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`];
     if (range === "MAX") {
-      endpoint = `${base_url}/animaldata/historic/${animal}/${metric}?&interval=${range_to_interval_map[range]}`;
+      endpoints[0] = `${base_url}/animaldata/historic/${animal}/${metric}?&interval=${range_to_interval_map[range]}`;
     }
 
-    // Fetch data from API
-    await axios.get(endpoint, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      })
-      .then((response) => {
-        setDataNotFound(false);
-        console.log(response.data);
-        setLabels(response.data.map((d) => d.timestamp));
-        clearDatasets();
-        console.log(data);
-        addDataset({
-          label: metric,
-          data: response.data.map((d) => d[metric]),
-          backgroundColor: "#4d7c0f",
-          borderColor: "rgba(54, 83, 20, 1)",
-          borderWidth: 2,
-        });
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("Failed to fetch data from API");
-        if (error.response) {
-          console.error("Error response", error.response);
-        }
-        setDataNotFound(true);
-        return;
+    const aggregations = ["mean", "min", "max"];
+    let aggregation_index = 0;
+    if (aggregateMode) {
+      // replicate 3 times
+      endpoints = endpoints.concat(endpoints).concat(endpoints);
+      endpoints = endpoints.map((endpoint, index) => {
+        return `${endpoint}&aggregate=${aggregations[index]}`;
       });
+      color_index = 1;
+    }
+    clearDatasets();
+
+    // Fetch data from API
+    for (let endpoint of endpoints) {
+      await axios.get(endpoint, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        })
+        .then((response) => {
+          setDataNotFound(false);
+          console.log(response.data);
+          setLabels(response.data.map((d) => d.timestamp));
+          console.log(data);
+          addDataset({
+            label: aggregateMode ? `${metric} - ${aggregations[aggregation_index++]}` : metric,
+            data: response.data.map((d) => d[metric]),
+            backgroundColor: colors[color_index][0],
+            borderColor: colors[color_index][1],
+            borderWidth: 2,
+          });
+          color_index++;
+          console.log(data);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch data from API");
+          if (error.response) {
+            console.error("Error response", error.response);
+          }
+          setDataNotFound(true);
+          return;
+        });
+    }
   }
 
-  useEffect(() => {
-    showScales();
-    fetchAnimalData(selectedAnimal.id, metric);
-  }, []);
 
   useEffect(() => {
     fetchAnimalData(selectedAnimal.id, metric);
-  }, [range]);
+  }, [range, aggregateMode]);
 
   const timeRangeSelectHandler = (range) => {
     const range_to_unit_map = {
@@ -235,10 +249,12 @@ const HistoricalAnimalsData = ({ metric }) => {
   const chartTypeSelectorHandler = (event) => {
     switch (event.target.value) {
       case "1":
+        setAggregateMode(false);
         setChartType("line");
         showScales();
         break;
       case "2":
+        setAggregateMode(true);
         setChartType("line");
         showScales();
         break;
@@ -258,7 +274,6 @@ const HistoricalAnimalsData = ({ metric }) => {
       <select className="select select-sm select-bordered w-full max-w-xs m-auto" onChange={chartTypeSelectorHandler}>
         <option value="1">Instant - Line Chart</option>
         <option value="2">Average - Line Chart</option>
-        <option value="3">Distribution - Pie chart</option>
       </select>
       <div className="flex flex-col h-64">
         {dataNotFound ? (
