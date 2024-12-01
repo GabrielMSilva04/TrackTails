@@ -27,9 +27,6 @@ import java.util.UUID;
 public class AnimalController {
     private final AnimalService animalService;
 
-    @Value("${upload.max-file-size}")
-    private long maxFileSize;
-
     @Autowired
     public AnimalController(AnimalService animalService) {
         this.animalService = animalService;
