@@ -7,6 +7,19 @@ import { useAnimalContext } from "../contexts/AnimalContext";
 
 const base_url = "http://localhost/api/v1";
 
+function convertToInfluxDBFormat(inputDatetime) {
+  const date = new Date(inputDatetime);
+
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+}
+
 const HistoricalAnimalsData = ({ metric }) => {
   const [chartType, setChartType] = useState("Line");
   const [range, setRange] = useState("24H");
@@ -157,10 +170,10 @@ const HistoricalAnimalsData = ({ metric }) => {
   const fetchAnimalData = async (animal, metric) => {
     const range_to_interval_map = {
       "1H": "1m",
-      "24H": "1h",
-      "1W": "1d",
+      "24H": "30m",
+      "1W": "6h",
       "1M": "1d",
-      "3M": "1d",
+      "3M": "2d",
       "1Y": "1w",
       "MAX": "1mo"
     };
@@ -173,12 +186,35 @@ const HistoricalAnimalsData = ({ metric }) => {
       "1Y": "1y",
     };
 
+    console.log("Range:", range);
+    let customRange = false;
+    let customRangeStart = null;
+    let customRangeEnd = null;
+    let customInterval = range_to_interval_map[range];
+    let splitRange = range.split(" - ");
+    if (splitRange.length > 1) {
+      customRange = true;
+      customRangeStart = splitRange[0];
+      customRangeEnd = splitRange[1];
+      console.log("Custom range", customRangeStart, customRangeEnd);
+      // Count how many minutes are in the custom range
+      let start = new Date(customRangeStart);
+      let end = new Date(customRangeEnd);
+      let minutes = (end - start) / 1000 / 60
+      console.log("Minutes in custom range", minutes);
+      // set custom intervel to minutes / 60
+      customInterval = parseInt(minutes / 60) + 1 + "m";
+    }
+    
+
     const colors = [["#4d7c0f", "rgba(54, 83, 20, 1)"], ["#f6ad55", "#f6ad55"], ["#80C4E9", "#80C4E9"], ["#f3722c", "#f3722c"], ["#f94144", "#f94144"]];
     let color_index = 0;
 
-    let endpoints = [`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`];
+    let endpoints = [`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${customInterval}`];
     if (range === "MAX") {
-      endpoints[0] = `${base_url}/animaldata/historic/${animal}/${metric}?&interval=${range_to_interval_map[range]}`;
+      endpoints[0] = `${base_url}/animaldata/historic/${animal}/${metric}?&interval=${customInterval}`;
+    } else if (customRange) {
+      endpoints[0] = `${base_url}/animaldata/historic/${animal}/${metric}?start=${convertToInfluxDBFormat(customRangeStart)}&end=${convertToInfluxDBFormat(customRangeEnd)}&interval=${customInterval}`;
     }
 
     const aggregations = ["mean", "min", "max"];
@@ -242,8 +278,8 @@ const HistoricalAnimalsData = ({ metric }) => {
     };
 
     setRange(range);
-    setChartScaleUnit(range_to_unit_map[range]);
-    updateScalesInterval(range);
+    setChartScaleUnit(range_to_unit_map[range] || "minute");
+    updateScalesInterval(range || "1H");
   }
 
   const chartTypeSelectorHandler = (event) => {
