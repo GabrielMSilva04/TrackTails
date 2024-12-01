@@ -17,33 +17,49 @@ export const AnimalProvider = ({ children }) => {
                         Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                     },
                 });
+
                 console.log('API Response (AnimalContext):', response.data);
+
                 if (!Array.isArray(response.data)) {
                     throw new Error('API response is not an array');
                 }
-                setAnimals(response.data); // Ensure this is an array
-                let selectedAnimalId = localStorage.getItem('selectedAnimal');
-                // print type
-                console.log(typeof selectedAnimalId);
-                if (selectedAnimalId) {
-                    console.log('Selected animal ID:', selectedAnimalId);
-                    console.log(response.data);
-                    const selected = response.data.find((animal) => animal.id == selectedAnimalId);
-                    console.log('Selected animal:', selected);
-                    setSelectedAnimal(selected);
-                }
+
+                const animalsWithImages = await addImageUrlsToPets(response.data, localStorage.getItem('authToken'));
+                setAnimals(animalsWithImages);
             } catch (err) {
-                console.error(err);
+                console.error('Error fetching animals:', err);
             }
         };
+
         fetchAnimals();
     }, []);
 
-    useEffect(() => {
-        if (selectedAnimal) {
-            localStorage.setItem('selectedAnimal', selectedAnimal.id);
+    // Fetch image for a single pet by ID
+    const fetchImageUrl = async (petId, token) => {
+        try {
+            const response = await axios.get(`${base_url}/animals/${petId}/image`, {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob',
+            });
+
+            // Convert Blob to URL and return
+            return URL.createObjectURL(response.data);
+        } catch (err) {
+            console.error(`Failed to fetch image for pet ID ${petId}:`, err);
+            return 'https://placehold.co/300';
         }
-    }, [selectedAnimal]);
+    };
+
+    // Add image URL to each pet object
+    const addImageUrlsToPets = async (pets, token) => {
+        const updatedPets = await Promise.all(
+            pets.map(async (pet) => {
+                const imageUrl = await fetchImageUrl(pet.id, token);
+                return { ...pet, imageUrl };
+            })
+        );
+        return updatedPets;
+    };
 
     return (
         <AnimalContext.Provider value={{ animals, selectedAnimal, setSelectedAnimal }}>
