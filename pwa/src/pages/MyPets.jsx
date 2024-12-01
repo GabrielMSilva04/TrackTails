@@ -100,13 +100,13 @@ export default function MyPets({ onAnimalSelect }) {
 
 
     const speciesIcon = {
-        Cat: <FontAwesomeIcon icon={faCat} />,
-        Dog: <FontAwesomeIcon icon={faDog} />,
+        cat: <FontAwesomeIcon icon={faCat} />,
+        dog: <FontAwesomeIcon icon={faDog} />,
     };
 
     const sexIcon = {
-        F: <FontAwesomeIcon icon={faVenus} />,
-        M: <FontAwesomeIcon icon={faMars} />,
+        f: <FontAwesomeIcon icon={faVenus} />,
+        m: <FontAwesomeIcon icon={faMars} />,
     };
 
     const petCard = (pet) => {
@@ -117,9 +117,9 @@ export default function MyPets({ onAnimalSelect }) {
                     <img
                         src={pet.imageUrl}
                         alt={pet.name}
-                        className="object-cover w-full h-full"/>
+                        className="object-cover w-full h-full"
                         onError={(e) => {
-                            e.target.src = 'https://placehold.co/300';
+                            e.target.src = 'https://placehold.co/300'; // Fallback image on error
                         }}
                     />
                 </div>
@@ -163,8 +163,8 @@ export default function MyPets({ onAnimalSelect }) {
                     className="select select-bordered border-2 select-primary w-5/12"
                 >
                     <option value="">All Species</option>
-                    <option value="Dog">Dog</option>
-                    <option value="Cat">Cat</option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
                 </select>
             </div>
 
