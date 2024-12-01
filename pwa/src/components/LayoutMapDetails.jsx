@@ -88,13 +88,7 @@ export default function LayoutMapDetails() {
                 console.log("Combined Route Data:", combinedData);
 
                 setRouteData(combinedData);
-
-                if (latestData.battery) {
-                    setLatestAnimalData(prevAnimal => ({
-                        ...prevAnimal,
-                        battery: latestData.battery,
-                    }));
-                }
+                setLatestAnimalData(latestData);
             } catch (error) {
                 console.error("Failed to fetch animal data:", error);
                 setRouteData([]);
@@ -129,7 +123,7 @@ export default function LayoutMapDetails() {
                         </Link>
                     </button>
                     <div>
-                        <span className="text-white font-semibold text-sm">Battery: {latestAnimalData?.battery * 100 || "Unknown"}</span>
+                        <span className="text-white font-semibold text-sm">Battery: {latestAnimalData?.batteryPercentage || "Unknown"}%</span>
                     </div>
                 </div>
 
@@ -138,6 +132,7 @@ export default function LayoutMapDetails() {
                     <span className="text-white font-semibold text-lg">{selectedAnimal.name}</span>
                     <img
                         src={selectedAnimal?.imageUrl || "https://placedog.net/300/300"}
+
                         alt={selectedAnimal?.name || "Unknown Animal"}
                         className="h-20 w-20 rounded-full border-4 border-primary mt-2"
                     />

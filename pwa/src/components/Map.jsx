@@ -22,13 +22,16 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
                 const headers = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                 }
+                
                 const updatedAnimals = await Promise.all(
                     animals.map(async (animal) => {
                         const response = await axios.get(
                             `${base_url}/animaldata/latest/${animal.id}`,
                             { headers }
                         );
+                      
                         return { ...animal, ...response.data };
+                      
                     })
                 );
                 setMyPetsData(updatedAnimals);
@@ -93,7 +96,7 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
         }
         return [40.63316, -8.65939];
     }, [myPetsData]);
-
+  
     const customIcon = (animal) =>
         L.divIcon({
             html: `
