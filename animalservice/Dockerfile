@@ -1,16 +1,16 @@
 # Stage 1: Build the application
 FROM maven:3.8.5-openjdk-17 AS builder
 
-WORKDIR /app
-
-COPY AnimalsDataCore /app/AnimalsDataCore
 WORKDIR /app/AnimalsDataCore
+COPY AnimalsDataCore/pom.xml /app/AnimalsDataCore/pom.xml
 RUN mvn dependency:go-offline -B
+COPY AnimalsDataCore/src /app/AnimalsDataCore/src
 RUN mvn clean install
 
-COPY animalservice /app/animalservice
 WORKDIR /app/animalservice
+COPY animalservice/pom.xml /app/animalservice/pom.xml
 RUN mvn dependency:go-offline -B
+COPY animalservice/src /app/animalservice/src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application
