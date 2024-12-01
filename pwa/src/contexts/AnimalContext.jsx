@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
 const AnimalContext = createContext();
@@ -8,6 +8,7 @@ const base_url = "http://localhost/api/v1";
 export const AnimalProvider = ({ children }) => {
     const [animals, setAnimals] = useState([]);
     const [selectedAnimal, setSelectedAnimal] = useState(null);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         const fetchAnimals = async () => {
@@ -26,8 +27,11 @@ export const AnimalProvider = ({ children }) => {
 
                 const animalsWithImages = await addImageUrlsToPets(response.data, localStorage.getItem('authToken'));
                 setAnimals(animalsWithImages);
+
+                setLoading(false);
             } catch (err) {
                 console.error('Error fetching animals:', err);
+                setLoading(false);
             }
         };
 
@@ -62,7 +66,7 @@ export const AnimalProvider = ({ children }) => {
     };
 
     return (
-        <AnimalContext.Provider value={{ animals, selectedAnimal, setSelectedAnimal }}>
+        <AnimalContext.Provider value={{ animals, selectedAnimal, setSelectedAnimal, loading }}>
             {children}
         </AnimalContext.Provider>
     );

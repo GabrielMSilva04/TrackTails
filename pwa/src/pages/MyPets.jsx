@@ -2,57 +2,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons'
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
-import axios from "axios";
 import { useAnimalContext } from "../contexts/AnimalContext";
 import { useNavigate } from 'react-router-dom';
 
-const base_url = "http://localhost/api/v1";
-
 export default function MyPets({ onAnimalSelect }) {
-    const [pets, setPets] = useState([]);
-    const [loading, setLoading] = useState(true); // State to track API call status
     const [error, setError] = useState(null); // State to track errors
-    const { setSelectedAnimal } = useAnimalContext();
+    const { setSelectedAnimal, animals, loading } = useAnimalContext();
     const navigate = useNavigate();
 
     // State for filtering
     const [filters, setFilters] = useState({ name: '', species: '' });
-
-    // Fetch pets from the API
-    useEffect(() => {
-        const fetchPets = async () => {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                console.warn('No token found. User is not logged in.');
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const response = await axios.get(`${base_url}/animals`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                console.log('API Response:', response.data);
-
-                if (!Array.isArray(response.data)) {
-                    throw new Error('API response is not an array');
-                }
-
-                const petsWithImages = await addImageUrlsToPets(response.data, token);
-                setPets(petsWithImages);
-            } catch (err) {
-                console.error('Error fetching pets:', err);
-                setError('Failed to fetch pets. Please try again.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPets();
-    }, []);
 
     const selectHandle = (pet) => {
         onAnimalSelect(pet.id);
@@ -61,33 +20,8 @@ export default function MyPets({ onAnimalSelect }) {
         navigate(`/animal/monitoring`);
     }
 
-    // Function to fetch the image for a specific pet
-    const fetchImageUrl = async (petId, token) => {
-        try {
-            const response = await axios.get(`${base_url}/animals/${petId}/image`, {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: 'blob',
-            });
-
-            return URL.createObjectURL(response.data);
-        } catch (err) {
-            console.error(`Failed to fetch image for pet ID ${petId}:`, err);
-            return 'https://placehold.co/300';
-        }
-    };
-
-    const addImageUrlsToPets = async (pets, token) => {
-        const updatedPets = await Promise.all(
-            pets.map(async (pet) => {
-                const imageUrl = await fetchImageUrl(pet.id, token);
-                return { ...pet, imageUrl };
-            })
-        );
-        return updatedPets;
-    };
-
     // Filtered pets
-    const filteredPets = pets.filter((pet) => {
+    const filteredPets = animals.filter((pet) => {
         const matchesName = pet.name.toLowerCase().includes(filters.name.toLowerCase());
         const matchesSpecies = filters.species ? pet.species === filters.species : true;
         return matchesName && matchesSpecies;
