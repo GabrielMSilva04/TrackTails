@@ -4,12 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { set } from "react-hook-form";
 import { useAnimalContext } from "../contexts/AnimalContext";
-
-const baseUrl = "http://localhost/api/v1";
-const animalsBaseUrl = `${baseUrl}/animals`;
 
 export default function LayoutAnimal({ showButtons = "all" }) {
     const { selectedAnimal } = useAnimalContext();
@@ -42,7 +37,7 @@ export default function LayoutAnimal({ showButtons = "all" }) {
             </div>
             <div className="avatar placeholder justify-center">
                 <div className="bg-neutral border-8 border-base-100 text-neutral-content w-32 rounded-full z-10 mx-auto mt-4 absolute">
-                    <img src={selectedAnimal.imagePath || "https://via.placeholder.com/150"} alt={selectedAnimal.name} />
+                    <img src={selectedAnimal.imageUrl || "https://via.placeholder.com/150"} alt={selectedAnimal.name} />
                 </div>
             </div>
             <div className="h-full pt-20">
