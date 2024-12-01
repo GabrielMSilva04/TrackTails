@@ -19,9 +19,16 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
     useEffect(() => {
         const fetchDynamicData = async () => {
             try {
+                const headers = {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                };
+
                 const updatedAnimals = await Promise.all(
                     animals.map(async (animal) => {
-                        const response = await axios.get(`${base_url}/animaldata/latest/${animal.id}`);
+                        const response = await axios.get(
+                            `${base_url}/animaldata/latest/${animal.id}`,
+                            { headers }
+                        );
                         return { ...animal, ...response.data }; // Merge permanent and dynamic data
                     })
                 );
@@ -92,7 +99,7 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
         html: `
         <div style="position: relative; width: 75px; height: 70px;">
             <img src="${pin}" style="width: 100%; height: 100%;" />
-            <img src="https://placedog.net/300/300" 
+            <img src="https://placehold.co/100x100" 
                  style="width: 30px; height: 30px; border-radius: 50%; position: absolute; top: 11px; left: 22.3px;" />
         </div>
     `,

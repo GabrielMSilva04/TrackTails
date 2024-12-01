@@ -33,7 +33,7 @@ export default function LayoutMapDetails() {
 
             try {
                 const headers = {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Replace with your token retrieval logic
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                 };
 
                 // Fetch latitude, longitude, and battery data
@@ -82,13 +82,7 @@ export default function LayoutMapDetails() {
                 console.log("Combined Route Data:", combinedData);
 
                 setRouteData(combinedData);
-
-                if (latestData.battery) {
-                    setLatestAnimalData(prevAnimal => ({
-                        ...prevAnimal,
-                        battery: latestData.battery,
-                    }));
-                }
+                setLatestAnimalData(latestData);
             } catch (error) {
                 console.error("Failed to fetch animal data:", error);
                 setRouteData([]); // Clear route data on error
@@ -125,7 +119,7 @@ export default function LayoutMapDetails() {
                         </Link>
                     </button>
                     <div>
-                        <span className="text-white font-semibold text-sm">Battery: {latestAnimalData?.battery * 100 || "Unknown"}</span>
+                        <span className="text-white font-semibold text-sm">Battery: {latestAnimalData?.batteryPercentage || "Unknown"}%</span>
                     </div>
                 </div>
 
@@ -133,7 +127,7 @@ export default function LayoutMapDetails() {
                 <div className="flex flex-col items-center">
                     <span className="text-white font-semibold text-lg">{selectedAnimal.name}</span>
                     <img
-                        src={selectedAnimal?.image || "https://placedog.net/300/300"}
+                        src={selectedAnimal?.image || "https://placehold.co/100x100"}
                         alt={selectedAnimal?.name || "Unknown Animal"}
                         className="h-20 w-20 rounded-full border-4 border-primary mt-2"
                     />
