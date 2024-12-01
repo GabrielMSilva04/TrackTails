@@ -122,7 +122,7 @@ function AppRoutes() {
 
                 {/* Finder Page */}
                 <Route path="/finders" element={<LayoutAnimal showButtons="none"/>}>
-                    <Route path="/finders" element={<Finders />} />
+                    <Route path="/finders/:deviceId" element={<Finders />} />
                 </Route>
             </Routes>
         </AnimalProvider>
