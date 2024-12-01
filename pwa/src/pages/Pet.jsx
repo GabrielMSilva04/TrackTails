@@ -125,7 +125,7 @@ export default function Pet({ onMetricSelect }) {
                 Age: {animalData.age}, {animalData.species}, Sex: {animalData.sex}
             </div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                Last Weight: {latestData.weight} kg, Last Height: {latestData.height} cm
+                <button onClick={()=>onMetricSelect("weight")}>Last Weight: {latestData.weight} kg</button>, <button onClick={()=>onMetricSelect("weight")}>Last Height: {latestData.height} cm</button>
             </div>
             <div className="flex flex-wrap justify-between px-4 mt-4 gap-4">
                 {stats.map((stat, index) => (
