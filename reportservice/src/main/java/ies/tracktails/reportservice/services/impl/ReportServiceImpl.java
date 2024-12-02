@@ -1,5 +1,8 @@
 package ies.tracktails.reportservice.services.impl;
 
+import ies.tracktails.animalsDataCore.services.AnimalDataService;
+
+
 import ies.tracktails.reportservice.services.ReportService;
 import ies.tracktails.reportservice.entities.Report;
 import ies.tracktails.reportservice.repositories.ReportRepository;
