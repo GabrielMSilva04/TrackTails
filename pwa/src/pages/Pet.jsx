@@ -50,6 +50,7 @@ export default function Pet({ onMetricSelect }) {
         heartRate: "Unknown",
         breathRate: "Unknown",
         speed: "Unknown",
+        batteryPercentage: "Unknown",
         location: { latitude: "Unknown", longitude: "Unknown" },
     });
 
@@ -97,6 +98,7 @@ export default function Pet({ onMetricSelect }) {
                         heartRate: data.heartRate?.toFixed(0) || "Unknown",
                         breathRate: data.breathRate?.toFixed(0) || "Unknown",
                         speed: data.speed?.toFixed(2) || "Unknown",
+                        batteryPercentage: data.batteryPercentage?.toFixed(0) || "Unknown",
                         location: {
                             latitude: data.latitude?.toFixed(6) || "Unknown",
                             longitude: data.longitude?.toFixed(6) || "Unknown",
@@ -133,7 +135,24 @@ export default function Pet({ onMetricSelect }) {
                     .join(", ")}
             </div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                <button onClick={()=>onMetricSelect("weight")}>Last Weight: {latestData.weight} kg</button>, <button onClick={()=>onMetricSelect("weight")}>Last Height: {latestData.height} cm</button>
+                <button onClick={() => onMetricSelect("weight")}>Last Weight: {latestData.weight} kg</button>
+                , <button onClick={() => onMetricSelect("weight")}>Last Height: {latestData.height} cm</button>
+            </div>
+            <div className="mt-2 text-center">
+                {latestData.batteryPercentage !== "Unknown" && (
+                    <div
+                        className={`text-lg font-bold px-4 py-2 rounded-lg inline-block ${
+                            latestData.batteryPercentage > 20
+                                ? "bg-primary text-white"
+                                : "bg-warning text-white"
+                        }`}
+                    >
+                        Battery:{" "}
+                        <span className="text-white font-extrabold">
+                {latestData.batteryPercentage}%
+            </span>
+                    </div>
+                )}
             </div>
             <div className="flex flex-wrap justify-between px-4 mt-4 gap-4">
                 {stats.map((stat, index) => (
