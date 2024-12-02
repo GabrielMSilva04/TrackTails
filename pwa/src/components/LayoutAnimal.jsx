@@ -59,12 +59,16 @@ export default function LayoutAnimal({ showButtons = "all" }) {
         navigate(`/editpet`);
     };
 
+    const onBackClick = () => {
+        window.location.href = "/mypets";
+    }
+
     return (
         <div className="bg-primary h-screen flex flex-col overflow-hidden">
             {showButtons !== "none" && (
-                <Link to="/mypets" className="text-white text-2xl font-bold absolute left-4 mt-5 z-10 fixed">
+                <button className="text-white text-2xl font-bold absolute left-4 mt-5 z-10 fixed" onClick={onBackClick}>
                     <FontAwesomeIcon icon={faArrowLeft} />
-                </Link>
+                </button>
             )}
             <div className="w-full flex justify-center items-center mt-4">
                 <h1 className="text-3xl text-white font-bold tracking-wide">trackTails.</h1>
