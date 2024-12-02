@@ -192,7 +192,9 @@ def main(device_id):
                 'speed': current_speed,
                 'bpm': bpm,
                 'respiratory_rate': respiratory_rate,
-                'location': last_location
+                'latitude': last_location['latitude'],
+                'longitude': last_location['longitude'],
+
             }
 
             print(data)
