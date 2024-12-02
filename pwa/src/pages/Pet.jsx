@@ -6,6 +6,7 @@ import sleepLogo from "../assets/sleep.png";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useAnimalContext } from '../contexts/AnimalContext';
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const baseUrl = "http://localhost/api/v1";
@@ -35,6 +36,7 @@ Card.propTypes = {
 };
 
 export default function Pet({ onMetricSelect }) {
+    const navigate = useNavigate();
     const { selectedAnimal } = useAnimalContext();
     const [animalData, setAnimalData] = useState({
         species: "Unknown",
@@ -125,7 +127,6 @@ export default function Pet({ onMetricSelect }) {
                 interval: '15m'
             };
 
-            // Send the request to generate the report
             const response = await axios.post(reportUrl, reportRequestBody, { params });
 
             if (response.status === 201) {
@@ -136,7 +137,7 @@ export default function Pet({ onMetricSelect }) {
                 const downloadUrl = `${reportUrl}/${reportId}/download`;
 
                 const pdfResponse = await axios.get(downloadUrl, {
-                    responseType: 'blob', // Ensures binary data is handled correctly
+                    responseType: 'blob',
                 });
 
                 const blob = new Blob([pdfResponse.data], { type: 'application/pdf' });
@@ -156,13 +157,16 @@ export default function Pet({ onMetricSelect }) {
         }
     };
 
+    const onLocationSelect = () => {
+        navigate("/map/details");
+    }
+
     const stats = [
         { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, trigger: (() => onMetricSelect("heartRate")), image: null },
         {icon: null, label: "Sleep", value: "Sleep", trigger: (() => null), image: sleepLogo},
         { icon: faGauge, label: "Speed", value: `${latestData.speed} HM/H`, trigger: (() => onMetricSelect("speed")), image: null },
         { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, trigger: (() => onMetricSelect("breathRate")), image: null },
-        { icon: faMapLocationDot, label: "Location", value: "Location", trigger: (() => null), image: null },
-        // { icon: faSyringe, label: "Vaccines", value: "Vaccines", trigger: (() => null), image: null },
+        { icon: faMapLocationDot, label: "Location", value: "Location", trigger: (() => onLocationSelect()), image: null },
         { icon: faFilePdf, label: "Generate Report", value: "Generate", trigger: (() => onGenerateReport(selectedAnimal.id)), image: null },
     ];
 
