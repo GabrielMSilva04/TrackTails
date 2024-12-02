@@ -1,5 +1,6 @@
 package ies.tracktails.reportservice.controllers;
 
+import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
 import ies.tracktails.reportservice.entities.Report;
 import ies.tracktails.reportservice.services.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -22,8 +25,21 @@ public class ReportController {
 
     @Operation(summary = "Create a new report as PDF")
     @PostMapping
-    public ResponseEntity<?> createReport(@RequestBody Report report) {
-        Report savedReport = reportService.createReport(report.getAnimalId(), report.getFileName());
+    public ResponseEntity<?> createReport(
+            @RequestParam(defaultValue = "-1d") String start,
+            @RequestParam(defaultValue = "now()") String end,
+            @RequestParam(defaultValue = "15m") String interval,
+            @RequestBody Report report) {
+
+        // Call the service method to create the report
+        Report savedReport = reportService.createReport(
+                report.getAnimalId(),
+                report.getFileName(),
+                start,
+                end,
+                interval
+        );
+
         return new ResponseEntity<>(savedReport, HttpStatus.CREATED);
     }
 

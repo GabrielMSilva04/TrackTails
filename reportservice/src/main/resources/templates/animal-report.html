@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+<h1>Animal Report</h1>
+<p><strong>Animal ID:</strong> {{animalId}}</p>
+<p><strong>Generated At:</strong> {{generatedAt}}</p>
+<h2>Historical Data</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Timestamp</th>
+        <th>Weight (kg)</th>
+        <th>Height (cm)</th>
+        <th>Heart Rate (bpm)</th>
+        <th>Breath Rate (breaths/min)</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#historicalData}}
+    <tr>
+        <td>{{timestamp}}</td>
+        <td>{{weight}}</td>
+        <td>{{height}}</td>
+        <td>{{heartRate}}</td>
+        <td>{{breathRate}}</td>
+    </tr>
+    {{/historicalData}}
+    </tbody>
+</table>
+</body>
+</html>

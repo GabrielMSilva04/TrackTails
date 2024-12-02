@@ -7,7 +7,14 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"ies.tracktails.reportservice", "ies.tracktails.animalsDataCore"})
+@ComponentScan(basePackages = {
+		"ies.tracktails.reportservice",
+		"ies.tracktails.animalsDataCore",
+		"ies.tracktails.animalsDataCore.services",
+		"ies.tracktails.animalsDataCore.configurations",
+		"ies.tracktails.reportservice.services",
+		"ies.tracktails.reportservice.controllers"
+})
 @EnableJpaRepositories(basePackages = {"ies.tracktails.reportservice.repositories", "ies.tracktails.animalsDataCore.repositories"})
 @EntityScan(basePackages = {"ies.tracktails.reportservice.entities", "ies.tracktails.animalsDataCore.entities"})
 public class ReportserviceApplication {
