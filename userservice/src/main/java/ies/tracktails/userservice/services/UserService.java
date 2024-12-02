@@ -10,15 +10,16 @@ public interface UserService {
     // Basic CRUD methods
     //Create
     // UserService.java
-    User registerUser(String displayName, String email, String password);
+    User registerUser(String displayName, String email, int phoneNumber, String password);
 
     //Read
     User getUserById(Long id);
     List<User> getUserByDisplayName(String displayName);
     User getUserByEmail(String email);
+    User getUserByPhoneNumber(int phoneNumber);
 
     //Update
-    User updateUser(Long userId, String displayName, String email, String password);
+    User updateUser(Long userId, String displayName, String email, int phoneNumber, String password);
 
     //Delete
     User deleteUser(Long userId);

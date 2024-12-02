@@ -2,54 +2,26 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons'
 import {Link} from "react-router-dom";
 import {useEffect, useState} from "react";
-import axios from "axios";
+import { useAnimalContext } from "../contexts/AnimalContext";
+import { useNavigate } from 'react-router-dom';
 
-const base_url = "http://localhost/api/v1";
-
-export default function MyPets() {
-    const [pets, setPets] = useState([]);
-    const [loading, setLoading] = useState(true); // State to track API call status
+export default function MyPets({ onAnimalSelect }) {
     const [error, setError] = useState(null); // State to track errors
+    const { setSelectedAnimal, animals, loading } = useAnimalContext();
+    const navigate = useNavigate();
 
     // State for filtering
     const [filters, setFilters] = useState({ name: '', species: '' });
 
-    // Fetch pets from the API
-    useEffect(() => {
-        const fetchPets = async () => {
-            const token = localStorage.getItem('authToken'); // Retrieve token from localStorage
-            if (!token) {
-                console.warn('No token found. User is not logged in.');
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const response = await axios.get(`${base_url}/animals`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`, // Add Authorization header
-                    },
-                });
-
-                console.log('API Response:', response.data);
-
-                if (!Array.isArray(response.data)) {
-                    throw new Error('API response is not an array');
-                }
-
-                setPets(response.data);
-            } catch (err) {
-                console.error('Error fetching pets:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPets();
-    }, []);
+    const selectHandle = (pet) => {
+        onAnimalSelect(pet.id);
+        console.log("SET SELECTED ANIMAL", pet);
+        setSelectedAnimal(pet);
+        navigate(`/animal/monitoring`);
+    }
 
     // Filtered pets
-    const filteredPets = pets.filter((pet) => {
+    const filteredPets = animals.filter((pet) => {
         const matchesName = pet.name.toLowerCase().includes(filters.name.toLowerCase());
         const matchesSpecies = filters.species ? pet.species === filters.species : true;
         return matchesName && matchesSpecies;
@@ -62,23 +34,28 @@ export default function MyPets() {
 
 
     const speciesIcon = {
-        Cat: <FontAwesomeIcon icon={faCat} />,
-        Dog: <FontAwesomeIcon icon={faDog} />,
-    }
+        cat: <FontAwesomeIcon icon={faCat} />,
+        dog: <FontAwesomeIcon icon={faDog} />,
+    };
+
     const sexIcon = {
-        F: <FontAwesomeIcon icon={faVenus} />,
-        M: <FontAwesomeIcon icon={faMars} />,
-    }
+        f: <FontAwesomeIcon icon={faVenus} />,
+        m: <FontAwesomeIcon icon={faMars} />,
+    };
+
     const petCard = (pet) => {
         return (
             <div className="relative flex flex-col items-center bg-primary rounded-xl p-4 w-40 shadow-lg mt-10">
                 {/* Pet Image */}
-                <div
-                    className="absolute -top-10 rounded-full overflow-hidden h-20 w-20 shadow-md">
+                <div className="absolute -top-10 rounded-full overflow-hidden h-20 w-20 shadow-md">
                     <img
-                        src={pet.imagePath ? pet.imagePath : 'https://placehold.co/300'}
+                        src={pet.imageUrl}
                         alt={pet.name}
-                        className="object-cover w-full h-full"/>
+                        className="object-cover w-full h-full"
+                        onError={(e) => {
+                            e.target.src = 'https://placehold.co/300'; // Fallback image on error
+                        }}
+                    />
                 </div>
 
                 {/* Spacer for the image */}
@@ -86,23 +63,13 @@ export default function MyPets() {
 
                 {/* Pet Info */}
                 <div className="flex items-center justify-between w-full mt-4 text-white">
-                    {/* Pet Type */}
-                    <div className="flex items-center">
-                        {speciesIcon[pet.species]}
-                    </div>
-                    {/* Pet Name */}
+                    <div className="flex items-center">{speciesIcon[pet.species]}</div>
                     <span className="font-bold text-lg">{pet.name}</span>
-                    {/* Gender Icon */}
-                    {sexIcon[pet]}
-
-                    {/* Sex Icon */}
-                    <div className="flex items-center">
-                        {sexIcon[pet.sex]}
-                    </div>
+                    <div className="flex items-center">{sexIcon[pet.sex]}</div>
                 </div>
             </div>
         );
-    }
+    };
 
     return (
         <>
@@ -130,22 +97,25 @@ export default function MyPets() {
                     className="select select-bordered border-2 select-primary w-5/12"
                 >
                     <option value="">All Species</option>
-                    <option value="Dog">Dog</option>
-                    <option value="Cat">Cat</option>
+                    <option value="dog">Dog</option>
+                    <option value="cat">Cat</option>
                 </select>
             </div>
 
             {/* Pet Cards Section */}
-            <div className="flex flex-wrap justify-center gap-4">
+            <div
+                className="flex flex-wrap justify-center gap-4 overflow-y-auto"
+                style={{ maxHeight: '65vh' }}
+            >
                 {loading ? (
                     <p className="text-gray-500 text-center w-full">Loading pets...</p>
                 ) : error ? (
                     <p className="text-error text-center w-full">{error}</p>
                 ) : filteredPets.length > 0 ? (
                     filteredPets.map((pet) => (
-                        <div key={pet.id}>
+                        <button key={pet.id} onClick={() => selectHandle(pet)} className="focus:outline-none">
                             {petCard(pet)}
-                        </div>
+                        </button>
                     ))
                 ) : (
                     <p className="text-gray-500 text-center w-full">No pets found.</p>

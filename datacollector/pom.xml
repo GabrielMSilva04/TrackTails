@@ -11,7 +11,7 @@
 	<groupId>ies.tracktails</groupId>
 	<artifactId>datacollector</artifactId>
 	<version>0.4.0-SNAPSHOT</version>
-	<name>datacollector</name>
+	<name>Data Collector</name>
 	<description>Data Collector component from TrackTails project</description>
 	<url/>
 	<licenses>

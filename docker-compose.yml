@@ -172,14 +172,20 @@ services:
       context: ./
       dockerfile: ./pwa/Dockerfile
     container_name: pwa
-    env_file:
-      - .env
+    ports:
+      - "8080:8080" # Expose the port used by the development server
+    volumes:
+      - ./pwa:/app  # Mount the local `pwa` directory into the container
+      - /app/node_modules  # Avoid overwriting node_modules inside the container
     depends_on:
       - animalservice
       - notificationservice
       - reportservice
       - userservice
       - gateway
+    environment:
+      NODE_ENV: development
+
 
   datacollector:
     build:
@@ -196,11 +202,29 @@ services:
       INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
       INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
       INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
-
-
     depends_on:
       - mariadb
       - influxdb
+      - zookeeper
+      - kafka
+      - kafdrop
+
+  actionservice:
+    build:
+      context: ./
+      dockerfile: ./actionservice/Dockerfile
+    container_name: actionservice
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+    depends_on:
+      - mariadb
+      - influxdb
+      - zookeeper
+      - kafka
+      - kafdrop
 
 volumes:
   mariadb_data:

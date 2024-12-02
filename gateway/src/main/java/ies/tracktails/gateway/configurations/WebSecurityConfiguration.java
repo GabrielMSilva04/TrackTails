@@ -52,11 +52,10 @@ public class WebSecurityConfiguration {
         .authorizeExchange(exchanges -> exchanges
             // Regras públicas
             .pathMatchers(
-                "/api/v1/animaldata/latest/**",
-                "/api/v1/animaldata/historic/**",
-                "/api/v1/animals/**",
+                "/api/v1/users/login",
+				"/api/v1/users/register",
                 "/api/v1/reports/**",
-                "/api/v1/users/**"
+				"/api/v1/finders/**"
             ).permitAll()
             // Regras autenticadas
             .pathMatchers("/api/v1/**").authenticated()

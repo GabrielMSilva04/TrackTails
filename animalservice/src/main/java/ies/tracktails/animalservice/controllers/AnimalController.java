@@ -1,7 +1,7 @@
 package ies.tracktails.animalservice.controllers;
 
 import ies.tracktails.animalsDataCore.entities.Animal;
-import ies.tracktails.animalservice.services.AnimalService;
+import ies.tracktails.animalsDataCore.services.AnimalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,9 +26,6 @@ import java.util.UUID;
 @RequestMapping("/api/v1/animals")
 public class AnimalController {
     private final AnimalService animalService;
-
-    @Value("${upload.max-file-size}")
-    private long maxFileSize;
 
     @Autowired
     public AnimalController(AnimalService animalService) {
@@ -129,5 +126,92 @@ public class AnimalController {
         Long userId = (Long) response.getBody();
         List<Animal> animals = animalService.getAnimalsByUserId(userId);
         return new ResponseEntity<>(animals, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Upload image for an animal", description = "Upload an image and associate it with an animal")
+    @PostMapping(value = "/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadAnimalImage(
+            @PathVariable Long id,
+            @RequestParam("image") MultipartFile imageFile,
+            @RequestHeader("X-User-Id") String userIdHeader) {
+
+        // Validate user authentication
+        ResponseEntity<?> response = validateAndGetUserId(userIdHeader);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            return response;
+        }
+
+        // Validate animal ownership
+        Long userId = (Long) response.getBody();
+        Animal animal = animalService.getAnimal(id);
+        if (animal == null || !animal.getUserId().equals(userId)) {
+            return new ResponseEntity<>("Unauthorized or Animal not found", HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            // Validate file size
+            long maxFileSizeBytes = 5 * 1024 * 1024; // 5MB
+            if (imageFile.getSize() > maxFileSizeBytes) {
+                return new ResponseEntity<>("File size exceeds the maximum limit of 2MB", HttpStatus.BAD_REQUEST);
+            }
+
+            // Validate file type
+            String contentType = imageFile.getContentType();
+            List<String> allowedTypes = List.of("image/png", "image/jpeg", "image/jpg", "image/heic", "image/heif");
+            if (!allowedTypes.contains(contentType)) {
+                return new ResponseEntity<>("Unsupported file format", HttpStatus.BAD_REQUEST);
+            }
+
+            // Save file logic
+            Path uploadDir = Paths.get("/uploads/animals");
+            Files.createDirectories(uploadDir);
+
+            String filename = id + "_" + UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+            Path filePath = uploadDir.resolve(filename);
+            Files.write(filePath, imageFile.getBytes());
+
+            // Update animal record
+            animal.setImagePath(filename);
+            animalService.updateAnimal(id, animal);
+
+            return new ResponseEntity<>("Image uploaded successfully", HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error uploading file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Operation(summary = "Get animal image", description = "Retrieve the uploaded image for an animal")
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<?> getAnimalImage(@PathVariable Long id, @RequestHeader("X-User-Id") String userIdHeader) {
+
+        ResponseEntity<?> response = validateAndGetUserId(userIdHeader);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            return response;
+        }
+
+        Long userId = (Long) response.getBody();
+
+        Animal animal = animalService.getAnimal(id);
+        if (animal == null || !animal.getUserId().equals(userId)) {
+            return new ResponseEntity<>("Unauthorized or Animal not found", HttpStatus.NOT_FOUND);
+        }
+
+        if (animal.getImagePath() == null) {
+            return new ResponseEntity<>("No image found for this animal", HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            Path filePath = Paths.get("/uploads/animals").resolve(animal.getImagePath());
+            Resource imageResource = new UrlResource(filePath.toUri());
+
+            if (imageResource.exists() && imageResource.isReadable()) {
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(imageResource);
+            } else {
+                return new ResponseEntity<>("Image not found", HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error retrieving image: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -43,6 +43,7 @@ public class AnimalDataService {
         animalDataDTO.getSpeed().ifPresent(speed -> point.addField("speed", speed));
         animalDataDTO.getHeartRate().ifPresent(heartRate -> point.addField("heartRate", heartRate));
         animalDataDTO.getBreathRate().ifPresent(breathRate -> point.addField("breathRate", breathRate));
+        animalDataDTO.getBatteryPercentage().ifPresent(batteryPercentage -> point.addField("batteryPercentage", batteryPercentage));
         animalDataDTO.getTimestamp().ifPresent(timestamp -> point.time(timestamp.toEpochMilli(), WritePrecision.MS));
 
         // Aditional tags
