@@ -16,16 +16,22 @@ public class Animal {
     @Column(nullable = false)
     private String species;
 
+    @Column
+    private String breed;
+
+    @Column
     private char sex;
 
-    private Date birthDate;
+    @Column
+    private Date birthday;
 
     @Column(nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private Long deviceId;
 
+    @Column
     private String beCarefulWith;
 
     @Column(name="image_path", nullable = true)
@@ -35,15 +41,17 @@ public class Animal {
         super();
     }
 
-    public Animal(String name, String species, char sex,Date birthDate, Long userId, Long deviceId, String beCarefulWith) {
+    public Animal(String name, String species, String breed, char sex,Date birthday, Long userId, Long deviceId, String beCarefulWith, String imagePath) {
         super();
         this.name = name;
         this.species = species;
+        this.breed = breed;
         this.sex = sex;
-        this.birthDate = birthDate;
+        this.birthday = birthday;
         this.userId = userId;
         this.deviceId = deviceId;
         this.beCarefulWith = beCarefulWith;
+        this.imagePath = imagePath;
     }
 
     public Long getId() {
@@ -58,8 +66,8 @@ public class Animal {
         return species;
     }
 
-    public Date getBirthDate() {
-        return birthDate;
+    public Date getBirthday() {
+        return birthday;
     }
 
     public char getSex() {
@@ -82,8 +90,8 @@ public class Animal {
         this.species = species;
     }
 
-    public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
     }
 
     public void setSex(char sex) {
@@ -118,17 +126,27 @@ public class Animal {
         this.beCarefulWith = beCarefulWith;
     }
 
+    public String getBreed() {
+        return breed;
+    }
+
+    public void setBreed(String breed) {
+        this.breed = breed;
+    }
+
     @Override
     public String toString() {
         return "Animal{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", species='" + species + '\'' +
+                ", breed='" + breed + '\'' +
                 ", sex'" + sex + '\'' +
-                ", birthDate=" + birthDate +
+                ", birthday=" + birthday +
                 ", userId=" + userId +
                 ", deviceId=" + deviceId +
                 ", beCarefulWith='" + beCarefulWith + '\'' +
+                ", imagePath='" + imagePath + '\'' +
                 '}';
     }
 }

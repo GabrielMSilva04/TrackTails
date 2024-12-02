@@ -10,7 +10,7 @@ const base_url = 'http://localhost/api/v1';
 
 function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
     const [myPetsData, setMyPetsData] = useState([]);
-    useWebSocket(1);
+    // useWebSocket(1);
 
     useEffect(() => {
         console.log('Map Page Rendered with Animals:', animals);
@@ -21,15 +21,17 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
             try {
                 const headers = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                };
-
+                }
+                
                 const updatedAnimals = await Promise.all(
                     animals.map(async (animal) => {
                         const response = await axios.get(
                             `${base_url}/animaldata/latest/${animal.id}`,
                             { headers }
                         );
-                        return { ...animal, ...response.data }; // Merge permanent and dynamic data
+                      
+                        return { ...animal, ...response.data };
+                      
                     })
                 );
                 setMyPetsData(updatedAnimals);
@@ -94,18 +96,20 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
         }
         return [40.63316, -8.65939];
     }, [myPetsData]);
-
-    const customIcon = L.divIcon({
-        html: `
-        <div style="position: relative; width: 75px; height: 70px;">
-            <img src="${pin}" style="width: 100%; height: 100%;" />
-            <img src="https://placehold.co/100x100" 
-                 style="width: 30px; height: 30px; border-radius: 50%; position: absolute; top: 11px; left: 22.3px;" />
-        </div>
-    `,
-        iconAnchor: [37.5, 70],
-        className: '',
-    });
+  
+    const customIcon = (animal) =>
+        L.divIcon({
+            html: `
+            <div style="position: relative; width: 75px; height: 70px;">
+                <img src="${pin}" style="width: 100%; height: 100%;" />
+                <img src="${animal.imageUrl}"
+                     style="width: 30px; height: 30px; border-radius: 50%; position: absolute; top: 11px; left: 22.3px;" />
+            </div>
+        `,
+            iconAnchor: [37.5, 70],
+            className: '',
+        }
+    );
 
     return (
         <MapContainer center={centerPosition} zoom={17} zoomControl={false} style={{ height: "100vh", width: "100%" }}>
@@ -123,7 +127,7 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
                     <Marker
                         key={animal.id}
                         position={[animal.latitude, animal.longitude]}
-                        icon={customIcon}
+                        icon={customIcon(animal)}
                         eventHandlers={{
                             click: () => clickHandler(animal),
                         }}

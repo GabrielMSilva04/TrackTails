@@ -38,8 +38,9 @@ export default function Pet({ onMetricSelect }) {
     const { selectedAnimal } = useAnimalContext();
     const [animalData, setAnimalData] = useState({
         species: "Unknown",
+        breed: "Unknown",
         sex: "Unknown",
-        birthDate: null,
+        birthday: null,
         age: "Calculating...",
     });
 
@@ -49,15 +50,16 @@ export default function Pet({ onMetricSelect }) {
         heartRate: "Unknown",
         breathRate: "Unknown",
         speed: "Unknown",
+        batteryPercentage: "Unknown",
         location: { latitude: "Unknown", longitude: "Unknown" },
     });
 
     useEffect(() => {
         console.log("Selected animal in Pet:", selectedAnimal);
         if (selectedAnimal) {
-            const calculateAge = (birthDate) => {
-                if (!birthDate) return "Unknown";
-                const birth = new Date(birthDate);
+            const calculateAge = (birthday) => {
+                if (!birthday || birthday === "Unknown") return null;
+                const birth = new Date(birthday);
                 const now = new Date();
                 const age = now.getFullYear() - birth.getFullYear();
                 const isBeforeBirthday =
@@ -73,10 +75,11 @@ export default function Pet({ onMetricSelect }) {
             };
 
             setAnimalData({
-                species: selectedAnimal.species || "Unknown",
-                sex: selectedAnimal.sex === "m" ? "Male" : "Female",
-                birthDate: formatDate(selectedAnimal.birthDate),
-                age: `${calculateAge(selectedAnimal.birthDate)} (${formatDate(selectedAnimal.birthDate)})`,
+                species: selectedAnimal.species ? selectedAnimal.species.charAt(0).toUpperCase() + selectedAnimal.species.slice(1) : "Unknown",
+                breed: selectedAnimal.breed || "Unknown",
+                sex: selectedAnimal.sex === "m" ? "Male" : selectedAnimal.sex === "f" ? "Female" : "Unknown",
+                birthday: formatDate(selectedAnimal.birthday),
+                age: selectedAnimal.birthday ? `${calculateAge(selectedAnimal.birthday)} (${formatDate(selectedAnimal.birthday)})` : "Unknown",
             });
 
             // Fetch latest data for the animal
@@ -95,6 +98,7 @@ export default function Pet({ onMetricSelect }) {
                         heartRate: data.heartRate?.toFixed(0) || "Unknown",
                         breathRate: data.breathRate?.toFixed(0) || "Unknown",
                         speed: data.speed?.toFixed(2) || "Unknown",
+                        batteryPercentage: data.batteryPercentage?.toFixed(0) || "Unknown",
                         location: {
                             latitude: data.latitude?.toFixed(6) || "Unknown",
                             longitude: data.longitude?.toFixed(6) || "Unknown",
@@ -111,8 +115,8 @@ export default function Pet({ onMetricSelect }) {
 
     const stats = [
         { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, trigger: (() => onMetricSelect("heartRate")), image: null },
-        {icon: null, label: "Sleep", value: "Sleep", trigger: (() => null), image: sleepLogo},
-        { icon: faGauge, label: "Speed", value: `${latestData.speed} HM/H`, trigger: (() => onMetricSelect("speed")), image: null },
+        { icon: null, label: "Sleep", value: "Sleep", trigger: (() => null), image: sleepLogo},
+        { icon: faGauge, label: "Speed", value: `${latestData.speed} KM/H`, trigger: (() => onMetricSelect("speed")), image: null },
         { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, trigger: (() => onMetricSelect("breathRate")), image: null },
         { icon: faMapLocationDot, label: "Location", value: "Location", trigger: (() => null), image: null },
         { icon: faSyringe, label: "Vaccines", value: "Vaccines", trigger: (() => null), image: null },
@@ -122,10 +126,38 @@ export default function Pet({ onMetricSelect }) {
     return (
         <div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                Age: {animalData.age}, {animalData.species}, Sex: {animalData.sex}
+                {[
+                    animalData.age !== "Unknown" ? `Age: ${animalData.age}` : null,
+                    animalData.species !== "Unknown" ? `${animalData.species}${animalData.breed !== "Unknown" ? `: ${animalData.breed}` : ""}` : null,
+                    animalData.sex !== "Unknown" ? `${animalData.sex}` : null,
+                ]
+                    .filter(Boolean)
+                    .join(", ")}
             </div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                <button onClick={()=>onMetricSelect("weight")}>Last Weight: {latestData.weight} kg</button>, <button onClick={()=>onMetricSelect("weight")}>Last Height: {latestData.height} cm</button>
+                {latestData.weight !== "Unknown" && (
+                    <button onClick={() => onMetricSelect("weight")}>Last Weight: {latestData.weight} kg</button>
+                )}
+                {latestData.weight !== "Unknown" && latestData.height !== "Unknown" && ", "}
+                {latestData.height !== "Unknown" && (
+                    <button onClick={() => onMetricSelect("height")}>Last Height: {latestData.height} cm</button>
+                )}
+            </div>
+            <div className="mt-2 text-center">
+                {latestData.batteryPercentage !== "Unknown" && (
+                    <div
+                        className={`text-lg font-bold px-4 py-2 rounded-lg inline-block ${
+                            latestData.batteryPercentage > 20
+                                ? "bg-primary text-white"
+                                : "bg-warning text-white"
+                        }`}
+                    >
+                        Battery:{" "}
+                        <span className="text-white font-extrabold">
+                {latestData.batteryPercentage}%
+            </span>
+                    </div>
+                )}
             </div>
             <div className="flex flex-wrap justify-between px-4 mt-4 gap-4">
                 {stats.map((stat, index) => (
