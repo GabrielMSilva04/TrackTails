@@ -2,11 +2,11 @@
 name = "datasource"
 version = "0.1.0"
 description = ""
-authors = ["martimsantos <santos.martim@ua.pt>"]
+authors = ["martimsantos <santos.martim@ua.pt>", "sebastiaoteixeira <sebastiao.teixeira@ua.pt>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 matplotlib = "^3.9.3"
 folium = "^0.18.0"
 confluent-kafka = "^2.6.1"
