@@ -1,5 +1,3 @@
-//and user phone number
-
 import { InputField } from "../components/InputField.jsx";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";

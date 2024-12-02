@@ -14,7 +14,7 @@ export default function LayoutAnimal({ showButtons = "all" }) {
     const navigate = useNavigate();
 
     LayoutAnimal.propTypes = {
-        showButtons: PropTypes.oneOf(["all", "back-only", "none"])
+        showButtons: PropTypes.oneOf(["all", "back-only", "none"]),
     };
 
     if (!selectedAnimal) {
@@ -29,7 +29,6 @@ export default function LayoutAnimal({ showButtons = "all" }) {
         console.log("Selected animal in LayoutAnimal:", selectedAnimal);
     }, [selectedAnimal]);
 
-    // Function to delete the animal
     const handleDelete = async () => {
         const confirmDelete = window.confirm(
             `Are you sure you want to delete ${selectedAnimal.name}? This action cannot be undone.`
@@ -48,13 +47,16 @@ export default function LayoutAnimal({ showButtons = "all" }) {
             alert("Animal deleted successfully.");
             console.log("Delete response:", response.data);
 
-            // Clear selectedAnimal and navigate back to mypets
             setSelectedAnimal(null);
             navigate("/mypets");
         } catch (error) {
             console.error("Error deleting animal:", error);
             alert("Failed to delete the animal. Please try again.");
         }
+    };
+
+    const handleEdit = () => {
+        navigate(`/editpet`);
     };
 
     return (
@@ -85,7 +87,10 @@ export default function LayoutAnimal({ showButtons = "all" }) {
                     {showButtons === "all" ? (
                         <div className="mt-4 text-primary font-bold text-2xl items-center justify-center">
                             {selectedAnimal.name}
-                            <button className="ml-1.5 text-lg text-neutral border rounded-full border-neutral w-7 h-7 items-center justify-center">
+                            <button
+                                onClick={handleEdit}
+                                className="ml-1.5 text-lg text-neutral border rounded-full border-neutral w-7 h-7 items-center justify-center"
+                            >
                                 <FontAwesomeIcon icon={faEdit} />
                             </button>
                         </div>
@@ -96,7 +101,6 @@ export default function LayoutAnimal({ showButtons = "all" }) {
                     )}
 
                     <div className="overflow-y-auto">
-                        {/* Pass selectedAnimal data to children via Outlet context */}
                         <Outlet context={{ selectedAnimal }} />
                     </div>
                 </div>

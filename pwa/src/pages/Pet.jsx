@@ -77,7 +77,7 @@ export default function Pet({ onMetricSelect }) {
             setAnimalData({
                 species: selectedAnimal.species ? selectedAnimal.species.charAt(0).toUpperCase() + selectedAnimal.species.slice(1) : "Unknown",
                 breed: selectedAnimal.breed || "Unknown",
-                sex: selectedAnimal.sex === "m" ? "Male" : "Female",
+                sex: selectedAnimal.sex === "m" ? "Male" : selectedAnimal.sex === "f" ? "Female" : "Unknown",
                 birthday: formatDate(selectedAnimal.birthday),
                 age: selectedAnimal.birthday ? `${calculateAge(selectedAnimal.birthday)} (${formatDate(selectedAnimal.birthday)})` : "Unknown",
             });
