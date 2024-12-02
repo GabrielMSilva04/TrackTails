@@ -10,6 +10,9 @@ python = "^3.12"
 matplotlib = "^3.9.3"
 folium = "^0.18.0"
 confluent-kafka = "^2.6.1"
+pyodbc = "^5.2.0"
+mariadb = "^1.1.11"
+python-dotenv = "^1.0.1"
 
 
 [build-system]

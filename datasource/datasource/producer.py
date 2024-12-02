@@ -6,27 +6,23 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import numpy as np
 from confluent_kafka import Producer
+import sys
 
 def create_kafka_producer():
-
     conf = {
-        'bootstrap.servers': 'localhost:29092',
+        'bootstrap.servers': 'localhost:9092',
         'client.id': 'animal-simulation-producer'
     }
-    producer = Producer(conf)
-    return producer
+    return Producer(conf)
 
 def send_to_kafka(producer, topic, message):
-
     try:
         producer.produce(topic, value=message)
         producer.flush()
-        print(f"Mensagem enviada para o tópico {topic}: {message}")
     except Exception as e:
-        print(f"Erro ao enviar mensagem para o Kafka: {e}")
+        pass
 
-def simulate_state_data(animal_id, last_state):
-
+def simulate_state_data(device_id, last_state):
     current_hour = datetime.now().hour
     states = ['adormir', 'acorrer', 'adescansar']
 
@@ -45,59 +41,39 @@ def simulate_state_data(animal_id, last_state):
         animal_state = random.choice(available_states)
 
     return animal_state, {
-        'animal_id': animal_id,
+        'device_id': device_id,
         'estado': animal_state,
         'timestamp': int(time.time())
     }
 
-def simulate_animal_speed(estado, animal_type="default"):
-
+def simulate_animal_speed(estado):
     speed_ranges = {
-        "default": {
-            "acorrer": (15.0, 25.0),
-            "adescansar": (0.5, 3.0),
-            "adormir": (0.0, 0.0)
-        },
-        "rapido": {
-            "acorrer": (30.0, 45.0),
-            "adescansar": (1.0, 5.0),
-            "adormir": (0.0, 0.0)
-        },
-        "lento": {
-            "acorrer": (8.0, 15.0),
-            "adescansar": (0.2, 2.0),
-            "adormir": (0.0, 0.0)
-        }
+        "acorrer": (15.0, 25.0),
+        "adescansar": (0.5, 3.0),
+        "adormir": (0.0, 0.0)
     }
 
-    animal_speeds = speed_ranges.get(animal_type, speed_ranges["default"])
-    speed_range = animal_speeds.get(estado, (0.0, 0.0))
-    speed = round(random.uniform(speed_range[0], speed_range[1]), 2)
-    return speed
+    speed_range = speed_ranges.get(estado, (0.0, 0.0))
+    return round(random.uniform(speed_range[0], speed_range[1]), 2)
 
-def simulate_heart_rate(estado, current_speed, animal_type="default"):
-
-    base_bpm = {
-        "default": 65,
-        "rapido": 80,
-        "lento": 50
-    }
+def simulate_heart_rate(estado, current_speed):
+    base_bpm = 60
 
     bpm_multipliers = {
-        "adormir": 0.8,
+        "adormir": 0.9,
         "adescansar": 1.0,
-        "acorrer": 1.5
+        "acorrer": 1.8
     }
 
-    base = base_bpm.get(animal_type, base_bpm["default"])
     multiplier = bpm_multipliers.get(estado, 1.0)
-    speed_factor = current_speed / 10
-    variation = random.uniform(-0.05, 0.05)
-    final_bpm = base * multiplier * (1 + speed_factor) * (1 + variation)
+    speed_factor = current_speed / 20
+    variation = random.uniform(-0.03, 0.03)
+    final_bpm = base_bpm * multiplier * (1 + speed_factor) * (1 + variation)
+    final_bpm = min(final_bpm, 130)
+
     return round(final_bpm, 1)
 
 def simulate_location(last_location, current_speed, update_interval, estado):
-
     if last_location is None:
         return {
             "latitude": 38.722252,
@@ -129,14 +105,11 @@ def simulate_location(last_location, current_speed, update_interval, estado):
     }
 
 def calculate_transition_speed(current_speed, target_speed, transition_progress):
-
     return current_speed + (target_speed - current_speed) * transition_progress
 
-def main():
-    animal_id = "A001"
-    animal_type = "default"
+def main(device_id):
     last_state = "adescansar"
-    update_interval = 5
+    update_interval = 3
     last_location = None
     tracking_data = []
     topic = "animal_tracking_topic"
@@ -150,18 +123,16 @@ def main():
     }
     transition_period = 4
     current_state_time = 0
-    current_speed = simulate_animal_speed(last_state, animal_type)
+    current_speed = simulate_animal_speed(last_state)
     next_state = None
 
-    print(f"Iniciando simulação para animal {animal_id} (Tipo: {animal_type})")
-
     try:
-        for _ in range(100):
+        while True:
             current_state_time += 1
             time_until_change = state_duration[last_state] - current_state_time
 
             if time_until_change == transition_period and next_state is None:
-                _, state_data = simulate_state_data(animal_id, last_state)
+                _, state_data = simulate_state_data(device_id, last_state)
                 next_state = state_data['estado']
 
             if current_state_time >= state_duration[last_state]:
@@ -174,40 +145,36 @@ def main():
                     )
                     next_state = None
 
-            target_speed = simulate_animal_speed(last_state, animal_type)
+            target_speed = simulate_animal_speed(last_state)
 
             if next_state and time_until_change <= transition_period:
-                next_state_speed = simulate_animal_speed(next_state, animal_type)
+                next_state_speed = simulate_animal_speed(next_state)
                 transition_progress = (transition_period - time_until_change) / transition_period
                 current_speed = calculate_transition_speed(current_speed, next_state_speed, transition_progress)
             else:
                 current_speed = calculate_transition_speed(current_speed, target_speed, 0.3)
 
-            bpm = simulate_heart_rate(last_state, current_speed, animal_type)
+            bpm = simulate_heart_rate(last_state, current_speed)
             last_location = simulate_location(last_location, current_speed, update_interval, last_state)
 
             data = {
                 'timestamp': time.time(),
-                'animal_id': animal_id,
+                'device_id': device_id,
                 'state': last_state,
                 'speed': current_speed,
                 'bpm': bpm,
                 'location': last_location
             }
 
+            print(data)
+
             send_to_kafka(producer, topic, json.dumps(data))
-
             tracking_data.append(data)
-
             time.sleep(update_interval)
 
-        print("\nSimulação completada!")
-
     except KeyboardInterrupt:
-        print("\nSimulação terminada pelo usuário")
-        if tracking_data:
-            print("\nDados de rastreamento enviados para o Kafka.")
-        print("Verifique o tópico Kafka para as mensagens enviadas.")
+        pass
 
 if __name__ == "__main__":
-    main()
+    device_id = sys.argv[1]
+    main(device_id)
