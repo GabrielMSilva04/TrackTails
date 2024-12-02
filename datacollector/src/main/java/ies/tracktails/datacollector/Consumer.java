@@ -6,6 +6,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
 import ies.tracktails.animalsDataCore.services.AnimalDataService;
+import ies.tracktails.animalsDataCore.services.AnimalService;
+import ies.tracktails.animalsDataCore.entities.Animal;
 
 @Service
 public class Consumer {
@@ -13,10 +15,15 @@ public class Consumer {
     @Autowired
     private AnimalDataService animalDataService;
 
+    @Autowired
+    private AnimalService animalService;
+
     public AnimalDataDTO convertToAnimalDataDTO(DataDTO data) {
         AnimalDataDTO animalDataDTO = new AnimalDataDTO();
-        animalDataDTO.setAnimalId(data.getDeviceId());
 
+        Animal animal = animalService.getAnimalByDeviceId(Long.parseLong(data.getDeviceId()));
+
+        animalDataDTO.setAnimalId(animal.getId().toString());
 
         data.getLatitude().ifPresent(latitude -> animalDataDTO.setLatitude(latitude));
         data.getLongitude().ifPresent(longitude -> animalDataDTO.setLongitude(longitude));
