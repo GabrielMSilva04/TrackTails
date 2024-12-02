@@ -19,13 +19,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User registerUser(String displayName, String email, String password) {
+    public User registerUser(String displayName, String email, int phoneNumber, String password) {
         if (userRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already in use");
         }
 
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        User user = new User(displayName, email, hashedPassword);
+        User user = new User(displayName, email, phoneNumber, hashedPassword);
 
         return userRepository.save(user);
     }
@@ -46,7 +46,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(Long userId, String displayName, String email, String password){
+    public User getUserByPhoneNumber(int phoneNumber){
+        return userRepository.findByPhoneNumber(phoneNumber).isPresent() ? userRepository.findByPhoneNumber(phoneNumber).get() : null;
+    }
+
+    @Override
+    public User updateUser(Long userId, String displayName, String email, int phoneNumber, String password){
         User userToUpdate = getUserById(userId);
         if (userToUpdate == null) {
             return null;
@@ -54,6 +59,7 @@ public class UserServiceImpl implements UserService {
 
         userToUpdate.setDisplayName(displayName);
         userToUpdate.setEmail(email);
+        userToUpdate.setPhoneNumber(phoneNumber);
 
         if (password != null && !password.isEmpty()) {
             String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());

@@ -35,9 +35,9 @@ export default function Navbar() {
                 </NavLink>
             </button>
             <button>
-                <NavLink className="tooltip" data-tip="Profile">
+                <NavLink to="/profile" className="tooltip" data-tip="Profile">
                     {({ isActive }) => (
-                        <FontAwesomeIcon icon={faUser} color="white" />
+                        <FontAwesomeIcon icon={faUser} color={isActive ? '#1cb51c' : 'white'} />
                     )}
                 </NavLink>
             </button>

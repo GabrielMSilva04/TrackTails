@@ -13,7 +13,6 @@ const InputField = ({
                         validate,
                         error,
                     }) => {
-    // Return null if 'name' or 'register' is missing, as they are critical for React Hook Form
     if (!name || !register) {
         return null;
     }
@@ -24,7 +23,7 @@ const InputField = ({
                 <span className="label-text text-secondary font-bold">{label}</span>
                 {type === 'select' ? (
                     <select
-                        {...register(name, { required, validate })} // Pass validate here
+                        {...register(name, { required, validate })}
                         value={value}
                         onChange={(e) => onChange?.(e.target.value)}
                         className="select select-bordered w-full"
@@ -38,9 +37,17 @@ const InputField = ({
                             </option>
                         ))}
                     </select>
+                ) : type === 'textarea' ? (
+                    <textarea
+                        {...register(name, { required, validate })}
+                        placeholder={placeholder}
+                        value={value}
+                        onChange={(e) => onChange?.(e.target.value)}
+                        className="textarea textarea-bordered w-full resize-none h-24"
+                    />
                 ) : (
                     <input
-                        {...register(name, { required, validate })} // Pass validate here
+                        {...register(name, { required, validate })}
                         type={type}
                         placeholder={placeholder}
                         value={value}

@@ -1,6 +1,6 @@
-import {InputField} from "../components/InputField.jsx";
-import {Link} from "react-router-dom";
-import {useForm} from "react-hook-form";
+import { InputField } from "../components/InputField.jsx";
+import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
 import axios from "axios";
 
 const base_url = "http://localhost/api/v1";
@@ -12,15 +12,94 @@ export default function RegisterPet() {
         formState: { errors },
     } = useForm();
 
+    const MAX_FILE_SIZE_MB = 5;
+    const ALLOWED_FORMATS = ['image/png', 'image/jpeg', 'image/jpg', 'image/heic', 'image/heif'];
+
     const onSubmit = async (data) => {
         try {
-            console.log('Form Data:', data);
-            const response = await axios.post(`${base_url}/animals`, data);
-            alert('Pet registered successfully!');
-            console.log('Response:', response.data);
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('No authentication token found. Please log in.');
+                return;
+            }
+
+            console.log('Form data:', data);
+
+            // Validate image file size and format before uploading
+            const file = data.image[0];
+            if (file) {
+                if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+                    alert(`File size exceeds the maximum limit of ${MAX_FILE_SIZE_MB}MB.`);
+                    return;
+                }
+                if (!ALLOWED_FORMATS.includes(file.type)) {
+                    alert('Invalid file format. Only PNG, JPEG, JPG, HEIC, and HEIF are allowed.');
+                    return;
+                }
+            }
+
+            // Register pet (without image)
+            const petResponse = await axios.post(
+                `${base_url}/animals`,
+                data,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const savedPet = petResponse.data;
+            console.log('Pet registered successfully:', savedPet);
+
+            // Upload image if selected
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const uploadResponse = await axios.post(
+                    `${base_url}/animals/${savedPet.id}/upload`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+
+                console.log('Image uploaded successfully:', uploadResponse.data);
+            }
+
+            // Send height and weight to AnimalDataController
+            const animalData = {
+                animalId: savedPet.id,
+                weight: data.weight ? parseFloat(data.weight) : null,
+                height: data.height ? parseFloat(data.height) : null,
+                timestamp: new Date().toISOString(),
+            };
+
+            const animalDataResponse = await axios.post(
+                `${base_url}/animaldata`,
+                animalData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            console.log('Animal data saved successfully:', animalDataResponse.data);
+
+            alert('Pet, image, and data registered successfully!');
+            window.location.href = '/mypets';
         } catch (error) {
-            console.error('Error registering pet:', error.response?.data || error.message);
-            alert('Failed to register the pet. Please try again.');
+            console.error('Error registering pet, uploading image, or saving data:', error.response?.data || error.message);
+            if (error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else {
+                alert('Failed to register the pet. Please try again.');
+            }
         }
     };
 
@@ -30,8 +109,8 @@ export default function RegisterPet() {
     ];
 
     const sexOptions = [
-        { value: 'male', label: 'Male' },
-        { value: 'female', label: 'Female' },
+        { value: 'm', label: 'Male' },
+        { value: 'f', label: 'Female' },
     ];
 
     return (
@@ -48,20 +127,24 @@ export default function RegisterPet() {
                     <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
                 </div>
 
-                <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="flex flex-col gap-2 h-full w-full">
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2 h-full w-full">
                     {/* Scrollable Content */}
                     <div className="flex-grow overflow-y-auto space-y-4 px-4">
                         <label className="form-control w-full">
                             <div className="label">
-                                <span className="label-text text-secondary font-bold">Photo</span>
+                                <span className="label-text text-secondary font-bold">Photo*</span>
                             </div>
                             <input
                                 type="file"
-                                name="image"
+                                {...register('image', {
+                                    required: {
+                                        value: false,
+                                        message: 'Image is required',
+                                    },
+                                })}
                                 className="file-input file-input-bordered file-input-primary w-full"
                             />
+                            {errors.image && <p className="text-error text-sm">{errors.image.message}</p>}
                         </label>
 
                         {/* Pet Name Input */}
@@ -91,7 +174,7 @@ export default function RegisterPet() {
                                     message: 'Species is required',
                                 }}
                                 options={[
-                                    {value: '', label: 'Select a species'},
+                                    { value: '', label: 'Select a species' },
                                     ...speciesOptions,
                                 ]}
                                 error={errors.species && errors.species.message}
@@ -106,7 +189,7 @@ export default function RegisterPet() {
                                 register={register}
                                 required={false}
                                 options={[
-                                    {value: '', label: 'Select the sex'},
+                                    { value: '', label: 'Select the sex' },
                                     ...sexOptions,
                                 ]}
                                 error={errors.sex && errors.sex.message}
@@ -169,6 +252,17 @@ export default function RegisterPet() {
                                 message: 'Device ID is required',
                             }}
                             error={errors.deviceId && errors.deviceId.message}
+                        />
+
+                        {/* Be Careful With */}
+                        <InputField
+                            label="Be Careful With"
+                            name="beCarefulWith"
+                            type="textarea"
+                            placeholder="Enter any special care instructions"
+                            register={register}
+                            required={false}
+                            error={errors.beCarefulWith && errors.beCarefulWith.message}
                         />
                     </div>
 

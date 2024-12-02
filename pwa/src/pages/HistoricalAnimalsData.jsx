@@ -3,13 +3,29 @@ import { useState, useEffect } from "react";
 import ChartComponent from "../components/Chart";
 import TimeRangeSelector from "../components/TimeRangeSelector"
 import axios from "axios";
+import { useAnimalContext } from "../contexts/AnimalContext";
 
 const base_url = "http://localhost/api/v1";
 
-const HistoricalAnimalsData = () => {
+function convertToInfluxDBFormat(inputDatetime) {
+  const date = new Date(inputDatetime);
+
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
+}
+
+const HistoricalAnimalsData = ({ metric }) => {
   const [chartType, setChartType] = useState("Line");
   const [range, setRange] = useState("24H");
   const [dataNotFound, setDataNotFound] = useState(false);
+  const [aggregateMode, setAggregateMode] = useState(false);
+  const { selectedAnimal } = useAnimalContext();
   const [data, setData] = useState({
     labels: [],
     datasets: [],
@@ -154,11 +170,12 @@ const HistoricalAnimalsData = () => {
   const fetchAnimalData = async (animal, metric) => {
     const range_to_interval_map = {
       "1H": "1m",
-      "24H": "1h",
-      "1W": "1d",
+      "24H": "30m",
+      "1W": "6h",
       "1M": "1d",
-      "3M": "1d",
+      "3M": "2d",
       "1Y": "1w",
+      "MAX": "1mo"
     };
     const range_api_map = {
       "1H": "1h",
@@ -169,40 +186,86 @@ const HistoricalAnimalsData = () => {
       "1Y": "1y",
     };
 
-    // Fetch data from API
-    await axios.get(`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${range_to_interval_map[range]}`)
-      .then((response) => {
-        setDataNotFound(false);
-        console.log(response.data);
-        setLabels(response.data.map((d) => d.timestamp));
-        clearDatasets();
-        console.log(data);
-        addDataset({
-          label: metric,
-          data: response.data.map((d) => d[metric]),
-          backgroundColor: "#4d7c0f",
-          borderColor: "rgba(54, 83, 20, 1)",
-          borderWidth: 2,
-        });
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("Failed to fetch data from API");
-        if (error.response) {
-          console.error("Error response", error.response);
-        }
-        setDataNotFound(true);
-        return;
+    console.log("Range:", range);
+    let customRange = false;
+    let customRangeStart = null;
+    let customRangeEnd = null;
+    let customInterval = range_to_interval_map[range];
+    let splitRange = range.split(" - ");
+    if (splitRange.length > 1) {
+      customRange = true;
+      customRangeStart = splitRange[0];
+      customRangeEnd = splitRange[1];
+      console.log("Custom range", customRangeStart, customRangeEnd);
+      // Count how many minutes are in the custom range
+      let start = new Date(customRangeStart);
+      let end = new Date(customRangeEnd);
+      let minutes = (end - start) / 1000 / 60
+      console.log("Minutes in custom range", minutes);
+      // set custom intervel to minutes / 60
+      customInterval = parseInt(minutes / 60) + 1 + "m";
+    }
+    
+
+    const colors = [["#4d7c0f", "rgba(54, 83, 20, 1)"], ["#f6ad55", "#f6ad55"], ["#80C4E9", "#80C4E9"], ["#f3722c", "#f3722c"], ["#f94144", "#f94144"]];
+    let color_index = 0;
+
+    let endpoints = [`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${customInterval}`];
+    if (range === "MAX") {
+      endpoints[0] = `${base_url}/animaldata/historic/${animal}/${metric}?&interval=${customInterval}`;
+    } else if (customRange) {
+      endpoints[0] = `${base_url}/animaldata/historic/${animal}/${metric}?start=${convertToInfluxDBFormat(customRangeStart)}&end=${convertToInfluxDBFormat(customRangeEnd)}&interval=${customInterval}`;
+    }
+
+    const aggregations = ["mean", "min", "max"];
+    let aggregation_index = 0;
+    if (aggregateMode) {
+      // replicate 3 times
+      endpoints = endpoints.concat(endpoints).concat(endpoints);
+      endpoints = endpoints.map((endpoint, index) => {
+        return `${endpoint}&aggregate=${aggregations[index]}`;
       });
+      color_index = 1;
+    }
+    clearDatasets();
+
+    // Fetch data from API
+    for (let endpoint of endpoints) {
+      await axios.get(endpoint, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        })
+        .then((response) => {
+          setDataNotFound(false);
+          console.log(response.data);
+          setLabels(response.data.map((d) => d.timestamp));
+          console.log(data);
+          addDataset({
+            label: aggregateMode ? `${metric} - ${aggregations[aggregation_index++]}` : metric,
+            data: response.data.map((d) => d[metric]),
+            backgroundColor: colors[color_index][0],
+            borderColor: colors[color_index][1],
+            borderWidth: 2,
+          });
+          color_index++;
+          console.log(data);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch data from API");
+          if (error.response) {
+            console.error("Error response", error.response);
+          }
+          setDataNotFound(true);
+          return;
+        });
+    }
   }
 
-  useEffect(() => {
-    showScales();
-  }, []);
 
   useEffect(() => {
-    fetchAnimalData("12345", "weight");
-  }, [range]);
+    fetchAnimalData(selectedAnimal.id, metric);
+  }, [range, aggregateMode]);
 
   const timeRangeSelectHandler = (range) => {
     const range_to_unit_map = {
@@ -215,17 +278,19 @@ const HistoricalAnimalsData = () => {
     };
 
     setRange(range);
-    setChartScaleUnit(range_to_unit_map[range]);
-    updateScalesInterval(range);
+    setChartScaleUnit(range_to_unit_map[range] || "minute");
+    updateScalesInterval(range || "1H");
   }
 
   const chartTypeSelectorHandler = (event) => {
     switch (event.target.value) {
       case "1":
+        setAggregateMode(false);
         setChartType("line");
         showScales();
         break;
       case "2":
+        setAggregateMode(true);
         setChartType("line");
         showScales();
         break;
@@ -245,7 +310,6 @@ const HistoricalAnimalsData = () => {
       <select className="select select-sm select-bordered w-full max-w-xs m-auto" onChange={chartTypeSelectorHandler}>
         <option value="1">Instant - Line Chart</option>
         <option value="2">Average - Line Chart</option>
-        <option value="3">Distribution - Pie chart</option>
       </select>
       <div className="flex flex-col h-64">
         {dataNotFound ? (

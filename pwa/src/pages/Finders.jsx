@@ -1,13 +1,15 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import { useState, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const baseUrl = "http://localhost/api/v1";
-const usersBaseUrl = `${baseUrl}/users`;
+const usersBaseUrl = `${baseUrl}/finders/user`;
+const animalsBaseUrl = `${baseUrl}/finders/animal`;
 
 export default function Finders() {
-    const { animal } = useOutletContext();
+    const { deviceId } = useParams();
+    const [animal, setAnimal] = useState(null);
     const [information, setInformation] = useState({
         phone: "",
         name: "",
@@ -39,6 +41,21 @@ export default function Finders() {
         }
     }, [animal]);
 
+    useEffect(() => {
+        const fetchAnimal = async () => {
+            try {
+                const response = await fetch(`${animalsBaseUrl}/${deviceId}`);
+                const animalData = await response.json();
+
+                setAnimal(animalData);
+            } catch (error) {
+                console.error("Error fetching animal:", error);
+            }
+        };
+
+        fetchAnimal();
+    }, [deviceId]);
+
     const copyToClipboard = (text) => {
         navigator.clipboard.writeText(text).then(() => setShowTooltip(true));
 
@@ -66,14 +83,15 @@ export default function Finders() {
                     <input
                         type="text"
                         placeholder="Phone Number"
-                        value={information.phone || "Loading..."}
+                        value={information.phone || "Information not available"}
+                        disabled={!information.phone}
                         className="input input-bordered border-2 input-primary h-8 w-full pr-10"
                         readOnly
                     />
                     <FontAwesomeIcon
                         icon={faCopy}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary cursor-pointer hover:text-primary-focus"
-                        onClick={() => copyToClipboard(information.phone)}
+                        onClick={() => information.phone ? copyToClipboard(information.phone) : null}
                     />
                 </div>
             </div>

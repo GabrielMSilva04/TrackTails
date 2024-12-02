@@ -17,6 +17,7 @@ public class AnimalDataDTO {
     private Optional<Double> speed;
     private Optional<Double> heartRate;
     private Optional<Double> breathRate;
+    private Optional<Double> batteryPercentage;
     private Map<String, String> additionalTags;
     private Optional<Instant> timestamp;
 
@@ -28,6 +29,7 @@ public class AnimalDataDTO {
         this.speed = Optional.empty();
         this.heartRate = Optional.empty();
         this.breathRate = Optional.empty();
+        this.batteryPercentage = Optional.empty();
         this.additionalTags = new HashMap<>();
         this.timestamp = Optional.empty();
     }
@@ -41,11 +43,12 @@ public class AnimalDataDTO {
         this.speed = Optional.empty();
         this.heartRate = Optional.empty();
         this.breathRate = Optional.empty();
+        this.batteryPercentage = Optional.empty();
         this.additionalTags = new HashMap<>();
         this.timestamp = Optional.empty();
     }
 
-    public AnimalDataDTO(String animalId, Double weight, Double height, Double latitude, Double longitude, Double speed, Double heartRate, Double breathRate, Instant timestamp) {
+    public AnimalDataDTO(String animalId, Double weight, Double height, Double latitude, Double longitude, Double speed, Double heartRate, Double breathRate, Double batteryPercentage, Instant timestamp) {
         this.animalId = animalId;
         this.weight = Optional.ofNullable(weight);
         this.height = Optional.ofNullable(height);
@@ -54,6 +57,7 @@ public class AnimalDataDTO {
         this.speed = Optional.ofNullable(speed);
         this.heartRate = Optional.ofNullable(heartRate);
         this.breathRate = Optional.ofNullable(breathRate);
+        this.batteryPercentage = Optional.ofNullable(batteryPercentage);
         this.additionalTags = new HashMap<>();
         this.timestamp = Optional.ofNullable(timestamp);
     }
@@ -123,6 +127,14 @@ public class AnimalDataDTO {
         this.breathRate = Optional.ofNullable(breathRate);
     }
 
+    public Optional<Double> getBatteryPercentage() {
+        return batteryPercentage;
+    }
+
+    public void setBatteryPercentage(Double batteryPercentage) {
+        this.batteryPercentage = Optional.ofNullable(batteryPercentage);
+    }
+
     public Optional<Instant> getTimestamp() {
         return timestamp;
     }
@@ -161,6 +173,9 @@ public class AnimalDataDTO {
                 break;
             case "breathRate":
                 this.setBreathRate(Double.parseDouble(value));
+                break;
+            case "batteryPercentage":
+                this.setBatteryPercentage(Double.parseDouble(value));
                 break;
             default:
                 break;

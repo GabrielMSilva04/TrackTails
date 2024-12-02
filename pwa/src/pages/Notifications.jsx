@@ -12,13 +12,17 @@ export default function Notifications() {
     const [notifications, setNotifications] = useState([]);
     const [markedAsRead, setMarkedAsRead] = useState(false);
 
+    const authHeaders = {
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+    };
+
     useEffect(() => {
         const fetchNotifications = async () => {
-            const userId = 123; // TODO: Get user ID from auth context
-
             try {
                 // Fetch notifications
-                const response = await axios.get(`${notificationsBaseUrl}`);
+                const response = await axios.get(`${notificationsBaseUrl}`, {
+                    headers: authHeaders,
+                });
                 const notificationData = response.data;
                 console.log("Notification Data:", notificationData);
 
@@ -26,7 +30,9 @@ export default function Notifications() {
                 const enrichedNotifications = await Promise.all(
                     notificationData.map(async (notification) => {
                         try {
-                            const animalResponse = await axios.get(`${animalsBaseUrl}/${notification.animalId}`);
+                            const animalResponse = await axios.get(`${animalsBaseUrl}/${notification.animalId}`, {
+                                headers: authHeaders,
+                            });
                             const animalData = animalResponse.data;
 
                             return {
@@ -38,13 +44,6 @@ export default function Notifications() {
                             };
                         } catch (error) {
                             console.error(`Error fetching animal data for ID ${notification.animalId}:`, error);
-                            // return {
-                            //     ...notification,
-                            //     name: "Unknown",
-                            //     notification: notification.content.replace("{name}", "Unknown"),
-                            //     img: "https://via.placeholder.com/150",
-                            //     highlight: ["Off Limits", "Acceleration"].includes(notification.title),
-                            // };
                         }
                     })
                 );
@@ -70,10 +69,14 @@ export default function Notifications() {
                 notificationList
                     .filter((notification) => !notification.read) // Filter unread notifications
                     .map((notification) =>
-                        axios.put(`${notificationsBaseUrl}/${notification.id}`, {
-                            ...notification,
-                            read: true,
-                        })
+                        axios.put(
+                            `${notificationsBaseUrl}/${notification.id}`,
+                            {
+                                ...notification,
+                                read: true,
+                            },
+                            { headers: authHeaders }
+                        )
                     )
             );
 
@@ -90,7 +93,9 @@ export default function Notifications() {
         try {
             await Promise.all(
                 notifications.map((notification) =>
-                    axios.delete(`${notificationsBaseUrl}/${notification.id}`)
+                    axios.delete(`${notificationsBaseUrl}/${notification.id}`, {
+                        headers: authHeaders,
+                    })
                 )
             );
 

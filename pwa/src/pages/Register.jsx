@@ -9,9 +9,48 @@ export default function Register() {
         formState: { errors },
     } = useForm();
 
-    const onSubmit = (data) => {
-        console.log('Form Data:', data);
-        alert('Pet registered successfully!');
+    const onSubmit = async (data) => {
+        const payload = {
+            displayName: data.displayName,
+            email: data.email,
+            phoneNumber: data.phoneNumber,
+            password: data.password,
+        };
+
+        console.log("Payload to send:", payload);
+
+        try {
+            const response = await axios.post(register_url, payload, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            alert("Registration successful!");
+            console.log("Registration Response:", response.data);
+        } catch (error) {
+            console.error("Registration Error:", error);
+            alert("Registration failed. Please try again.");
+        }
+
+        // Login user after registration
+        try {
+            const response = await axios.post(login_url, {
+                email: data.email,
+                password: data.password,
+            });
+
+            const token = response.data.token;
+            localStorage.setItem("authToken", token);
+            alert("Login successful!");
+
+            console.log("Token:", token);
+
+            // Redirect user to mypets page
+            window.location.href = "/mypets";
+        } catch (error) {
+            console.error("Login Error:", error);
+            alert("Login failed. Please try again.");
+        }
     };
 
     return (
@@ -50,6 +89,21 @@ export default function Register() {
                             message: "This field is required"
                         }}
                         error={errors.email?.message}
+                    />
+                    <InputField
+                        label="Phone Number"
+                        name="phoneNumber"
+                        type="text"
+                        placeholder="123456789"
+                        register={register}
+                        required={{
+                            value: true,
+                            message: "This field is required",
+                        }}
+                        validate={(value) =>
+                            /^\d{5,15}$/.test(value) || "Phone number must be 5-15 digits"
+                        }
+                        error={errors.phoneNumber?.message}
                     />
                     <InputField
                         label="Password"

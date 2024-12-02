@@ -8,9 +8,27 @@ export default function Login() {
         formState: { errors },
     } = useForm();
 
-    const onSubmit = (data) => {
-        console.log('Form Data:', data);
-        alert('Pet registered successfully!');
+    const onSubmit = async (data) => {
+        try {
+            // Send login request
+            const response = await axios.post(login_url, {
+                email: data.email,
+                password: data.password,
+            });
+
+            console.log("Login Response:", response.data);
+            // Store token in localStorage
+            const token = response.data.token;
+            localStorage.setItem("authToken", token);
+            alert("Login successful!");
+
+            console.log("Token:", token);
+
+            window.location.href = "/mypets";
+        } catch (error) {
+            console.error("Login Error:", error);
+            alert("Login failed. Please try again.");
+        }
     };
 
     return (

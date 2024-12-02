@@ -1,19 +1,16 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import {InputField} from "../components/InputField.jsx";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { InputField } from "../components/InputField.jsx";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useAnimalContext } from "../contexts/AnimalContext";
+
+const base_url = "http://localhost/api/v1";
 
 export default function EditPet() {
-    // Example pet information
-    const petData = {
-        name: 'Buddy',
-        species: 'dog',
-        breed: 'Golden Retriever',
-        weight: 30,
-        height: 60,
-        birthday: '2018-05-20',
-        sex: 'male',
-    };
-
+    const navigate = useNavigate();
+    const { selectedAnimal } = useAnimalContext(); // Get selected animal from context
+    const [animalData, setAnimalData] = useState({});
     const {
         register,
         handleSubmit,
@@ -21,17 +18,131 @@ export default function EditPet() {
         formState: { errors },
     } = useForm();
 
-    // Pre-fill form with pet data
-    useEffect(() => {
-        Object.keys(petData).forEach((key) => {
-            setValue(key, petData[key]);
-        });
-    }, [setValue]);
+    const MAX_FILE_SIZE_MB = 5;
+    const ALLOWED_FORMATS = ["image/png", "image/jpeg", "image/jpg", "image/heic", "image/heif"];
 
-    const onSubmit = (data) => {
-        console.log('Updated Pet Information:', data);
-        alert('Pet information updated successfully!');
+    // Pre-fill form with selected animal data
+    useEffect(() => {
+        if (selectedAnimal) {
+            Object.keys(selectedAnimal).forEach((key) => {
+                if (key === "birthday" && selectedAnimal[key]) {
+                    const date = new Date(selectedAnimal[key]);
+                    const formattedDate = date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+                    setValue("birthday", formattedDate);
+                } else {
+                    setValue(key, selectedAnimal[key]);
+                }
+            });
+
+            // Fetch latest animal data (weight, height, etc.)
+            const fetchAnimalData = async () => {
+                try {
+                    const token = localStorage.getItem("authToken");
+                    const animalDataResponse = await axios.get(
+                        `${base_url}/animaldata/latest/${selectedAnimal.id}`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                            },
+                        }
+                    );
+                    const data = animalDataResponse.data;
+                    setAnimalData(data);
+
+                } catch (error) {
+                    console.error("Error fetching animal data:", error);
+                }
+            };
+
+            fetchAnimalData();
+        }
+    }, [selectedAnimal, setValue]);
+
+    const onSubmit = async (data) => {
+        try {
+            const token = localStorage.getItem("authToken");
+            if (!token) {
+                alert("No authentication token found. Please log in.");
+                return;
+            }
+
+            console.log("Updated Pet Information:", data);
+
+            // Update pet details
+            await axios.put(
+                `${base_url}/animals/${selectedAnimal.id}`,
+                {
+                    ...data,
+                    weight: undefined,
+                    height: undefined,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            // Update animal data
+            const updatedAnimalData = {
+                animalId: selectedAnimal.id,
+                weight: data.weight ? parseFloat(data.weight) : null,
+                height: data.height ? parseFloat(data.height) : null,
+                timestamp: new Date().toISOString(),
+            };
+
+            await axios.post(`${base_url}/animaldata`, updatedAnimalData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            // Update image if a new file is provided
+            if (data.image && data.image.length > 0) {
+                const file = data.image[0];
+                if (file) {
+                    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+                        alert(`File size exceeds the maximum limit of ${MAX_FILE_SIZE_MB}MB.`);
+                        return;
+                    }
+                    if (!ALLOWED_FORMATS.includes(file.type)) {
+                        alert("Invalid file format. Only PNG, JPEG, JPG, HEIC, and HEIF are allowed.");
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append("image", file);
+
+                    await axios.post(`${base_url}/animals/${selectedAnimal.id}/upload`, formData, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "multipart/form-data",
+                        },
+                    });
+
+                    console.log("Image updated successfully");
+                }
+            }
+
+            alert("Pet updated successfully!");
+            window.location.href = "/mypets";
+        } catch (error) {
+            console.error("Error updating pet or saving data:", error.response?.data || error.message);
+            if (error.response?.data?.message) {
+                alert(error.response.data.message);
+            } else {
+                alert("Failed to update the pet. Please try again.");
+            }
+        }
     };
+
+    if (!selectedAnimal) {
+        return (
+            <div className="text-center text-primary mt-10">
+                <h2>Loading pet data...</h2>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-primary h-screen w-full flex flex-col overflow-hidden">
@@ -44,7 +155,7 @@ export default function EditPet() {
             <div className="bg-white w-full rounded-t-3xl p-8 flex flex-col items-center h-3/4 overflow-hidden">
                 <div className="flex items-center justify-between w-full relative mb-6">
                     <button
-                        onClick={() => window.history.back()}
+                        onClick={() => navigate(-1)}
                         className="text-primary font-bold text-lg absolute left-0"
                     >
                         ← Back
@@ -60,6 +171,18 @@ export default function EditPet() {
                     {/* Scrollable Content */}
                     <div className="flex-grow overflow-y-auto space-y-4 px-4">
                         {/* Form Fields */}
+                        <label className="form-control w-full">
+                            <div className="label">
+                                <span className="label-text text-secondary font-bold">Photo</span>
+                            </div>
+                            <input
+                                type="file"
+                                {...register("image")}
+                                className="file-input file-input-bordered file-input-primary w-full"
+                            />
+                            {errors.image && <p className="text-error text-sm">{errors.image.message}</p>}
+                        </label>
+
                         <InputField
                             label="Pet Name*"
                             name="name"
@@ -68,7 +191,7 @@ export default function EditPet() {
                             register={register}
                             required={{
                                 value: true,
-                                message: 'Pet name is required',
+                                message: "Pet name is required",
                             }}
                             error={errors.name && errors.name.message}
                         />
@@ -77,7 +200,7 @@ export default function EditPet() {
                             label="Breed"
                             name="breed"
                             type="text"
-                            placeholder="Enter the breed"
+                            placeholder="Breed"
                             register={register}
                             required={false}
                             error={errors.breed && errors.breed.message}
@@ -92,12 +215,12 @@ export default function EditPet() {
                                 register={register}
                                 required={{
                                     value: true,
-                                    message: 'Species is required',
+                                    message: "Species is required",
                                 }}
                                 options={[
-                                    {value: '', label: 'Select a species'},
-                                    {value: 'dog', label: 'Dog'},
-                                    {value: 'cat', label: 'Cat'},
+                                    {value: "", label: "Select a species"},
+                                    {value: "dog", label: "Dog"},
+                                    {value: "cat", label: "Cat"},
                                 ]}
                                 error={errors.species && errors.species.message}
                             />
@@ -110,34 +233,44 @@ export default function EditPet() {
                                 register={register}
                                 required={false}
                                 options={[
-                                    {value: '', label: 'Select the sex'},
-                                    {value: 'male', label: 'Male'},
-                                    {value: 'female', label: 'Female'},
+                                    {value: "\u0000", label: "Select the sex"},
+                                    {value: "m", label: "Male"},
+                                    {value: "f", label: "Female"},
                                 ]}
                                 error={errors.sex && errors.sex.message}
                             />
                         </div>
 
                         <div className="flex gap-2">
-                            <InputField
-                                label="Weight (kg)"
-                                name="weight"
-                                type="number"
-                                placeholder="Enter the weight"
-                                register={register}
-                                required={false}
-                                error={errors.weight && errors.weight.message}
-                            />
+                            <div className="flex flex-col w-full">
+                                <InputField
+                                    label="Weight (kg)"
+                                    name="weight"
+                                    type="number"
+                                    placeholder="Weight (kg)"
+                                    register={register}
+                                    required={false}
+                                    error={errors.weight && errors.weight.message}
+                                />
+                                <span className="text-xs text-gray-500 mt-1">
+            {animalData.weight ? `Last: ${animalData.weight} kg` : "No measurements"}
+        </span>
+                            </div>
 
-                            <InputField
-                                label="Height (cm)"
-                                name="height"
-                                type="number"
-                                placeholder="Enter the height"
-                                register={register}
-                                required={false}
-                                error={errors.height && errors.height.message}
-                            />
+                            <div className="flex flex-col w-full">
+                                <InputField
+                                    label="Height (cm)"
+                                    name="height"
+                                    type="number"
+                                    placeholder="Height (cm)"
+                                    register={register}
+                                    required={false}
+                                    error={errors.height && errors.height.message}
+                                />
+                                <span className="text-xs text-gray-500 mt-1">
+            {animalData.height ? `Last: ${animalData.height} cm` : "No measurements"}
+        </span>
+                            </div>
                         </div>
 
                         <InputField
@@ -148,6 +281,31 @@ export default function EditPet() {
                             register={register}
                             required={false}
                             error={errors.birthday && errors.birthday.message}
+                        />
+
+                        {/* Device ID */}
+                        <InputField
+                            label="Device ID*"
+                            name="deviceId"
+                            type="text"
+                            placeholder="Enter the device ID"
+                            register={register}
+                            required={{
+                                value: true,
+                                message: "Device ID is required",
+                            }}
+                            error={errors.deviceId && errors.deviceId.message}
+                        />
+
+                        {/* Be Careful With */}
+                        <InputField
+                            label="Be Careful With"
+                            name="beCarefulWith"
+                            type="textarea"
+                            placeholder="Enter any special care instructions"
+                            register={register}
+                            required={false}
+                            error={errors.beCarefulWith && errors.beCarefulWith.message}
                         />
                     </div>
 
@@ -161,4 +319,4 @@ export default function EditPet() {
             </div>
         </div>
     );
-};
+}

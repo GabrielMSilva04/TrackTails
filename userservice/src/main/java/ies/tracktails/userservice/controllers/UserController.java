@@ -41,6 +41,9 @@ public class UserController {
         if (registerRequest.getEmail() == null || registerRequest.getEmail().isEmpty()) {
             return new ResponseEntity<>(new ErrorResponse("The field 'email' is mandatory.", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
+        if (registerRequest.getPhoneNumber() == 0) {
+            return new ResponseEntity<>(new ErrorResponse("The field 'phoneNumber' is mandatory.", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        }
         if (registerRequest.getPassword() == null || registerRequest.getPassword().isEmpty()) {
             return new ResponseEntity<>(new ErrorResponse("The field 'password' is mandatory.", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
         }
@@ -49,6 +52,7 @@ public class UserController {
             User savedUser = userService.registerUser(
                     registerRequest.getDisplayName(),
                     registerRequest.getEmail(),
+                    registerRequest.getPhoneNumber(),
                     registerRequest.getPassword()
             );
             return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
@@ -107,7 +111,7 @@ public class UserController {
         }
 
         try {
-            User updatedUser = userService.updateUser(userId, newUser.getDisplayName(), newUser.getEmail(), newUser.getPassword());
+            User updatedUser = userService.updateUser(userId, newUser.getDisplayName(), newUser.getEmail(), newUser.getPhoneNumber(), newUser.getPassword());
             if (updatedUser == null) {
                 return new ResponseEntity<>("User not found.", HttpStatus.NOT_FOUND);
             }

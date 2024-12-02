@@ -8,8 +8,6 @@ RUN npm install
 
 COPY ./pwa ./
 
-RUN npm run build
-
 EXPOSE 8080
 
 CMD [ "npm", "run", "dev" ]

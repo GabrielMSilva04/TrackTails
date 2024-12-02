@@ -9,4 +9,5 @@ import java.util.List;
 public interface AnimalRepository extends JpaRepository <Animal, Long> {
     Animal findByName(String name);
     List<Animal> findByUserId(Long userId);
+    Animal findByDeviceId(Long deviceId);
 }

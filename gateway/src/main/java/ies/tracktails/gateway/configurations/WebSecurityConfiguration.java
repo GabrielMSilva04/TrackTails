@@ -69,11 +69,21 @@ public class WebSecurityConfiguration {
 	@Order(2)
 	SecurityWebFilterChain apiHttpSecurity(ServerHttpSecurity http) {
 		http
-				.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
-				.authorizeExchange((exchanges) -> exchanges
-						.anyExchange().authenticated())
-				.oauth2ResourceServer((oauth2) -> oauth2
-						.jwt(Customizer.withDefaults()));
+		.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/api/v1/**"))
+		.csrf(ServerHttpSecurity.CsrfSpec::disable)
+        .authorizeExchange(exchanges -> exchanges
+            // Regras públicas
+            .pathMatchers(
+                "/api/v1/users/login",
+				"/api/v1/users/register",
+                "/api/v1/reports/**",
+				"/api/v1/finders/**"
+            ).permitAll()
+            // Regras autenticadas
+            .pathMatchers("/api/v1/**").authenticated()
+            // Qualquer outra rota
+            .anyExchange().permitAll())
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
 		http.addFilterAt(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION); // Add filter to extract and add userId
 

@@ -1,6 +1,6 @@
-package ies.tracktails.animalservice.services.impl;
+package ies.tracktails.animalsDataCore.services.impl;
 
-import ies.tracktails.animalservice.services.AnimalService;
+import ies.tracktails.animalsDataCore.services.AnimalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ies.tracktails.animalsDataCore.repositories.AnimalRepository;
@@ -31,11 +31,13 @@ public class AnimalServiceImpl implements AnimalService {
         Animal existingAnimal = animalRepository.findById(animal.getId()).get();
         existingAnimal.setName(animal.getName());
         existingAnimal.setSpecies(animal.getSpecies());
+        existingAnimal.setBreed(animal.getBreed());
         existingAnimal.setSex(animal.getSex());
-        existingAnimal.setBirthDate(animal.getBirthDate());
+        existingAnimal.setBirthday(animal.getBirthday());
         existingAnimal.setUserId(animal.getUserId());
         existingAnimal.setDeviceId(animal.getDeviceId());
         existingAnimal.setBeCarefulWith(animal.getBeCarefulWith());
+        existingAnimal.setImagePath(animal.getImagePath());
         return animalRepository.save(existingAnimal);
     }
 
@@ -57,5 +59,10 @@ public class AnimalServiceImpl implements AnimalService {
     @Override
     public List<Animal> getAnimalsByUserId(Long userId) {
         return animalRepository.findByUserId(userId);
+    }
+
+    @Override
+    public Animal getAnimalByDeviceId(Long deviceId) {
+        return animalRepository.findByDeviceId(deviceId);
     }
 }
