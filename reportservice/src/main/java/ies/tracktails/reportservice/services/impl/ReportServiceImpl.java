@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -56,7 +57,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Report getReportByAnimalId(Long animalId) {
+    public List<Report> getReportsByAnimalId(Long animalId) {
         return reportRepository.findByAnimalId(animalId);
     }
 

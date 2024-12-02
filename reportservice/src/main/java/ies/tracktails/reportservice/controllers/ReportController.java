@@ -27,7 +27,6 @@ public class ReportController {
         return new ResponseEntity<>(savedReport, HttpStatus.CREATED);
     }
 
-
     @Operation(summary = "Download a report by ID")
     @GetMapping("/{id}/download")
     public ResponseEntity<byte[]> downloadReport(@PathVariable Long id) {
@@ -41,5 +40,15 @@ public class ReportController {
         headers.setContentDispositionFormData("attachment", report.getFileName());
 
         return new ResponseEntity<>(report.getFileContent(), headers, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get a list of reports by animal ID")
+    @GetMapping("/animal/{animalId}")
+    public ResponseEntity<?> getReportsByAnimalId(@PathVariable Long animalId) {
+        var reports = reportService.getReportsByAnimalId(animalId);
+        if (reports.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(reports, HttpStatus.OK);
     }
 }
