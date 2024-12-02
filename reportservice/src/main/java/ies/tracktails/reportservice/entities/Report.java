@@ -3,7 +3,7 @@ package ies.tracktails.reportservice.entities;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity(name="reports")
+@Entity(name = "reports")
 public class Report {
 
     @Id
@@ -13,23 +13,27 @@ public class Report {
     @Column(name = "animal_id", nullable = false)
     private Long animalId;
 
-    @Column(name = "timestamp", nullable = false)
-    private LocalDateTime timestamp;
-
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
+    @Column(name = "timestamp", nullable = false)
+    private LocalDateTime timestamp;
+
+    @Lob
+    @Column(name = "file_content", columnDefinition = "MEDIUMBLOB", nullable = true)
+    private byte[] fileContent;
+
     public Report() {
-        super();
         this.timestamp = LocalDateTime.now();
     }
 
-    public Report(Long animalId, String fileName){
-        super();
+    public Report(Long animalId, String fileName) {
         this.animalId = animalId;
         this.timestamp = LocalDateTime.now();
         this.fileName = fileName;
     }
+
+    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -62,5 +66,12 @@ public class Report {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
-}
 
+    public byte[] getFileContent() {
+        return fileContent;
+    }
+
+    public void setFileContent(byte[] fileContent) {
+        this.fileContent = fileContent;
+    }
+}
