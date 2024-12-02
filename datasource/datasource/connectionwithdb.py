@@ -13,8 +13,8 @@ def get_device_ids_from_db():
         conn = mariadb.connect(
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
-            host="127.0.0.1",  # Usando 127.0.0.1 para conectar ao contêiner
-            port=3306,          # A porta exposta pelo Docker
+            host="127.0.0.1",
+            port=3306,
             database=os.getenv("DB_NAME")
         )
 
