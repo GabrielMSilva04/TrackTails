@@ -1,7 +1,7 @@
 package ies.tracktails.animalservice.controllers;
 
 import ies.tracktails.animalsDataCore.entities.Animal;
-import ies.tracktails.animalservice.services.AnimalService;
+import ies.tracktails.animalsDataCore.services.AnimalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
