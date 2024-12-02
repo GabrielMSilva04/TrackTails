@@ -1,6 +1,5 @@
 package ies.tracktails.animalservice.entities;
 
-import ies.tracktails.animalservice.dtos.FenceDTO;
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -50,21 +49,6 @@ public class Fence {
 
     // Default constructor
     public Fence() {}
-
-    // Constructor from DTO
-    public Fence(FenceDTO fenceDTO) {
-        this.animalId = fenceDTO.getAnimalId();
-        this.point1Latitude = fenceDTO.getPoint1Latitude();
-        this.point1Longitude = fenceDTO.getPoint1Longitude();
-        this.point2Latitude = fenceDTO.getPoint2Latitude();
-        this.point2Longitude = fenceDTO.getPoint2Longitude();
-        this.point3Latitude = fenceDTO.getPoint3Latitude();
-        this.point3Longitude = fenceDTO.getPoint3Longitude();
-        this.point4Latitude = fenceDTO.getPoint4Latitude();
-        this.point4Longitude = fenceDTO.getPoint4Longitude();
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
-    }
 
     // Getters and Setters
     public Long getId() {
