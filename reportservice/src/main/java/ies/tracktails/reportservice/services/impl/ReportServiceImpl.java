@@ -111,29 +111,30 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private List<AnimalDataDTO> consolidateData(List<AnimalDataDTO>... dataLists) {
-        Map<Instant, AnimalDataDTO> consolidatedMap = new TreeMap<>();
+        Map<Instant, AnimalDataDTO> consolidatedMap = new HashMap<>();
 
         for (List<AnimalDataDTO> dataList : dataLists) {
             for (AnimalDataDTO data : dataList) {
                 if (data.getTimestamp().isPresent()) {
                     Instant timestamp = data.getTimestamp().get();
+                    AnimalDataDTO existingData = consolidatedMap.getOrDefault(timestamp, new AnimalDataDTO(data.getAnimalId()));
 
-                    AnimalDataDTO existingData = consolidatedMap.getOrDefault(
-                            timestamp, new AnimalDataDTO(data.getAnimalId())
-                    );
-
-                    existingData.setTimestamp(timestamp);
-
-                    data.getWeight().ifPresent(existingData::setWeight);
-                    data.getHeight().ifPresent(existingData::setHeight);
-                    data.getHeartRate().ifPresent(existingData::setHeartRate);
-                    data.getBreathRate().ifPresent(existingData::setBreathRate);
+                    data.getTimestamp().ifPresent(existingData::setTimestamp);
+                    data.getWeight().ifPresent(weight -> existingData.setWeight(round(weight)));
+                    data.getHeight().ifPresent(height -> existingData.setHeight(round(height)));
+                    data.getHeartRate().ifPresent(heartRate -> existingData.setHeartRate(round(heartRate)));
+                    data.getBreathRate().ifPresent(breathRate -> existingData.setBreathRate(round(breathRate)));
 
                     consolidatedMap.put(timestamp, existingData);
                 }
             }
         }
+
         return new ArrayList<>(consolidatedMap.values());
+    }
+
+    private Double round(Double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 
 
