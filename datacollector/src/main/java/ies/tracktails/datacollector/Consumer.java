@@ -23,6 +23,10 @@ public class Consumer {
 
         Animal animal = animalService.getAnimalByDeviceId(Long.parseLong(data.getDeviceId()));
 
+        if (animal == null) {
+            return null;
+        }
+
         animalDataDTO.setAnimalId(animal.getId().toString());
 
         data.getLatitude().ifPresent(latitude -> animalDataDTO.setLatitude(latitude));
