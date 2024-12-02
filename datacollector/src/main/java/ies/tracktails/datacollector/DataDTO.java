@@ -1,9 +1,12 @@
 package ies.tracktails.datacollector;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Optional;
 
 public class DataDTO {
 
+    @JsonProperty("device_id")
     private String device_id;
     private Optional<Double> latitude;
     private Optional<Double> longitude;
@@ -12,7 +15,6 @@ public class DataDTO {
     private Optional<Double> respiratory_rate;
 
     public DataDTO() {
-        device_id = "";
         latitude = Optional.empty();
         longitude = Optional.empty();
         speed = Optional.empty();

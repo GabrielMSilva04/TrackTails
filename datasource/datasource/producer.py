@@ -196,10 +196,11 @@ def main(device_id):
                 'longitude': last_location['longitude'],
             }
 
-            print(data)
+
 
             send_to_kafka(producer, topic, json.dumps(data))
             tracking_data.append(data)
+
             time.sleep(update_interval)
 
     except KeyboardInterrupt:

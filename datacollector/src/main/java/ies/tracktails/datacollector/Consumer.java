@@ -17,6 +17,7 @@ public class Consumer {
         AnimalDataDTO animalDataDTO = new AnimalDataDTO();
         animalDataDTO.setAnimalId(data.getDeviceId());
 
+
         data.getLatitude().ifPresent(latitude -> animalDataDTO.setLatitude(latitude));
         data.getLongitude().ifPresent(longitude -> animalDataDTO.setLongitude(longitude));
         data.getSpeed().ifPresent(speed -> animalDataDTO.setSpeed(speed));
@@ -29,6 +30,7 @@ public class Consumer {
     @KafkaListener(topics = "animal_tracking_topic", groupId = "kafka-listener-group")
     public void listen(DataDTO data) {
         try {
+            System.out.println(data.getDeviceId());
             System.out.println("Received message: " + data.toString());
             AnimalDataDTO animalDataDTO = convertToAnimalDataDTO(data);
             animalDataService.writeAnimalData(animalDataDTO);
