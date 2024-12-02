@@ -31,7 +31,6 @@ public class ReportController {
             @RequestParam(defaultValue = "15m") String interval,
             @RequestBody Report report) {
 
-        // Call the service method to create the report
         Report savedReport = reportService.createReport(
                 report.getAnimalId(),
                 report.getFileName(),

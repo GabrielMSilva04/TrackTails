@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.itextpdf.html2pdf.HtmlConverter;
 
-
 import java.time.Instant;
 import java.util.List;
 import java.util.ArrayList;
@@ -48,14 +47,12 @@ public class ReportServiceImpl implements ReportService {
             List<AnimalDataDTO> breathRateData = animalDataService.getRangeValues(
                     animalId.toString(), "breathRate", start, end, interval, "mean");
 
-            // Combine data into a consolidated list
             List<AnimalDataDTO> consolidatedData = consolidateData(
                     weightData, heightData, heartRateData, breathRateData);
 
             // Generate the PDF
             byte[] pdfBytes = generatePdfFromTemplate(animalId, consolidatedData);
 
-            // Save the report
             Report report = new Report();
             report.setAnimalId(animalId);
             report.setFileName(fileName);
@@ -77,10 +74,9 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private byte[] generatePdfFromTemplate(Long animalId, List<AnimalDataDTO> historicalData) throws Exception {
-        // Load the HTML template
         String htmlTemplate = loadHtmlTemplate();
 
-        // Replace placeholders with actual data
+        // Replace placeholders with data
         String populatedHtml = populateTemplate(htmlTemplate, animalId, historicalData);
 
         // Convert the populated HTML to PDF
@@ -97,17 +93,14 @@ public class ReportServiceImpl implements ReportService {
                 .replace("{{animalId}}", animalId.toString())
                 .replace("{{generatedAt}}", Instant.now().toString());
 
-        // Replace dynamic historical data
         StringBuilder historicalDataHtml = new StringBuilder();
-        System.out.println("SSTESTSS");
         for (AnimalDataDTO data : historicalData) {
-            System.out.println(data.getTimestamp());
             historicalDataHtml.append("<tr>")
                     .append("<td>").append(data.getTimestamp().map(Instant::toString).orElse("N/A")).append("</td>")
-                    .append("<td>").append(data.getWeight().orElse(null)).append("</td>") // Return null if missing
-                    .append("<td>").append(data.getHeight().orElse(null)).append("</td>") // Return null if missing
-                    .append("<td>").append(data.getHeartRate().orElse(null)).append("</td>") // Return null if missing
-                    .append("<td>").append(data.getBreathRate().orElse(null)).append("</td>") // Return null if missing
+                    .append("<td>").append(data.getWeight().orElse(null)).append("</td>")
+                    .append("<td>").append(data.getHeight().orElse(null)).append("</td>")
+                    .append("<td>").append(data.getHeartRate().orElse(null)).append("</td>")
+                    .append("<td>").append(data.getBreathRate().orElse(null)).append("</td>")
                     .append("</tr>");
         }
 
@@ -118,36 +111,28 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private List<AnimalDataDTO> consolidateData(List<AnimalDataDTO>... dataLists) {
-        // Use a TreeMap to keep entries sorted by timestamp
         Map<Instant, AnimalDataDTO> consolidatedMap = new TreeMap<>();
 
         for (List<AnimalDataDTO> dataList : dataLists) {
             for (AnimalDataDTO data : dataList) {
-                // Ensure timestamp is present
                 if (data.getTimestamp().isPresent()) {
                     Instant timestamp = data.getTimestamp().get();
 
-                    // Get existing data for the timestamp or create a new instance
                     AnimalDataDTO existingData = consolidatedMap.getOrDefault(
                             timestamp, new AnimalDataDTO(data.getAnimalId())
                     );
 
-                    // Set timestamp explicitly
                     existingData.setTimestamp(timestamp);
 
-                    // Merge fields if present
                     data.getWeight().ifPresent(existingData::setWeight);
                     data.getHeight().ifPresent(existingData::setHeight);
                     data.getHeartRate().ifPresent(existingData::setHeartRate);
                     data.getBreathRate().ifPresent(existingData::setBreathRate);
 
-                    // Update the map with consolidated data
                     consolidatedMap.put(timestamp, existingData);
                 }
             }
         }
-
-        // Convert the map values to a list and return
         return new ArrayList<>(consolidatedMap.values());
     }
 
