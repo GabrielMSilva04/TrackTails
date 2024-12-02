@@ -2,13 +2,15 @@
 FROM maven:3.8.5-openjdk-17 AS builder
 
 # Set the working directory in the container
-WORKDIR /app/datacollector
+
 
 # Uncomment this line if you are using AnimalDataCore as a dependency
-#COPY AnimalsDataCore /app/AnimalsDataCore
-#WORKDIR /app/AnimalsDataCore
-#RUN mvn dependency:go-offline -B
-#RUN mvn clean install
+COPY AnimalsDataCore /app/AnimalsDataCore
+WORKDIR /app/AnimalsDataCore
+RUN mvn dependency:go-offline -B
+RUN mvn clean install
+
+WORKDIR /app/datacollector
 
 COPY datacollector/pom.xml /app/datacollector/pom.xml
 RUN mvn dependency:go-offline -B
@@ -20,6 +22,8 @@ FROM openjdk:17-jdk-slim
 
 # Set the working directory in the container
 WORKDIR /app
+
+
 
 # Copy the packaged application from the builder stage
 COPY --from=builder /app/datacollector/target/*.jar app.jar
