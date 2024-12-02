@@ -4,7 +4,6 @@ FROM maven:3.8.5-openjdk-17 AS builder
 WORKDIR /app/userservice
 COPY userservice/pom.xml /app/userservice/pom.xml
 RUN mvn dependency:go-offline -B
-COPY userservice/src /app/userservice/src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the application

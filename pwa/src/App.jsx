@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react'
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
+import { useState } from 'react'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
 import Profile from './pages/Profile'
@@ -14,19 +14,19 @@ import RegisterPet from "./pages/RegisterPet.jsx";
 import EditPet from "./pages/EditPet.jsx";
 import HistoricalAnimalsData from './pages/HistoricalAnimalsData'
 import Finders from './pages/Finders'
-import {checkToken} from "./utils.js";
+
 import './App.css'
 import Notifications from "./pages/Notifications.jsx";
 import { AnimalProvider } from './contexts/AnimalContext';
 import { useNavigate } from 'react-router-dom'
 
-const ProtectedRoute = ({ loggedIn, children }) => {
-    return loggedIn ? children : <Navigate to="/login" />;
-};
+function App() {
+  const [selectedAnimal, setSelectedAnimal] = useState('')
+  const [selectedMetric, setSelectedMetric] = useState('')
 
-export default function App() {
-    const [loggedUser, setLoggedUser] = useState(false);
-    const [loading, setLoading] = useState(true);
+  const handleSelectAnimal = (animal) => {
+    setSelectedAnimal(animal)
+  }
 
     useEffect(() => {
         if ( checkToken() ) {
@@ -127,3 +127,6 @@ function AppRoutes() {
         </AnimalProvider>
     );
 }
+
+export default App;
+

@@ -1,11 +1,10 @@
 FROM maven:3.8.5-openjdk-17 AS builder
 
+WORKDIR /app
+
+COPY gateway /app/gateway
 WORKDIR /app/gateway
-
-COPY gateway/pom.xml /app/gateway/pom.xml
 RUN mvn dependency:go-offline -B
-
-COPY gateway/src /app/gateway/src
 RUN mvn clean package -DskipTests
 
 

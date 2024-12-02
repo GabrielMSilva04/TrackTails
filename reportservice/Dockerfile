@@ -11,7 +11,6 @@ RUN mvn clean install
 WORKDIR /app/reportservice
 COPY reportservice/pom.xml /app/reportservice/pom.xml
 RUN mvn dependency:go-offline -B
-COPY reportservice/src /app/reportservice/src
 RUN mvn clean package -DskipTests
 
 FROM openjdk:17-jdk-slim

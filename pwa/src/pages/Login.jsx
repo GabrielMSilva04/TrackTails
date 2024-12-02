@@ -1,13 +1,7 @@
 import {InputField} from "../components/InputField.jsx";
 import {useForm} from "react-hook-form";
-import axios from "axios";
-import {useNavigate} from "react-router-dom";
-
-const base_url = "http://localhost/api/v1";
-const login_url = `${base_url}/users/login`;
 
 export default function Login() {
-    const navigate = useNavigate();
     const {
         register,
         handleSubmit,

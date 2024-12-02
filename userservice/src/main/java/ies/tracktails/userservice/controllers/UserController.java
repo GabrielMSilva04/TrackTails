@@ -8,7 +8,6 @@ import ies.tracktails.userservice.entities.User;
 import ies.tracktails.userservice.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -28,45 +26,6 @@ public class UserController {
     JwtTokenProvider jwtTokenProvider;
     public UserController(UserService userService) {
         this.userService = userService;
-    }
-
-    @GetMapping("/user_id")
-    public ResponseEntity<String> getUser(@RequestHeader("X-User-Id") String userId) {
-        return ResponseEntity.ok("User ID: " + userId);
-    }
-
-    @Operation(summary = "Get current user")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User retrieved", content = @Content(schema = @Schema(implementation = User.class))),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid token");
-        }
-
-        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-
-        try {
-            // Validate token
-            if (!jwtTokenProvider.validateToken(token)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
-            }
-
-            // Extract user ID
-            Long userId = jwtTokenProvider.getUserIdFromToken(token);
-
-            // Fetch user details
-            User user = userService.getUserById(userId);
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-            }
-
-            return ResponseEntity.ok(user);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: " + e.getMessage());
-        }
     }
 
     @Operation(summary = "Register user")
