@@ -73,6 +73,34 @@ def simulate_heart_rate(estado, current_speed):
 
     return round(final_bpm, 1)
 
+def simulate_respiratory_rate(estado, current_speed, bpm):
+    base_respirations = 12
+
+
+    respiratory_multipliers = {
+        "adormir": 0.8,
+        "adescansar": 1.0,
+        "acorrer": 2.0
+    }
+
+
+    multiplier = respiratory_multipliers.get(estado, 1.0)
+    speed_factor = current_speed / 25
+    bpm_factor = (bpm - 60) / 70
+
+    variation = random.uniform(-0.05, 0.05)
+    final_rate = (
+            base_respirations *
+            multiplier *
+            (1 + speed_factor * 0.5) *
+            (1 + bpm_factor * 0.3) *
+            (1 + variation)
+    )
+
+    final_rate = min(final_rate, 50)
+
+    return round(final_rate, 1)
+
 def simulate_location(last_location, current_speed, update_interval, estado):
     if last_location is None:
         return {
@@ -157,19 +185,22 @@ def main(device_id):
             bpm = simulate_heart_rate(last_state, current_speed)
             last_location = simulate_location(last_location, current_speed, update_interval, last_state)
 
+            respiratory_rate = simulate_respiratory_rate(last_state, current_speed, bpm)
+
             data = {
-                'timestamp': time.time(),
                 'device_id': device_id,
-                'state': last_state,
                 'speed': current_speed,
                 'bpm': bpm,
-                'location': last_location
+                'respiratory_rate': respiratory_rate,
+                'latitude': last_location['latitude'],
+                'longitude': last_location['longitude'],
             }
 
-            print(data)
+
 
             send_to_kafka(producer, topic, json.dumps(data))
             tracking_data.append(data)
+
             time.sleep(update_interval)
 
     except KeyboardInterrupt:
