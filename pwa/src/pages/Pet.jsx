@@ -116,7 +116,7 @@ export default function Pet({ onMetricSelect }) {
     const stats = [
         { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, trigger: (() => onMetricSelect("heartRate")), image: null },
         { icon: null, label: "Sleep", value: "Sleep", trigger: (() => null), image: sleepLogo},
-        { icon: faGauge, label: "Speed", value: `${latestData.speed} HM/H`, trigger: (() => onMetricSelect("speed")), image: null },
+        { icon: faGauge, label: "Speed", value: `${latestData.speed} KM/H`, trigger: (() => onMetricSelect("speed")), image: null },
         { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, trigger: (() => onMetricSelect("breathRate")), image: null },
         { icon: faMapLocationDot, label: "Location", value: "Location", trigger: (() => null), image: null },
         { icon: faSyringe, label: "Vaccines", value: "Vaccines", trigger: (() => null), image: null },
@@ -135,8 +135,13 @@ export default function Pet({ onMetricSelect }) {
                     .join(", ")}
             </div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                <button onClick={() => onMetricSelect("weight")}>Last Weight: {latestData.weight} kg</button>
-                , <button onClick={() => onMetricSelect("weight")}>Last Height: {latestData.height} cm</button>
+                {latestData.weight !== "Unknown" && (
+                    <button onClick={() => onMetricSelect("weight")}>Last Weight: {latestData.weight} kg</button>
+                )}
+                {latestData.weight !== "Unknown" && latestData.height !== "Unknown" && ", "}
+                {latestData.height !== "Unknown" && (
+                    <button onClick={() => onMetricSelect("height")}>Last Height: {latestData.height} cm</button>
+                )}
             </div>
             <div className="mt-2 text-center">
                 {latestData.batteryPercentage !== "Unknown" && (

@@ -25,7 +25,13 @@ export default function EditPet() {
     useEffect(() => {
         if (selectedAnimal) {
             Object.keys(selectedAnimal).forEach((key) => {
-                setValue(key, selectedAnimal[key]);
+                if (key === "birthday" && selectedAnimal[key]) {
+                    const date = new Date(selectedAnimal[key]);
+                    const formattedDate = date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+                    setValue("birthday", formattedDate);
+                } else {
+                    setValue(key, selectedAnimal[key]);
+                }
             });
 
             // Fetch latest animal data (weight, height, etc.)
@@ -43,9 +49,6 @@ export default function EditPet() {
                     const data = animalDataResponse.data;
                     setAnimalData(data);
 
-                    // Set weight and height fields
-                    setValue("weight", data.weight || "");
-                    setValue("height", data.height || "");
                 } catch (error) {
                     console.error("Error fetching animal data:", error);
                 }
@@ -197,7 +200,7 @@ export default function EditPet() {
                             label="Breed"
                             name="breed"
                             type="text"
-                            placeholder="Enter the breed"
+                            placeholder="Breed"
                             register={register}
                             required={false}
                             error={errors.breed && errors.breed.message}
@@ -215,9 +218,9 @@ export default function EditPet() {
                                     message: "Species is required",
                                 }}
                                 options={[
-                                    { value: "", label: "Select a species" },
-                                    { value: "dog", label: "Dog" },
-                                    { value: "cat", label: "Cat" },
+                                    {value: "", label: "Select a species"},
+                                    {value: "dog", label: "Dog"},
+                                    {value: "cat", label: "Cat"},
                                 ]}
                                 error={errors.species && errors.species.message}
                             />
@@ -230,34 +233,44 @@ export default function EditPet() {
                                 register={register}
                                 required={false}
                                 options={[
-                                    { value: "", label: "Select the sex" },
-                                    { value: "male", label: "Male" },
-                                    { value: "female", label: "Female" },
+                                    {value: "\u0000", label: "Select the sex"},
+                                    {value: "m", label: "Male"},
+                                    {value: "f", label: "Female"},
                                 ]}
                                 error={errors.sex && errors.sex.message}
                             />
                         </div>
 
                         <div className="flex gap-2">
-                            <InputField
-                                label="Weight (kg)"
-                                name="weight"
-                                type="number"
-                                placeholder={animalData.weight || "Enter the weight"}
-                                register={register}
-                                required={false}
-                                error={errors.weight && errors.weight.message}
-                            />
+                            <div className="flex flex-col w-full">
+                                <InputField
+                                    label="Weight (kg)"
+                                    name="weight"
+                                    type="number"
+                                    placeholder="Weight (kg)"
+                                    register={register}
+                                    required={false}
+                                    error={errors.weight && errors.weight.message}
+                                />
+                                <span className="text-xs text-gray-500 mt-1">
+            {animalData.weight ? `Last: ${animalData.weight} kg` : "No measurements"}
+        </span>
+                            </div>
 
-                            <InputField
-                                label="Height (cm)"
-                                name="height"
-                                type="number"
-                                placeholder={animalData.height || "Enter the height"}
-                                register={register}
-                                required={false}
-                                error={errors.height && errors.height.message}
-                            />
+                            <div className="flex flex-col w-full">
+                                <InputField
+                                    label="Height (cm)"
+                                    name="height"
+                                    type="number"
+                                    placeholder="Height (cm)"
+                                    register={register}
+                                    required={false}
+                                    error={errors.height && errors.height.message}
+                                />
+                                <span className="text-xs text-gray-500 mt-1">
+            {animalData.height ? `Last: ${animalData.height} cm` : "No measurements"}
+        </span>
+                            </div>
                         </div>
 
                         <InputField
