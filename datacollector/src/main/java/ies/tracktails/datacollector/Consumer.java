@@ -6,18 +6,12 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
 import ies.tracktails.animalsDataCore.services.AnimalDataService;
-import java.util.Optional;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.influxdb.client.domain.WritePrecision;
 
 @Service
 public class Consumer {
 
     @Autowired
     private AnimalDataService animalDataService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     public AnimalDataDTO convertToAnimalDataDTO(DataDTO data) {
         AnimalDataDTO animalDataDTO = new AnimalDataDTO();
@@ -33,9 +27,9 @@ public class Consumer {
     }
 
     @KafkaListener(topics = "animal_tracking_topic", groupId = "kafka-listener-group")
-    public void listen(String message) {
+    public void listen(DataDTO data) {
         try {
-            DataDTO data = objectMapper.readValue(message, DataDTO.class);
+            System.out.println("Received message: " + data.toString());
             AnimalDataDTO animalDataDTO = convertToAnimalDataDTO(data);
             animalDataService.writeAnimalData(animalDataDTO);
         } catch (Exception e) {
