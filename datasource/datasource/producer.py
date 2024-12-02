@@ -194,7 +194,6 @@ def main(device_id):
                 'respiratory_rate': respiratory_rate,
                 'latitude': last_location['latitude'],
                 'longitude': last_location['longitude'],
-
             }
 
             print(data)

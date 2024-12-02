@@ -4,7 +4,7 @@ import java.util.Optional;
 
 public class DataDTO {
 
-    private String deviceId;
+    private String device_id;
     private Optional<Double> latitude;
     private Optional<Double> longitude;
     private Optional<Double> speed;
@@ -12,6 +12,7 @@ public class DataDTO {
     private Optional<Double> respiratory_rate;
 
     public DataDTO() {
+        device_id = "";
         latitude = Optional.empty();
         longitude = Optional.empty();
         speed = Optional.empty();
@@ -19,8 +20,8 @@ public class DataDTO {
         respiratory_rate = Optional.empty();
     }
 
-    public DataDTO(String deviceId, Optional<Double> latitude, Optional<Double> longitude, Optional<Double> speed, Optional<Double> bpm, Optional<Double> respiratory_rate) {
-        this.deviceId = deviceId;
+    public DataDTO(String device_id, Optional<Double> latitude, Optional<Double> longitude, Optional<Double> speed, Optional<Double> bpm, Optional<Double> respiratory_rate) {
+        this.device_id = device_id;
         this.latitude = Optional.ofNullable(latitude.orElse(null));
         this.longitude = Optional.ofNullable(longitude.orElse(null));
         this.speed = Optional.ofNullable(speed.orElse(null));
@@ -32,7 +33,7 @@ public class DataDTO {
     @Override
     public String toString() {
         return "DataDTO{" +
-                "deviceId='" + deviceId + '\'' +
+                "device_id='" + device_id + '\'' +
                 ", speed=" + speed +
                 ", bpm=" + bpm +
                 ", respiratory_rate=" + respiratory_rate +
@@ -42,11 +43,11 @@ public class DataDTO {
     }
 
     public String getDeviceId() {
-        return deviceId;
+        return device_id;
     }
 
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
+    public void setDeviceId(String device_id) {
+        this.device_id = device_id;
     }
 
     public Optional<Double> getLatitude() {
