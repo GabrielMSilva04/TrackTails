@@ -92,6 +92,7 @@ export default function RegisterPet() {
             console.log('Animal data saved successfully:', animalDataResponse.data);
 
             alert('Pet, image, and data registered successfully!');
+            window.location.href = '/mypets';
         } catch (error) {
             console.error('Error registering pet, uploading image, or saving data:', error.response?.data || error.message);
             if (error.response?.data?.message) {

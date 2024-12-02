@@ -125,7 +125,7 @@ export default function EditPet() {
             }
 
             alert("Pet updated successfully!");
-            navigate(`/mypets`);
+            window.location.href = "/mypets";
         } catch (error) {
             console.error("Error updating pet or saving data:", error.response?.data || error.message);
             if (error.response?.data?.message) {

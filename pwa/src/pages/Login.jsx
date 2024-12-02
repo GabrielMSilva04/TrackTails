@@ -30,7 +30,7 @@ export default function Login() {
 
             console.log("Token:", token);
 
-            navigate("/mypets");
+            window.location.href = "/mypets";
         } catch (error) {
             console.error("Login Error:", error);
             alert("Login failed. Please try again.");
