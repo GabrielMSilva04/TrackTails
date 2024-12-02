@@ -1,13 +1,17 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import NavBar from "./Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAnimalContext } from "../contexts/AnimalContext";
+import axios from "axios";
+
+const baseUrl = "http://localhost/api/v1";
 
 export default function LayoutAnimal({ showButtons = "all" }) {
-    const { selectedAnimal } = useAnimalContext();
+    const { selectedAnimal, setSelectedAnimal } = useAnimalContext();
+    const navigate = useNavigate();
 
     LayoutAnimal.propTypes = {
         showButtons: PropTypes.oneOf(["all", "back-only", "none"])
@@ -24,6 +28,34 @@ export default function LayoutAnimal({ showButtons = "all" }) {
     useEffect(() => {
         console.log("Selected animal in LayoutAnimal:", selectedAnimal);
     }, [selectedAnimal]);
+
+    // Function to delete the animal
+    const handleDelete = async () => {
+        const confirmDelete = window.confirm(
+            `Are you sure you want to delete ${selectedAnimal.name}? This action cannot be undone.`
+        );
+
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+            const response = await axios.delete(`${baseUrl}/animals/${selectedAnimal.id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                },
+            });
+            alert("Animal deleted successfully.");
+            console.log("Delete response:", response.data);
+
+            // Clear selectedAnimal and navigate back to mypets
+            setSelectedAnimal(null);
+            navigate("/mypets");
+        } catch (error) {
+            console.error("Error deleting animal:", error);
+            alert("Failed to delete the animal. Please try again.");
+        }
+    };
 
     return (
         <div className="bg-primary h-screen flex flex-col overflow-hidden">
@@ -43,7 +75,10 @@ export default function LayoutAnimal({ showButtons = "all" }) {
             <div className="h-full pt-20">
                 <div className="bg-base-100 w-full h-full rounded-t-3xl flex flex-col pb-36 items-center">
                     {showButtons === "all" && (
-                        <button className="text-lg text-red-700 border rounded-full border-red-700 w-7 h-7 m-2 ml-auto z-20">
+                        <button
+                            className="text-lg text-red-700 border rounded-full border-red-700 w-7 h-7 m-2 ml-auto z-20"
+                            onClick={handleDelete}
+                        >
                             <FontAwesomeIcon icon={faTrash} />
                         </button>
                     )}
