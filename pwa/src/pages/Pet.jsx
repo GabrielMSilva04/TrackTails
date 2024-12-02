@@ -133,8 +133,7 @@ export default function Pet({ onMetricSelect }) {
                     .join(", ")}
             </div>
             <div className="mt-2 text-secondary font-bold text-xs text-center">
-                {latestData.weight !== "Unknown" && `Last Weight: ${latestData.weight} kg`}
-                {latestData.height !== "Unknown" && `, Last Height: ${latestData.height} cm`}
+                <button onClick={()=>onMetricSelect("weight")}>Last Weight: {latestData.weight} kg</button>, <button onClick={()=>onMetricSelect("weight")}>Last Height: {latestData.height} cm</button>
             </div>
             <div className="flex flex-wrap justify-between px-4 mt-4 gap-4">
                 {stats.map((stat, index) => (

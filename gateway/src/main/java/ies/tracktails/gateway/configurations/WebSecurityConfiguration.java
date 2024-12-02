@@ -54,7 +54,8 @@ public class WebSecurityConfiguration {
             .pathMatchers(
                 "/api/v1/users/login",
 				"/api/v1/users/register",
-                "/api/v1/reports/**"
+                "/api/v1/reports/**",
+				"/api/v1/finders/**"
             ).permitAll()
             // Regras autenticadas
             .pathMatchers("/api/v1/**").authenticated()

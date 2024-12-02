@@ -1,4 +1,4 @@
-package ies.tracktails.animalservice.services;
+package ies.tracktails.animalsDataCore.services;
 
 import ies.tracktails.animalsDataCore.entities.Animal;
 import java.util.List;
@@ -11,4 +11,5 @@ public interface AnimalService {
     public Animal getAnimalByName(String name);
     public List<Animal> getAllAnimals();
     public List<Animal> getAnimalsByUserId(Long userId);
+    public Animal getAnimalByDeviceId(Long deviceId);
 }

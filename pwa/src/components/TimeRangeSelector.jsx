@@ -30,7 +30,7 @@ const CustomTimeRangeDropdown = ({ onSelect, isActive }) => {
       if (new Date(startDate) > new Date(endDate)) {
         return;
       }
-      onSelect(`${startDate}-${endDate}`);
+      onSelect(`${startDate} - ${endDate}`);
     }
   };
 
