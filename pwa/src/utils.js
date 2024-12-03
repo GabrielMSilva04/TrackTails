@@ -1,3 +1,11 @@
+export function checkToken() {
+	const token = localStorage.getItem("authToken");
+	if (!token || token === "undefined") {
+		return false;
+	}
+	return true;
+}
+
 export function range2(start, end, step) {
 	// if only one argument is provided, the function will use it as the end value
 	if (end === undefined) {

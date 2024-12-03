@@ -1,5 +1,10 @@
 import {InputField} from "../components/InputField.jsx";
 import {useForm} from "react-hook-form";
+import axios from "axios";
+
+const base_url = "http://localhost/api/v1";
+const register_url = `${base_url}/users/register`;
+const login_url = `${base_url}/users/login`;
 
 export default function Register() {
     const {
