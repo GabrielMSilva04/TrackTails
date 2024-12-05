@@ -4,8 +4,7 @@ import ChartComponent from "../components/Chart";
 import TimeRangeSelector from "../components/TimeRangeSelector"
 import axios from "axios";
 import { useAnimalContext } from "../contexts/AnimalContext";
-
-const base_url = "http://localhost/api/v1";
+import { baseUrl } from "../consts";
 
 function convertToInfluxDBFormat(inputDatetime) {
   const date = new Date(inputDatetime);
@@ -210,11 +209,11 @@ const HistoricalAnimalsData = ({ metric }) => {
     const colors = [["#4d7c0f", "rgba(54, 83, 20, 1)"], ["#f6ad55", "#f6ad55"], ["#80C4E9", "#80C4E9"], ["#f3722c", "#f3722c"], ["#f94144", "#f94144"]];
     let color_index = 0;
 
-    let endpoints = [`${base_url}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${customInterval}`];
+    let endpoints = [`${baseUrl}/animaldata/historic/${animal}/${metric}?start=-${range_api_map[range]}&interval=${customInterval}`];
     if (range === "MAX") {
-      endpoints[0] = `${base_url}/animaldata/historic/${animal}/${metric}?&interval=${customInterval}`;
+      endpoints[0] = `${baseUrl}/animaldata/historic/${animal}/${metric}?&interval=${customInterval}`;
     } else if (customRange) {
-      endpoints[0] = `${base_url}/animaldata/historic/${animal}/${metric}?start=${convertToInfluxDBFormat(customRangeStart)}&end=${convertToInfluxDBFormat(customRangeEnd)}&interval=${customInterval}`;
+      endpoints[0] = `${baseUrl}/animaldata/historic/${animal}/${metric}?start=${convertToInfluxDBFormat(customRangeStart)}&end=${convertToInfluxDBFormat(customRangeEnd)}&interval=${customInterval}`;
     }
 
     const aggregations = ["mean", "min", "max"];

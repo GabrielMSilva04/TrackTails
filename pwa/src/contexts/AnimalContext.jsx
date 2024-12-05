@@ -1,9 +1,8 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { baseUrl } from '../consts';
 
 const AnimalContext = createContext();
-
-const base_url = "http://localhost/api/v1";
 
 export const AnimalProvider = ({ children }) => {
     const [animals, setAnimals] = useState([]);
@@ -13,7 +12,7 @@ export const AnimalProvider = ({ children }) => {
     useEffect(() => {
         const fetchAnimals = async () => {
             try {
-                const response = await axios.get(`${base_url}/animals`, {
+                const response = await axios.get(`${baseUrl}/animals`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                     },
@@ -41,7 +40,7 @@ export const AnimalProvider = ({ children }) => {
     // Fetch image for a single pet by ID
     const fetchImageUrl = async (petId, token) => {
         try {
-            const response = await axios.get(`${base_url}/animals/${petId}/image`, {
+            const response = await axios.get(`${baseUrl}/animals/${petId}/image`, {
                 headers: { Authorization: `Bearer ${token}` },
                 responseType: 'blob',
             });

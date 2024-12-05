@@ -6,8 +6,7 @@ import { PiBoundingBoxFill } from "react-icons/pi";
 import { useAnimalContext } from '../contexts/AnimalContext';
 import Map from './Map';
 import axios from 'axios';
-
-const base_url = "http://localhost/api/v1";
+import { baseUrl } from '../consts';
 
 export default function LayoutMapDetails() {
     const { selectedAnimal } = useAnimalContext();
@@ -47,7 +46,7 @@ export default function LayoutMapDetails() {
 
                 // Fetch latitude, longitude, and battery data
                 const [latitudeResponse, longitudeResponse, latestResponse] = await Promise.all([
-                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.id}/latitude`, {
+                    axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/latitude`, {
                         params: {
                             start: "-1d",
                             end: "now()",
@@ -56,7 +55,7 @@ export default function LayoutMapDetails() {
                         },
                         headers,
                     }),
-                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.id}/longitude`, {
+                    axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/longitude`, {
                         params: {
                             start: "-1d",
                             end: "now()",
@@ -65,7 +64,7 @@ export default function LayoutMapDetails() {
                         },
                         headers,
                     }),
-                    axios.get(`${base_url}/animaldata/latest/${selectedAnimal.id}`, {
+                    axios.get(`${baseUrl}/animaldata/latest/${selectedAnimal.id}`, {
                         headers,
                     }),
                 ]);

@@ -6,8 +6,7 @@ import PropTypes from "prop-types";
 import { useEffect } from "react";
 import { useAnimalContext } from "../contexts/AnimalContext";
 import axios from "axios";
-
-const baseUrl = "http://localhost/api/v1";
+import { baseUrl } from "../consts";
 
 export default function LayoutAnimal({ showButtons = "all" }) {
     const { selectedAnimal, setSelectedAnimal } = useAnimalContext();

@@ -3,8 +3,8 @@ import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState } from "react";
 import NotificationComponent from "../components/NotificationComponent";
 import axios from "axios";
+import { baseUrl } from "../consts";
 
-const baseUrl = "http://localhost/api/v1";
 const notificationsBaseUrl = `${baseUrl}/notifications`;
 const animalsBaseUrl = `${baseUrl}/animals`;
 

@@ -5,8 +5,7 @@ import L from 'leaflet';
 import pin from '../assets/pin.png';
 import axios from 'axios';
 import { useWebSocket } from '../useWebSocket';
-
-const base_url = 'http://localhost/api/v1';
+import { baseUrl } from '../consts';
 
 function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
     const [myPetsData, setMyPetsData] = useState([]);
@@ -26,7 +25,7 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
                 const updatedAnimals = await Promise.all(
                     animals.map(async (animal) => {
                         const response = await axios.get(
-                            `${base_url}/animaldata/latest/${animal.id}`,
+                            `${baseUrl}/animaldata/latest/${animal.id}`,
                             { headers }
                         );
                       

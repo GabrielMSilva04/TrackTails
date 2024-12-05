@@ -4,8 +4,7 @@ import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import axios from 'axios';
-
-const base_url = "http://localhost/api/v1";
+import { baseUrl } from '../consts';
 
 export default function Profile() {
     const [pets, setPets] = useState([]);
@@ -25,7 +24,7 @@ export default function Profile() {
                 return;
             }
             try {
-                const response = await axios.get(`${base_url}/users/me`, {
+                const response = await axios.get(`${baseUrl}/users/me`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -53,7 +52,7 @@ export default function Profile() {
                 return;
             }
             try {
-                const response = await axios.get(`${base_url}/animals`, {
+                const response = await axios.get(`${baseUrl}/animals`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -94,7 +93,7 @@ export default function Profile() {
         console.log(formData);
 
         try {
-            const response = await axios.put(`${base_url}/users/${userId}`, formData, {
+            const response = await axios.put(`${baseUrl}/users/${userId}`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
