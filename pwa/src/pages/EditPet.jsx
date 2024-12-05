@@ -4,8 +4,7 @@ import { InputField } from "../components/InputField.jsx";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAnimalContext } from "../contexts/AnimalContext";
-
-const base_url = "http://localhost/api/v1";
+import { baseUrl } from "../consts";
 
 export default function EditPet() {
     const navigate = useNavigate();
@@ -39,7 +38,7 @@ export default function EditPet() {
                 try {
                     const token = localStorage.getItem("authToken");
                     const animalDataResponse = await axios.get(
-                        `${base_url}/animaldata/latest/${selectedAnimal.id}`,
+                        `${baseUrl}/animaldata/latest/${selectedAnimal.id}`,
                         {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -70,7 +69,7 @@ export default function EditPet() {
 
             // Update pet details
             await axios.put(
-                `${base_url}/animals/${selectedAnimal.id}`,
+                `${baseUrl}/animals/${selectedAnimal.id}`,
                 {
                     ...data,
                     weight: undefined,
@@ -91,7 +90,7 @@ export default function EditPet() {
                 timestamp: new Date().toISOString(),
             };
 
-            await axios.post(`${base_url}/animaldata`, updatedAnimalData, {
+            await axios.post(`${baseUrl}/animaldata`, updatedAnimalData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -113,7 +112,7 @@ export default function EditPet() {
                     const formData = new FormData();
                     formData.append("image", file);
 
-                    await axios.post(`${base_url}/animals/${selectedAnimal.id}/upload`, formData, {
+                    await axios.post(`${baseUrl}/animals/${selectedAnimal.id}/upload`, formData, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                             "Content-Type": "multipart/form-data",

@@ -2,8 +2,7 @@ import { InputField } from "../components/InputField.jsx";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-
-const base_url = "http://localhost/api/v1";
+import { baseUrl } from "../consts";
 
 export default function RegisterPet() {
     const {
@@ -40,7 +39,7 @@ export default function RegisterPet() {
 
             // Register pet (without image)
             const petResponse = await axios.post(
-                `${base_url}/animals`,
+                `${baseUrl}/animals`,
                 data,
                 {
                     headers: {
@@ -58,7 +57,7 @@ export default function RegisterPet() {
                 formData.append('image', file);
 
                 const uploadResponse = await axios.post(
-                    `${base_url}/animals/${savedPet.id}/upload`,
+                    `${baseUrl}/animals/${savedPet.id}/upload`,
                     formData,
                     {
                         headers: {
@@ -80,7 +79,7 @@ export default function RegisterPet() {
             };
 
             const animalDataResponse = await axios.post(
-                `${base_url}/animaldata`,
+                `${baseUrl}/animaldata`,
                 animalData,
                 {
                     headers: {

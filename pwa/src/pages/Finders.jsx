@@ -2,8 +2,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { baseUrl } from "../consts";
 
-const baseUrl = "http://localhost/api/v1";
 const usersBaseUrl = `${baseUrl}/finders/user`;
 const animalsBaseUrl = `${baseUrl}/finders/animal`;
 
