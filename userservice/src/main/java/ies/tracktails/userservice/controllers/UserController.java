@@ -74,7 +74,7 @@ public class UserController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "User registered", content = @Content(schema = @Schema(implementation = User.class))),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Bad request", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
         if (registerRequest.getDisplayName() == null || registerRequest.getDisplayName().isEmpty()) {
             return new ResponseEntity<>(new ErrorResponse("The field 'displayName' is mandatory.", HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
