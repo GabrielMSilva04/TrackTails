@@ -5,19 +5,11 @@ import { useAnimalContext } from '../contexts/AnimalContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
 import Navbar from "./Navbar.jsx";
-import axios from "axios";
-
-const base_url = "http://localhost/api/v1";
 
 function LayoutMap() {
-    const { animals, setSelectedAnimal } = useAnimalContext();
+    const { animals, setSelectedAnimal, loading } = useAnimalContext();
     const navigate = useNavigate();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-    // Conditional rendering to avoid passing empty animals to Map
-    // if (!animals || animals.length === 0) {
-    //     return <div>Loading animals...</div>;
-    // }
 
     const handleAnimalClick = (animal) => {
         setSelectedAnimal(animal);
@@ -69,7 +61,7 @@ function LayoutMap() {
                                     >
                                         <div>
                                             <img
-                                                src={animal.image ?? "https://placehold.co/100x100"}
+                                                src={animal.imageUrl ?? "https://placehold.co/100x100"}
                                                 alt={animal.name}
                                                 className="h-8 w-8 rounded-full"
                                             />

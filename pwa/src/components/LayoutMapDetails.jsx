@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faLightbulb, faRoute, faVolumeHigh } from "@fortawesome/free-solid-svg-icons";
 import { PiBoundingBoxFill } from "react-icons/pi";
-import { useAnimalContext } from '../contexts/AnimalContext'; // Import the context hook
+import { useAnimalContext } from '../contexts/AnimalContext';
 import Map from './Map';
 import axios from 'axios';
 
@@ -20,17 +20,26 @@ export default function LayoutMapDetails() {
     const [showFenceControls, setShowFenceControls] = useState(false);
     const [routeData, setRouteData] = useState([]);
 
+
     useEffect(() => {
-        if (!selectedAnimal || !selectedAnimal.latitude || !selectedAnimal.longitude) {
+        if (!selectedAnimal) {
             navigate("/map");
+            return;
         }
         console.log("Selected animal:", selectedAnimal);
+
+        if (!selectedAnimal.latitude || !selectedAnimal.longitude) {
+            console.log("Missing latitude/longitude data. Waiting...");
+        }
     }, [selectedAnimal, navigate]);
 
     useEffect(() => {
-        const fetchAnimalData = async () => {
-            if (!selectedAnimal) return;
+        if (!selectedAnimal || !selectedAnimal.id) {
+            console.log('No selected animal to fetch data for.');
+            return;
+        }
 
+        const fetchAnimalData = async () => {
             try {
                 const headers = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -38,7 +47,7 @@ export default function LayoutMapDetails() {
 
                 // Fetch latitude, longitude, and battery data
                 const [latitudeResponse, longitudeResponse, latestResponse] = await Promise.all([
-                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.animalId}/latitude`, {
+                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.id}/latitude`, {
                         params: {
                             start: "-1d",
                             end: "now()",
@@ -47,7 +56,7 @@ export default function LayoutMapDetails() {
                         },
                         headers,
                     }),
-                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.animalId}/longitude`, {
+                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.id}/longitude`, {
                         params: {
                             start: "-1d",
                             end: "now()",
@@ -56,7 +65,7 @@ export default function LayoutMapDetails() {
                         },
                         headers,
                     }),
-                    axios.get(`${base_url}/animaldata/latest/${selectedAnimal.animalId}`, {
+                    axios.get(`${base_url}/animaldata/latest/${selectedAnimal.id}`, {
                         headers,
                     }),
                 ]);
@@ -65,9 +74,6 @@ export default function LayoutMapDetails() {
                 const longitudeData = longitudeResponse.data;
                 const latestData = latestResponse.data;
 
-                console.log("Latitude data:", latitudeData);
-                console.log("Longitude data:", longitudeData);
-                console.log("Latest data (battery):", latestData);
 
                 const combinedData = latitudeData.map(latPoint => {
                     const matchingLonPoint = longitudeData.find(
@@ -85,13 +91,12 @@ export default function LayoutMapDetails() {
                 setLatestAnimalData(latestData);
             } catch (error) {
                 console.error("Failed to fetch animal data:", error);
-                setRouteData([]); // Clear route data on error
+                setRouteData([]);
             }
         };
 
         fetchAnimalData();
     }, [selectedAnimal]);
-
 
     const closeCurrentFence = () => {
         setAddingFence(false);
@@ -102,7 +107,6 @@ export default function LayoutMapDetails() {
             setFence(fence.slice(0, -1));
         }
     };
-
 
     if (!selectedAnimal) {
         return <div>Loading...</div>;
@@ -127,7 +131,8 @@ export default function LayoutMapDetails() {
                 <div className="flex flex-col items-center">
                     <span className="text-white font-semibold text-lg">{selectedAnimal.name}</span>
                     <img
-                        src={selectedAnimal?.image || "https://placehold.co/100x100"}
+                        src={selectedAnimal?.imageUrl || "https://placedog.net/300/300"}
+
                         alt={selectedAnimal?.name || "Unknown Animal"}
                         className="h-20 w-20 rounded-full border-4 border-primary mt-2"
                     />

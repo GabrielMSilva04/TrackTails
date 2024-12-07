@@ -68,7 +68,6 @@ function AppRoutes() {
     const handleSelectAnimal = (animal) => {
         console.log('Selected animal:', animal)
         setSelectedAnimal(animal)
-        // go to the monitoring page
     }
 
     const handleSelectMetric = (metric) => {
@@ -76,7 +75,7 @@ function AppRoutes() {
         // go to the historic page
         navigate('/animal/historic')
     }
-      
+
     return (
         <AnimalProvider>
             <Routes>
@@ -87,13 +86,13 @@ function AppRoutes() {
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/mypets" element={<MyPets onAnimalSelect={handleSelectAnimal} />} />
                   <Route path="/profile" element={<Profile/>}/>
-                  <Route path="/registerpet" element={<RegisterPet />} />
-                  <Route path="/editpet" element={<EditPet />} />
-
 
                   {/* 404 Not Found Route */}
                   <Route path="*" element={<h2>404 - Page Not Found</h2>} />
                 </Route>
+
+                <Route path="/registerpet" element={<RegisterPet />} />
+                <Route path="/editpet" element={<EditPet />} />
 
                 {/* Map and Details */}
                 <Route path="/map" element={<LayoutMap />} />
