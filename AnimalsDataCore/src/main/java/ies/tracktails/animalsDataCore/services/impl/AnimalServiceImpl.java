@@ -65,4 +65,10 @@ public class AnimalServiceImpl implements AnimalService {
     public Animal getAnimalByDeviceId(Long deviceId) {
         return animalRepository.findByDeviceId(deviceId);
     }
+
+    @Override
+    public Boolean userHasAccessToAnimal(String userId, String animalId) {
+        Animal animal = animalRepository.findById(Long.parseLong(animalId)).get();
+        return animal.getUserId().equals(Long.parseLong(userId));
+    }
 }

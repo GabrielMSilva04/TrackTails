@@ -57,13 +57,10 @@ public class WebSecurityConfiguration {
                 "/api/v1/reports/**",
 				"/api/v1/finders/**"
             ).permitAll()
-            // Regras autenticadas
             .pathMatchers("/api/v1/**").authenticated()
-            // Qualquer outra rota
             .anyExchange().permitAll())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
-		// Adiciona o filtro de JWT (caso necessário)
 		http.addFilterAfter(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION);														// add userId
 
 		return http.build();
@@ -76,9 +73,10 @@ public class WebSecurityConfiguration {
 			.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/ws/**"))
 			.csrf(ServerHttpSecurity.CsrfSpec::disable)
 			.authorizeExchange(authorize -> authorize
-				.pathMatchers("/ws/**").permitAll() // Permite conexões WebSocket (ajuste conforme necessário)
-				.anyExchange().authenticated())
-			.oauth2ResourceServer(OAuth2ResourceServerSpec::jwt); // JWT ainda é necessário para autenticação.
+            .pathMatchers("/ws/**").authenticated())
+			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+		
+		http.addFilterAfter(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION);														// add userId
 
 		return http.build();
 	}

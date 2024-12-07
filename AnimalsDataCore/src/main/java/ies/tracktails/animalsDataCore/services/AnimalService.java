@@ -12,4 +12,5 @@ public interface AnimalService {
     public List<Animal> getAllAnimals();
     public List<Animal> getAnimalsByUserId(Long userId);
     public Animal getAnimalByDeviceId(Long deviceId);
+    public Boolean userHasAccessToAnimal(String userId, String animalId);
 }

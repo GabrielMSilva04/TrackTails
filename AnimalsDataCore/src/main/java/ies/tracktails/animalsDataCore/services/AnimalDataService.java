@@ -1,6 +1,5 @@
 package ies.tracktails.animalsDataCore.services;
 
-import ies.tracktails.animalsDataCore.configurations.InfluxDBConfig;
 import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
 import ies.tracktails.animalsDataCore.observers.AnimalDataChangeListener;
 import com.influxdb.client.InfluxDBClient;
