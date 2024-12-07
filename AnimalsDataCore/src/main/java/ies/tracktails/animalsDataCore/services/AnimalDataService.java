@@ -2,6 +2,7 @@ package ies.tracktails.animalsDataCore.services;
 
 import ies.tracktails.animalsDataCore.configurations.InfluxDBConfig;
 import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
+import ies.tracktails.animalsDataCore.observers.AnimalDataChangeListener;
 import com.influxdb.client.InfluxDBClient;
 import com.influxdb.client.WriteApi;
 import com.influxdb.client.domain.WritePrecision;
@@ -14,12 +15,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.List;
 import java.util.ArrayList;
 
 @Service
 public class AnimalDataService {
+
+    // Observer pattern
+    private final CopyOnWriteArrayList<AnimalDataChangeListener> listeners = new CopyOnWriteArrayList<>();
+
+    public void addListener(AnimalDataChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(AnimalDataChangeListener listener) {
+        listeners.remove(listener);
+    }
     
+    // InfluxDB client
     private final InfluxDBClient influxDBClient;
 
     @Value("${influxdb.bucket}")
@@ -53,6 +67,10 @@ public class AnimalDataService {
 
         try (WriteApi writeApi = influxDBClient.getWriteApi()) {
             writeApi.writePoint(point);
+
+            for (AnimalDataChangeListener listener : listeners) {
+                listener.onAnimalDataChanged(animalDataDTO);
+            }
         }
     }
 

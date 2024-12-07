@@ -181,4 +181,31 @@ public class AnimalDataDTO {
                 break;
         }
     }
+
+    public String serialize() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"animalId\": \"").append(animalId).append("\", ");
+        weight.ifPresent(value -> sb.append("\"weight\": ").append(value).append(", "));
+        height.ifPresent(value -> sb.append("\"height\": ").append(value).append(", "));
+        latitude.ifPresent(value -> sb.append("\"latitude\": ").append(value).append(", "));
+        longitude.ifPresent(value -> sb.append("\"longitude\": ").append(value).append(", "));
+        speed.ifPresent(value -> sb.append("\"speed\": ").append(value).append(", "));
+        heartRate.ifPresent(value -> sb.append("\"heartRate\": ").append(value).append(", "));
+        breathRate.ifPresent(value -> sb.append("\"breathRate\": ").append(value).append(", "));
+        batteryPercentage.ifPresent(value -> sb.append("\"batteryPercentage\": ").append(value).append(", "));
+        timestamp.ifPresent(value -> sb.append("\"timestamp\": ").append(value.toEpochMilli()).append(", "));
+        sb.append("\"additionalTags\": {");
+        for (Map.Entry<String, String> entry : additionalTags.entrySet()) {
+            sb.append("\"").append(entry.getKey()).append("\": \"").append(entry.getValue()).append("\", ");
+        }
+        sb.append("}");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return serialize();
+    }
 }

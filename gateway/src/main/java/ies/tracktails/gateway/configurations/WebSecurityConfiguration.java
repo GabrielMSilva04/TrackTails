@@ -69,9 +69,23 @@ public class WebSecurityConfiguration {
 		return http.build();
 	}
 
-	// By default, permit all requests without authentication
 	@Bean
 	@Order(2)
+	SecurityWebFilterChain websocketHttpSecurity(ServerHttpSecurity http) {
+		http
+			.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/ws/**"))
+			.csrf(ServerHttpSecurity.CsrfSpec::disable)
+			.authorizeExchange(authorize -> authorize
+				.pathMatchers("/ws/**").permitAll() // Permite conexões WebSocket (ajuste conforme necessário)
+				.anyExchange().authenticated())
+			.oauth2ResourceServer(OAuth2ResourceServerSpec::jwt); // JWT ainda é necessário para autenticação.
+
+		return http.build();
+	}
+
+	// By default, permit all requests without authentication
+	@Bean
+	@Order(3)
 	SecurityWebFilterChain defaultHttpSecurity(ServerHttpSecurity http) {
 		http
 				.authorizeExchange((exchanges) -> exchanges
