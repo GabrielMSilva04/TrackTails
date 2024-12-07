@@ -19,7 +19,6 @@ export default function LayoutMapDetails() {
     const [showFenceControls, setShowFenceControls] = useState(false);
     const [routeData, setRouteData] = useState([]);
 
-
     useEffect(() => {
         if (!selectedAnimal) {
             navigate("/map");
@@ -32,6 +31,7 @@ export default function LayoutMapDetails() {
         }
     }, [selectedAnimal, navigate]);
 
+    // Fetch latest animal data and route data
     useEffect(() => {
         if (!selectedAnimal || !selectedAnimal.id) {
             console.log('No selected animal to fetch data for.');
@@ -44,35 +44,21 @@ export default function LayoutMapDetails() {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                 };
 
-                // Fetch latitude, longitude, and battery data
                 const [latitudeResponse, longitudeResponse, latestResponse] = await Promise.all([
                     axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/latitude`, {
-                        params: {
-                            start: "-1d",
-                            end: "now()",
-                            interval: "15m",
-                            aggregate: "last",
-                        },
+                        params: { start: "-1d", end: "now()", interval: "15m", aggregate: "last" },
                         headers,
                     }),
                     axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/longitude`, {
-                        params: {
-                            start: "-1d",
-                            end: "now()",
-                            interval: "15m",
-                            aggregate: "last",
-                        },
+                        params: { start: "-1d", end: "now()", interval: "15m", aggregate: "last" },
                         headers,
                     }),
-                    axios.get(`${baseUrl}/animaldata/latest/${selectedAnimal.id}`, {
-                        headers,
-                    }),
+                    axios.get(`${baseUrl}/animaldata/latest/${selectedAnimal.id}`, { headers }),
                 ]);
 
                 const latitudeData = latitudeResponse.data;
                 const longitudeData = longitudeResponse.data;
                 const latestData = latestResponse.data;
-
 
                 const combinedData = latitudeData.map(latPoint => {
                     const matchingLonPoint = longitudeData.find(
@@ -97,8 +83,82 @@ export default function LayoutMapDetails() {
         fetchAnimalData();
     }, [selectedAnimal]);
 
+    // Fetch existing fence data
+    useEffect(() => {
+        if (!selectedAnimal || !selectedAnimal.id) return;
+
+        const fetchFenceData = async () => {
+            try {
+                const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+                const response = await axios.get(`${baseUrl}/fences/${selectedAnimal.id}`, { headers });
+                const fenceData = response.data;
+                console.log("Fetched fence data:", fenceData);
+
+                setFence([
+                    [fenceData.point1Latitude, fenceData.point1Longitude],
+                    [fenceData.point2Latitude, fenceData.point2Longitude],
+                    [fenceData.point3Latitude, fenceData.point3Longitude],
+                    [fenceData.point4Latitude, fenceData.point4Longitude],
+                ]);
+            } catch (error) {
+                console.error("Failed to fetch fence data:", error);
+            }
+        };
+
+        fetchFenceData();
+    }, [selectedAnimal]);
+
+    // Save or update fence
+    const saveFence = async () => {
+        console.log("Fence Coordinates:", fence);
+        if (fence.length < 4) {
+            alert("You need to define all four points of the fence.");
+            setFence([]);
+            return;
+        }
+
+        const [point1, point2, point3, point4] = fence;
+
+        const fenceData = {
+            animalId: selectedAnimal.id,
+            point1Latitude: fence[0].lat,
+            point1Longitude: fence[0].lng,
+            point2Latitude: fence[1].lat,
+            point2Longitude: fence[1].lng,
+            point3Latitude: fence[2].lat,
+            point3Longitude: fence[2].lng,
+            point4Latitude: fence[3].lat,
+            point4Longitude: fence[3].lng,
+        };
+
+        try {
+            console.log("Fence Data:", fenceData);
+            const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+            await axios.post(`${baseUrl}/fences`, fenceData, { headers });
+            alert("Fence saved successfully!");
+            setAddingFence(false);
+        } catch (error) {
+            console.error("Failed to save fence:", error);
+            alert("Failed to save fence.");
+        }
+    };
+
+    // Delete fence
+    const deleteFence = async () => {
+        try {
+            const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+            await axios.delete(`${baseUrl}/fences/${selectedAnimal.id}`, { headers });
+            alert("Fence deleted successfully!");
+            setFence([]);
+        } catch (error) {
+            console.error("Failed to delete fence:", error);
+            alert("Failed to delete fence.");
+        }
+    };
+
     const closeCurrentFence = () => {
         setAddingFence(false);
+        saveFence();
     };
 
     const undoLastVertex = () => {
