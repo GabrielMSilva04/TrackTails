@@ -1,12 +1,9 @@
 package ies.tracktails.animalservice.entities;
 
-import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import jakarta.persistence.*;
 import java.time.Instant;
 
+@Table(name = "fences")
 @Entity
 public class Fence {
 
@@ -48,7 +45,9 @@ public class Fence {
     private Instant updatedAt;
 
     // Default constructor
-    public Fence() {}
+    public Fence() {
+        super();
+    }
 
     // Getters and Setters
     public Long getId() {

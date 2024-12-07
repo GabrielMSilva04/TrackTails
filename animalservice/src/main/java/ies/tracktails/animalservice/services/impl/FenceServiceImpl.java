@@ -23,14 +23,14 @@ public class FenceServiceImpl implements FenceService {
     public void addOrUpdateFence(FenceDTO fenceDTO) {
         Fence fence = new Fence();
         fence.setAnimalId(fenceDTO.getAnimalId());
-        fence.setPoint1Latitude(fenceDTO.getPoint1Latitude());
-        fence.setPoint1Longitude(fenceDTO.getPoint1Longitude());
-        fence.setPoint2Latitude(fenceDTO.getPoint2Latitude());
-        fence.setPoint2Longitude(fenceDTO.getPoint2Longitude());
-        fence.setPoint3Latitude(fenceDTO.getPoint3Latitude());
-        fence.setPoint3Longitude(fenceDTO.getPoint3Longitude());
-        fence.setPoint4Latitude(fenceDTO.getPoint4Latitude());
-        fence.setPoint4Longitude(fenceDTO.getPoint4Longitude());
+        fence.setPoint1Latitude(fenceDTO.getPoint1Latitude().orElse(null));
+        fence.setPoint1Longitude(fenceDTO.getPoint1Longitude().orElse(null));
+        fence.setPoint2Latitude(fenceDTO.getPoint2Latitude().orElse(null));
+        fence.setPoint2Longitude(fenceDTO.getPoint2Longitude().orElse(null));
+        fence.setPoint3Latitude(fenceDTO.getPoint3Latitude().orElse(null));
+        fence.setPoint3Longitude(fenceDTO.getPoint3Longitude().orElse(null));
+        fence.setPoint4Latitude(fenceDTO.getPoint4Latitude().orElse(null));
+        fence.setPoint4Longitude(fenceDTO.getPoint4Longitude().orElse(null));
         fence.setCreatedAt(Instant.now());
         fence.setUpdatedAt(Instant.now());
 
@@ -42,8 +42,7 @@ public class FenceServiceImpl implements FenceService {
     public FenceDTO getFenceByAnimalId(Long animalId) {
         Fence fence = fenceRepository.findByAnimalId(animalId);
         if (fence != null) {
-            FenceDTO fenceDTO = new FenceDTO();
-            fenceDTO.setAnimalId(fence.getAnimalId());
+            FenceDTO fenceDTO = new FenceDTO(fence.getAnimalId());
             fenceDTO.setPoint1Latitude(fence.getPoint1Latitude());
             fenceDTO.setPoint1Longitude(fence.getPoint1Longitude());
             fenceDTO.setPoint2Latitude(fence.getPoint2Latitude());
