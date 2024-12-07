@@ -1,7 +1,7 @@
 package ies.tracktails.animalservice.controllers;
 
-import ies.tracktails.animalservice.services.FenceService;
-import ies.tracktails.animalservice.dtos.FenceDTO;
+import ies.tracktails.animalsDataCore.services.FenceService;
+import ies.tracktails.animalsDataCore.dtos.FenceDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

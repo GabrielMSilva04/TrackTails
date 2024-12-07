@@ -1,4 +1,4 @@
-package ies.tracktails.animalservice.dtos;
+package ies.tracktails.animalsDataCore.dtos;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;

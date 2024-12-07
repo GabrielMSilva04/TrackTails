@@ -1,9 +1,9 @@
-package ies.tracktails.animalservice.services.impl;
+package ies.tracktails.animalsDataCore.services.impl;
 
-import ies.tracktails.animalservice.services.FenceService;
-import ies.tracktails.animalservice.entities.Fence;
-import ies.tracktails.animalservice.dtos.FenceDTO;
-import ies.tracktails.animalservice.repositories.FenceRepository;
+import ies.tracktails.animalsDataCore.services.FenceService;
+import ies.tracktails.animalsDataCore.entities.Fence;
+import ies.tracktails.animalsDataCore.dtos.FenceDTO;
+import ies.tracktails.animalsDataCore.repositories.FenceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +21,21 @@ public class FenceServiceImpl implements FenceService {
     // Add or update fence
     @Override
     public void addOrUpdateFence(FenceDTO fenceDTO) {
-        Fence fence = new Fence();
-        fence.setAnimalId(fenceDTO.getAnimalId());
+        Fence existingFence = fenceRepository.findByAnimalId(fenceDTO.getAnimalId());
+
+        Fence fence;
+        if (existingFence != null) {
+            // Update the existing fence
+            fence = existingFence;
+            fence.setUpdatedAt(Instant.now());
+        } else {
+            // Create a new fence
+            fence = new Fence();
+            fence.setAnimalId(fenceDTO.getAnimalId());
+            fence.setCreatedAt(Instant.now());
+        }
+
+        // Update the common properties
         fence.setPoint1Latitude(fenceDTO.getPoint1Latitude());
         fence.setPoint1Longitude(fenceDTO.getPoint1Longitude());
         fence.setPoint2Latitude(fenceDTO.getPoint2Latitude());
@@ -31,8 +44,6 @@ public class FenceServiceImpl implements FenceService {
         fence.setPoint3Longitude(fenceDTO.getPoint3Longitude());
         fence.setPoint4Latitude(fenceDTO.getPoint4Latitude());
         fence.setPoint4Longitude(fenceDTO.getPoint4Longitude());
-        fence.setCreatedAt(Instant.now());
-        fence.setUpdatedAt(Instant.now());
 
         fenceRepository.save(fence);
     }

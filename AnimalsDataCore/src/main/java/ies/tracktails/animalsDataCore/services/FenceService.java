@@ -1,6 +1,6 @@
-package ies.tracktails.animalservice.services;
+package ies.tracktails.animalsDataCore.services;
 
-import ies.tracktails.animalservice.dtos.FenceDTO;
+import ies.tracktails.animalsDataCore.dtos.FenceDTO;
 
 public interface FenceService {
     void addOrUpdateFence(FenceDTO fenceDTO);
