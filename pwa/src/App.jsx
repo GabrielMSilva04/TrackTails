@@ -46,6 +46,11 @@ export default function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
+                {/* Finder Page */}
+                <Route path="/finders" element={<LayoutAnimal showButtons="none" useUrl={true}/>}>
+                    <Route path="/finders/:deviceId" element={<Finders />} />
+                </Route>
+
                 {/* Protected Pages */}
                 <Route
                     path="*"
@@ -117,11 +122,6 @@ function AppRoutes() {
                         path="/animal/monitoring"
                         element={<Pet onMetricSelect={handleSelectMetric} />}
                     />
-                </Route>
-
-                {/* Finder Page */}
-                <Route path="/finders" element={<LayoutAnimal showButtons="none"/>}>
-                    <Route path="/finders/:deviceId" element={<Finders />} />
                 </Route>
             </Routes>
         </AnimalProvider>

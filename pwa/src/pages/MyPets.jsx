@@ -105,7 +105,7 @@ export default function MyPets({ onAnimalSelect }) {
             {/* Pet Cards Section */}
             <div
                 className="flex flex-wrap justify-center gap-4 overflow-y-auto"
-                style={{ maxHeight: '65vh' }}
+                style={{ maxHeight: '65vh', paddingBottom: '2rem' }}
             >
                 {loading ? (
                     <p className="text-gray-500 text-center w-full">Loading pets...</p>
