@@ -1,7 +1,6 @@
 package ies.tracktails.animalsDataCore.entities;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 
 @Table(name = "fences")
@@ -9,10 +8,7 @@ import java.time.Instant;
 public class Fence {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private Long animalId;
 
     @Column(nullable = false)
@@ -51,10 +47,6 @@ public class Fence {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
     public Long getAnimalId() {
         return animalId;
     }
@@ -147,8 +139,7 @@ public class Fence {
     @Override
     public String toString() {
         return "Fence{" +
-                "id=" + id +
-                ", animalId=" + animalId +
+                "animalId=" + animalId +
                 ", point1Latitude=" + point1Latitude +
                 ", point1Longitude=" + point1Longitude +
                 ", point2Latitude=" + point2Latitude +

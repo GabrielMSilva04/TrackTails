@@ -11,8 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+
 import java.util.Map;
 
 @RestController
@@ -63,64 +64,52 @@ public class FenceController {
     }
 
     // Get the fence by animal ID
-    @Operation(
-        summary = "Get a fence by animal ID",
-        description = "Fetches the fence details for the specified animal ID."
-    )
+    @Operation(summary = "Get fence by animal ID",
+            description = "Fetch the fence details for a specific animal")
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Fence found",
-            content = @Content(schema = @Schema(implementation = FenceDTO.class))
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Fence not found",
-            content = @Content
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Failed to process request",
-            content = @Content
-        )
+            @ApiResponse(responseCode = "200", description = "Fence data retrieved successfully", content = @Content(schema = @Schema(implementation = FenceDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Fence not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{animalId}")
-    public ResponseEntity<FenceDTO> getFenceByAnimalId(@PathVariable Long animalId) {
+    public ResponseEntity<?> getFenceByAnimalId(@PathVariable Long animalId) {
         try {
             FenceDTO fenceDTO = fenceService.getFenceByAnimalId(animalId);
             if (fenceDTO == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Fence not found for animalId: " + animalId));
             }
-            return new ResponseEntity<>(fenceDTO, HttpStatus.OK);
+            return ResponseEntity.ok(fenceDTO);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to fetch fence: " + e.getMessage()));
         }
     }
 
     // Delete the fence by animal ID
-    @Operation(
-        summary = "Delete a fence by animal ID",
-        description = "Deletes the fence associated with the specified animal ID."
-    )
+    @Operation(summary = "Delete fence by animal ID",
+            description = "Delete the geofence details for a specific animal")
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Fence deleted successfully",
-            content = @Content(schema = @Schema(example = "Fence deleted successfully"))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Failed to delete fence",
-            content = @Content(schema = @Schema(example = "Failed to delete fence"))
-        )
+            @ApiResponse(responseCode = "200", description = "Fence deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Fence not found"),
+            @ApiResponse(responseCode = "400", description = "Bad request due to invalid input"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{animalId}")
-    public ResponseEntity<String> deleteFence(@PathVariable Long animalId) {
+    public ResponseEntity<?> deleteFence(@PathVariable Long animalId) {
         try {
+            // Call the service to delete the fence
             fenceService.deleteFence(animalId);
-            return new ResponseEntity<>("Fence deleted successfully", HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message", "Fence deleted successfully"));
+        } catch (EntityNotFoundException e) {
+            // Handle case when the fence doesn't exist
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return new ResponseEntity<>("Failed to delete fence", HttpStatus.BAD_REQUEST);
+            // Handle generic server-side errors
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to delete fence: " + e.getMessage()));
         }
     }
 }
