@@ -77,4 +77,45 @@ public class FenceServiceImpl implements FenceService {
 
         fenceRepository.delete(fence);
     }
+
+    // Check if a point is inside the fence
+    @Override
+    public boolean isInsideFence(Long animalId, Double latitude, Double longitude) {
+        Fence fence = fenceRepository.findByAnimalId(animalId).orElse(null);
+
+        if (fence == null) {
+            return false;
+        }
+
+        double[][] fencePoints = {
+                {fence.getPoint1Latitude(), fence.getPoint1Longitude()},
+                {fence.getPoint2Latitude(), fence.getPoint2Longitude()},
+                {fence.getPoint3Latitude(), fence.getPoint3Longitude()},
+                {fence.getPoint4Latitude(), fence.getPoint4Longitude()}
+        };
+        double[] point = {latitude, longitude};
+
+        // Use Ray-Casting Algorithm to determine if the point is inside the polygon
+        boolean isInside = isPointInPolygon(fencePoints, point);
+        return isInside;
+    }
+
+    private boolean isPointInPolygon(double[][] polygon, double[] point) {
+        int n = polygon.length;
+        boolean inside = false;
+
+        for (int i = 0, j = n - 1; i < n; j = i++) {
+            double xi = polygon[i][0], yi = polygon[i][1];
+            double xj = polygon[j][0], yj = polygon[j][1];
+
+            // Check if point lies on an edge or is inside using Ray-Casting
+            boolean intersect = ((yi > point[1]) != (yj > point[1])) &&
+                    (point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi);
+            if (intersect) {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    }
 }

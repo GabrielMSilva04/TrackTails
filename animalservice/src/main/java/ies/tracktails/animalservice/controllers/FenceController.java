@@ -112,4 +112,30 @@ public class FenceController {
                     .body(Map.of("error", "Failed to delete fence: " + e.getMessage()));
         }
     }
+
+    @Operation(summary = "Check if a point is inside the fence",
+            description = "Checks whether a given latitude and longitude point is inside the fence of a specified animal.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Point check completed successfully", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Fence not found for the animal"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
+    @GetMapping("/{animalId}/isInside")
+    public ResponseEntity<Map<String, Object>> isPointInsideFence(
+            @PathVariable Long animalId,
+            @RequestParam Double latitude,
+            @RequestParam Double longitude) {
+        try {
+            boolean isInside = fenceService.isInsideFence(animalId, latitude, longitude);
+            return ResponseEntity.ok(Map.of(
+                    "animalId", animalId,
+                    "latitude", latitude,
+                    "longitude", longitude,
+                    "isInside", isInside
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to check point: " + e.getMessage()));
+        }
+    }
 }
