@@ -3,6 +3,10 @@ package ies.tracktails.animalservice.controllers;
 import ies.tracktails.animalservice.services.FenceService;
 import ies.tracktails.animalservice.dtos.FenceDTO;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +26,27 @@ public class FenceController {
         this.fenceService = fenceService;
     }
 
+    @Operation(
+        summary = "Create or update a fence",
+        description = "Creates or updates a fence associated with the specified animal."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Fence created/updated successfully",
+            content = @Content(schema = @Schema(example = "{\"message\": \"Fence created/updated successfully\"}"))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input data",
+            content = @Content(schema = @Schema(example = "{\"error\": \"Invalid input data: <details>\"}"))
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Failed to process request",
+            content = @Content(schema = @Schema(example = "{\"error\": \"Failed to process request: <details>\"}"))
+        )
+    })
     @PostMapping
     public ResponseEntity<?> addOrUpdateFence(@RequestBody @Valid FenceDTO fenceDTO) {
         try {
@@ -38,6 +63,27 @@ public class FenceController {
     }
 
     // Get the fence by animal ID
+    @Operation(
+        summary = "Get a fence by animal ID",
+        description = "Fetches the fence details for the specified animal ID."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Fence found",
+            content = @Content(schema = @Schema(implementation = FenceDTO.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Fence not found",
+            content = @Content
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Failed to process request",
+            content = @Content
+        )
+    })
     @GetMapping("/{animalId}")
     public ResponseEntity<FenceDTO> getFenceByAnimalId(@PathVariable Long animalId) {
         try {
@@ -52,6 +98,22 @@ public class FenceController {
     }
 
     // Delete the fence by animal ID
+    @Operation(
+        summary = "Delete a fence by animal ID",
+        description = "Deletes the fence associated with the specified animal ID."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Fence deleted successfully",
+            content = @Content(schema = @Schema(example = "Fence deleted successfully"))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Failed to delete fence",
+            content = @Content(schema = @Schema(example = "Failed to delete fence"))
+        )
+    })
     @DeleteMapping("/{animalId}")
     public ResponseEntity<String> deleteFence(@PathVariable Long animalId) {
         try {
