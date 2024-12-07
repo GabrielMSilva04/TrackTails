@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { useAnimalContext } from '../contexts/AnimalContext';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { baseUrl } from "../consts";
 
-const baseUrl = "http://localhost/api/v1";
 const animalDataBaseUrl = `${baseUrl}/animaldata`;
 
 const Card = ({ icon, label, value, trigger, image }) => (
