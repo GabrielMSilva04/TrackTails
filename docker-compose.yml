@@ -190,6 +190,7 @@ services:
       - gateway
     environment:
       NODE_ENV: development
+      VITE_API_BASE_URL: ${BASE_URL}
 
 
   datacollector:
