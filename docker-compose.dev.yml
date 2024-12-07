@@ -99,6 +99,7 @@ services:
     build:
       context: ./
       dockerfile: ./animalservice/Dockerfile
+      target: development
     container_name: animalservice
     ports:
       - "8082:8080"
@@ -112,11 +113,16 @@ services:
       INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
       INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
       INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
+      SPRING_PROFILES_ACTIVE: dev
     depends_on:
       - mariadb
       - influxdb
     volumes:
-      - animal-images:/uploads/animals
+      - ./animalservice/src:/app/src
+      - ./animalservice/pom.xml:/app/pom.xml
+      - ~/.m2:/root/.m2
+
+    command: mvn spring-boot:run -Dspring-boot.run.profiles=dev
     restart: always
 
   notificationservice:
@@ -134,6 +140,10 @@ services:
       - INFLUX_HOST=influxdb
     depends_on:
       - mariadb
+    volumes:
+      - ./notificationservice:/app  # Mount the source code
+      - /app/target                 # Avoid overwriting the target directory
+    command: mvn spring-boot:run    # Use Maven's spring-boot:run for hot reload
     restart: always
 
   reportservice:
@@ -156,6 +166,10 @@ services:
     depends_on:
       - mariadb
       - influxdb
+    volumes:
+        - ./reportservice:/app  # Mount the source code
+        - /app/target            # Avoid overwriting the target directory
+    command: mvn spring-boot:run   # Use Maven's spring-boot:run for hot reload
     restart: always
 
   userservice:
@@ -172,10 +186,13 @@ services:
       - DB_PORT=3306
       - JWT_PRIVATE_KEY=/app/keys/private.key
       - JWT_PUBLIC_KEY=/app/keys/public.key
-    volumes:
-      - ./security:/app/keys
     depends_on:
       - mariadb
+    volumes:
+      - ./security:/app/keys
+      - ./userservice:/app  # Mount the source code
+      - /app/target         # Avoid overwriting the target directory
+    command: mvn spring-boot:run  # Use Maven's spring-boot:run for hot reload
     restart: always
 
   pwa:
@@ -219,6 +236,10 @@ services:
       - influxdb
       - zookeeper
       - kafka
+    volumes:
+      - ./datacollector:/app
+      - /app/target
+    command: mvn spring-boot:run
     restart: always
 
   actionservice:
@@ -236,6 +257,10 @@ services:
       - influxdb
       - zookeeper
       - kafka
+    volumes:
+        - ./actionservice:/app
+        - /app/target
+    command: mvn spring-boot:run
     restart: always
 
 volumes:
