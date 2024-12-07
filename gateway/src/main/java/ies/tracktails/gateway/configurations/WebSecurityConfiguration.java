@@ -14,6 +14,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 
 import ies.tracktails.gateway.filters.JwtHeaderFilter;
+import ies.tracktails.gateway.filters.WebSocketAuthFilter;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -76,6 +77,7 @@ public class WebSecurityConfiguration {
             .pathMatchers("/ws/**").authenticated())
 			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 		
+        http.addFilterBefore(new WebSocketAuthFilter(), SecurityWebFiltersOrder.AUTHENTICATION);
 		http.addFilterAfter(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION);														// add userId
 
 		return http.build();
