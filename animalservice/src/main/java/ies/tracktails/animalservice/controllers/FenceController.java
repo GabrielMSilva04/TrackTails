@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/fences")
 public class FenceController {
@@ -19,14 +22,18 @@ public class FenceController {
         this.fenceService = fenceService;
     }
 
-    // Create or update fence
     @PostMapping
-    public ResponseEntity<String> addOrUpdateFence(@RequestBody FenceDTO fenceDTO) {
+    public ResponseEntity<?> addOrUpdateFence(@RequestBody @Valid FenceDTO fenceDTO) {
         try {
             fenceService.addOrUpdateFence(fenceDTO);
-            return new ResponseEntity<>("Fence created/updated successfully", HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of("message", "Fence created/updated successfully"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid input data: " + e.getMessage()));
         } catch (Exception e) {
-            return new ResponseEntity<>("Failed to create/update fence", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to process request: " + e.getMessage()));
         }
     }
 
