@@ -11,7 +11,7 @@ spring:
         - id: animalservice-animals
           uri: http://animalservice:8080
           predicates:
-            - Path=/api/v1/animals/**,  /api/v1/animaldata/**, /api/v1/animaldata, /api/v1/finders/animal/**
+            - Path=/api/v1/animals/**,  /api/v1/animaldata/**, /api/v1/animaldata, /api/v1/finders/animal/**, /api/v1/fences/**, /api/v1/fences
         - id: animalservice-websocket
           uri: ws://animalservice:8080
           predicates:
