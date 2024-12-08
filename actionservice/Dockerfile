@@ -4,12 +4,6 @@ FROM maven:3.8.5-openjdk-17 AS builder
 # Set the working directory in the container
 WORKDIR /app/actionservice
 
-# Uncomment this line if you are using AnimalDataCore as a dependency
-#COPY AnimalsDataCore /app/AnimalsDataCore
-#WORKDIR /app/AnimalsDataCore
-#RUN mvn dependency:go-offline -B
-#RUN mvn clean install
-
 COPY actionservice/pom.xml /app/actionservice/pom.xml
 RUN mvn dependency:go-offline -B
 COPY actionservice/src /app/actionservice/src

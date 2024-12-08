@@ -86,13 +86,16 @@ services:
   gateway:
     build:
       context: ./
-      dockerfile: ./gateway/Dockerfile
+      dockerfile: ./gateway/Dockerfile.dev
     container_name: gateway
     ports:
       - "80:80"
       - "443:443"
     depends_on:
       - userservice
+    volumes:
+      - ./gateway:/app/gateway
+      - ~/.m2:/root/.m2
     restart: always
 
   animalservice:
@@ -118,12 +121,13 @@ services:
       - influxdb
     volumes:
       - ./animalservice:/app/animalservice
+      - ~/.m2:/root/.m2
     restart: always
 
   notificationservice:
     build:
       context: ./
-      dockerfile: ./notificationservice/Dockerfile
+      dockerfile: ./notificationservice/Dockerfile.dev
     container_name: notificationservice
     ports:
       - "8083:8080"
@@ -136,15 +140,14 @@ services:
     depends_on:
       - mariadb
     volumes:
-      - ./notificationservice:/app  # Mount the source code
-      - /app/target                 # Avoid overwriting the target directory
-    command: mvn spring-boot:run    # Use Maven's spring-boot:run for hot reload
+      - ./notificationservice:/app/notificationservice
+      - ~/.m2:/root/.m2
     restart: always
 
   reportservice:
     build:
       context: ./
-      dockerfile: ./reportservice/Dockerfile
+      dockerfile: ./reportservice/Dockerfile.dev
     container_name: reportservice
     ports:
       - "8084:8080"
@@ -162,15 +165,14 @@ services:
       - mariadb
       - influxdb
     volumes:
-        - ./reportservice:/app  # Mount the source code
-        - /app/target            # Avoid overwriting the target directory
-    command: mvn spring-boot:run   # Use Maven's spring-boot:run for hot reload
+      - ./reportservice:/app/reportservice
+      - ~/.m2:/root/.m2
     restart: always
 
   userservice:
     build:
       context: ./
-      dockerfile: ./userservice/Dockerfile
+      dockerfile: ./userservice/Dockerfile.dev
     container_name: userservice
     ports:
       - "8085:8080"
@@ -185,9 +187,53 @@ services:
       - mariadb
     volumes:
       - ./security:/app/keys
-      - ./userservice:/app  # Mount the source code
-      - /app/target         # Avoid overwriting the target directory
-    command: mvn spring-boot:run  # Use Maven's spring-boot:run for hot reload
+      - ./userservice:/app/userservice
+      - ~/.m2:/root/.m2
+    restart: always
+
+  datacollector:
+    build:
+      context: ./
+      dockerfile: ./datacollector/Dockerfile.dev
+    container_name: datacollector
+    env_file:
+      - .env
+    environment:
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      INFLUXDB_HOST: influxdb
+      INFLUXDB_PORT: 8086
+      INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
+      INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
+    depends_on:
+      - mariadb
+      - influxdb
+      - zookeeper
+      - kafka
+    volumes:
+      - ./datacollector:/app/datacollector
+      - ~/.m2:/root/.m2
+    restart: always
+
+  actionservice:
+    build:
+      context: ./
+      dockerfile: ./actionservice/Dockerfile.dev
+    container_name: actionservice
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+    depends_on:
+      - mariadb
+      - influxdb
+      - zookeeper
+      - kafka
+    volumes:
+      - ./actionservice:/app/actionservice
+      - ~/.m2:/root/.m2
     restart: always
 
   pwa:
@@ -209,53 +255,6 @@ services:
     environment:
       NODE_ENV: development
       VITE_API_BASE_URL: ${BASE_URL}
-    restart: always
-
-  datacollector:
-    build:
-      context: ./
-      dockerfile: ./datacollector/Dockerfile
-    container_name: datacollector
-    env_file:
-      - .env
-    environment:
-      DB_HOST: mariadb
-      DB_PORT: 3306
-      INFLUXDB_HOST: influxdb
-      INFLUXDB_PORT: 8086
-      INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
-      INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
-      INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
-    depends_on:
-      - mariadb
-      - influxdb
-      - zookeeper
-      - kafka
-    volumes:
-      - ./datacollector:/app
-      - /app/target
-    command: mvn spring-boot:run
-    restart: always
-
-  actionservice:
-    build:
-      context: ./
-      dockerfile: ./actionservice/Dockerfile
-    container_name: actionservice
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=mariadb
-      - DB_PORT=3306
-    depends_on:
-      - mariadb
-      - influxdb
-      - zookeeper
-      - kafka
-    volumes:
-        - ./actionservice:/app
-        - /app/target
-    command: mvn spring-boot:run
     restart: always
 
 volumes:

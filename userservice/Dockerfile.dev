@@ -1,0 +1,7 @@
+FROM maven:3.8.5-openjdk-17 AS development
+
+COPY userservice /app/userservice
+WORKDIR /app/userservice
+EXPOSE 8080
+
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.profiles=dev"]

@@ -3,13 +3,6 @@ FROM maven:3.8.5-openjdk-17 AS builder
 
 # Set the working directory in the container
 WORKDIR /app/notificationservice
-
-# Uncomment this line if you are using AnimalDataCore as a dependency
-#COPY AnimalsDataCore /app/AnimalsDataCore
-#WORKDIR /app/AnimalsDataCore
-#RUN mvn dependency:go-offline -B
-#RUN mvn clean install
-
 COPY notificationservice/pom.xml /app/notificationservice/pom.xml
 RUN mvn dependency:go-offline -B
 COPY notificationservice/src /app/notificationservice/src
