@@ -98,8 +98,7 @@ services:
   animalservice:
     build:
       context: ./
-      dockerfile: ./animalservice/Dockerfile
-      target: development
+      dockerfile: ./animalservice/Dockerfile.dev
     container_name: animalservice
     ports:
       - "8082:8080"
@@ -118,11 +117,7 @@ services:
       - mariadb
       - influxdb
     volumes:
-      - ./animalservice/src:/app/src
-      - ./animalservice/pom.xml:/app/pom.xml
-      - ~/.m2:/root/.m2
-
-    command: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+      - ./animalservice:/app/animalservice
     restart: always
 
   notificationservice:

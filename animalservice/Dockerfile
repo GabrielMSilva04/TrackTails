@@ -20,13 +20,3 @@ WORKDIR /app
 COPY --from=builder /app/animalservice/target/*.jar /app/animalservice.jar
 EXPOSE 8080
 CMD ["java", "-jar", "/app/animalservice.jar"]
-
-# Stage 3: Development Environment with Hot Reload
-FROM maven:3.8.5-openjdk-17 AS development
-
-WORKDIR /app
-COPY animalservice /app
-COPY AnimalsDataCore /app/AnimalsDataCore
-EXPOSE 8080
-
-CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.profiles=dev"]
