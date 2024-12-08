@@ -12,6 +12,12 @@ spring:
           uri: http://animalservice:8080
           predicates:
             - Path=/api/v1/animals/**,  /api/v1/animaldata/**, /api/v1/animaldata, /api/v1/finders/animal/**, /api/v1/fences/**, /api/v1/fences
+        - id: animalservice-websocket
+          uri: ws://animalservice:8080
+          predicates:
+            - Path=/ws/animaldata/**
+          filters:
+            - PreserveHostHeader=true
         - id: notificationservice
           uri: http://notificationservice:8080
           predicates:
@@ -49,6 +55,8 @@ spring:
 
 logging:
   level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.reactive.socket: DEBUG
     org.springframework.security: DEBUG
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
     org.springframework.security.oauth2.jwt: DEBUG

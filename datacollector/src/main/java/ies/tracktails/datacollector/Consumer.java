@@ -41,7 +41,6 @@ public class Consumer {
     @KafkaListener(topics = "animal_tracking_topic", groupId = "kafka-listener-group")
     public void listen(DataDTO data) {
         try {
-            System.out.println(data.getDeviceId());
             System.out.println("Received message: " + data.toString());
             AnimalDataDTO animalDataDTO = convertToAnimalDataDTO(data);
             animalDataService.writeAnimalData(animalDataDTO);
