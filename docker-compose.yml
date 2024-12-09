@@ -21,10 +21,12 @@ services:
         max-size: "10m"
         max-file: "3"
     healthcheck:
-      test: [ "CMD-SHELL", "mysqladmin ping -h localhost" ]
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 10s
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
+
   
   influxdb:
     image: influxdb:2
@@ -272,7 +274,6 @@ services:
       - influxdb
       - zookeeper
       - kafka
-      - kafdrop
 
   actionservice:
     build:
@@ -289,7 +290,6 @@ services:
       - influxdb
       - zookeeper
       - kafka
-      - kafdrop
 
 volumes:
   mariadb_data:
