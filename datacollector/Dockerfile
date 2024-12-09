@@ -22,7 +22,6 @@ RUN apt-get update && apt-get install -y wget
 
 WORKDIR /app
 
-# Copy the packaged application from the builder stage
 COPY --from=builder /app/datacollector/target/*.jar datacollector.jar
 
 ## Run the Spring Boot application
