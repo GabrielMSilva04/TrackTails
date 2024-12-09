@@ -1,10 +1,13 @@
 package ies.tracktails.datacollector;
 
+// peso
+
 import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
 import ies.tracktails.animalsDataCore.services.AnimalService;
 import ies.tracktails.animalsDataCore.services.FenceService;
 import ies.tracktails.animalsDataCore.services.AnimalDataService;
 import ies.tracktails.animalsDataCore.entities.Animal;
+import ies.tracktails.animalsDataCore.dtos.FenceDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -160,14 +163,18 @@ public class AnimalMonitoringService {
 
     private boolean checkFence(AnimalDataDTO data) {
         Long animalId = Long.parseLong(data.getAnimalId());
+
         if (data.getLatitude().isEmpty() || data.getLongitude().isEmpty()) {
+            return true;
+        }
+
+        FenceDTO fenceDTO = fenceService.getFenceByAnimalId(animalId);
+        if (fenceDTO == null) {
             return true;
         }
 
         double latitude = data.getLatitude().get();
         double longitude = data.getLongitude().get();
-
         return fenceService.isInsideFence(animalId, latitude, longitude);
     }
-
 }
