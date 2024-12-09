@@ -89,7 +89,8 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     restart: always
     logging:
       driver: "json-file"
@@ -118,6 +119,11 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:80/api/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   # Application services
@@ -246,16 +252,11 @@ services:
       dockerfile: ./pwa/Dockerfile
     container_name: pwa
     depends_on:
-      animalservice:
-        condition: service_healthy
-      notificationservice:
-        condition: service_healthy
-      reportservice:
-        condition: service_healthy
-      userservice:
-        condition: service_healthy
-      gateway:
-        condition: service_healthy
+      - animalservice
+      - notificationservice
+      - reportservice
+      - userservice
+      - gateway
     environment:
       NODE_ENV: production
       VITE_API_BASE_URL: ${BASE_URL}
@@ -264,6 +265,11 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+        test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
     restart: unless-stopped
 
 
