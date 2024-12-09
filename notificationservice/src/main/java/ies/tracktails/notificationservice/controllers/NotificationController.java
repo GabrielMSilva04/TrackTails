@@ -22,6 +22,11 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        return new ResponseEntity<>("{\"status\": \"UP\"}", HttpStatus.OK);
+    }
+
     @Operation(summary = "Create a new notification")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Notification created",
