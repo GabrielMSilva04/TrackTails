@@ -1,5 +1,6 @@
 package ies.tracktails.datacollector;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,6 @@ public class Consumer {
 
         animalDataDTO.setAnimalId(animal.getId().toString());
 
-        animalDataDTO.setWeight(animalDataService.getLatestValue(animal.getId().toString(), "weight").getWeight().get());
         data.getLatitude().ifPresent(latitude -> animalDataDTO.setLatitude(latitude));
         data.getLongitude().ifPresent(longitude -> animalDataDTO.setLongitude(longitude));
         data.getSpeed().ifPresent(speed -> animalDataDTO.setSpeed(speed));
@@ -54,7 +54,3 @@ public class Consumer {
         }
     }
 }
-
-
-
-

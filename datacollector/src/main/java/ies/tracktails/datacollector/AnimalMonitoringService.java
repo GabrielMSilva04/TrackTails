@@ -3,6 +3,7 @@ package ies.tracktails.datacollector;
 import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
 import ies.tracktails.animalsDataCore.services.AnimalService;
 import ies.tracktails.animalsDataCore.services.FenceService;
+import ies.tracktails.animalsDataCore.services.AnimalDataService;
 import ies.tracktails.animalsDataCore.entities.Animal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -10,18 +11,21 @@ import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class AnimalMonitoringService {
 
     private final FenceService fenceService;
     private final AnimalService animalService;
+    private final AnimalDataService animalDataService;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    public AnimalMonitoringService(FenceService fenceService, AnimalService animalService, KafkaTemplate<String, String> kafkaTemplate) {
+    public AnimalMonitoringService(FenceService fenceService, AnimalService animalService, AnimalDataService animalDataService, KafkaTemplate<String, String> kafkaTemplate) {
         this.fenceService = fenceService;
         this.animalService = animalService;
+        this.animalDataService = animalDataService;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -75,16 +79,27 @@ public class AnimalMonitoringService {
             return true;
         }
 
-        Date birthday = animal.getBirthday();
-
         double heartRate = data.getHeartRate().get();
-        int ageInMonths = getAnimalAgeInMonths(birthday);
+        Date birthday = animal.getBirthday();
+        Optional<Double> optionalWeight = data.getWeight();
+        double weight = optionalWeight.orElse(Double.MAX_VALUE);
+
+        int ageInMonths = (birthday != null) ? getAnimalAgeInMonths(birthday) : -1;
 
         if ("dog".equalsIgnoreCase(species)) {
-            if (ageInMonths < 1) {
+            if (ageInMonths == -1 && !optionalWeight.isPresent()) {
+                return heartRate >= 60 && heartRate <= 200;
+            } else if (ageInMonths == -1) {
+                if (weight < 10) {
+                    return heartRate >= 90 && heartRate <= 160; // Small breed
+                } else if (weight <= 25) {
+                    return heartRate >= 80 && heartRate <= 120; // Medium breed
+                } else {
+                    return heartRate >= 60 && heartRate <= 90; // Large breed
+                }
+            } else if (ageInMonths < 1) {
                 return heartRate >= 160 && heartRate <= 200;
             } else {
-                double weight = data.getWeight().orElse(Double.MAX_VALUE);
                 if (weight < 10) {
                     return heartRate >= 90 && heartRate <= 160; // Small breed
                 } else if (weight <= 25) {
@@ -94,7 +109,7 @@ public class AnimalMonitoringService {
                 }
             }
         } else if ("cat".equalsIgnoreCase(species)) {
-            return heartRate >= 150 && heartRate <= 220; // Cats
+            return heartRate >= 150 && heartRate <= 220; // Gatos
         }
 
         return true;
