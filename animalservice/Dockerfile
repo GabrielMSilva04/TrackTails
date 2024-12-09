@@ -15,8 +15,10 @@ RUN mvn clean package -DskipTests
 
 # Stage 2: Production Runtime
 FROM openjdk:17-jdk-slim AS production
+RUN apt-get update && apt-get install -y wget
 
 WORKDIR /app
+
 COPY --from=builder /app/animalservice/target/*.jar /app/animalservice.jar
-EXPOSE 8080
+
 CMD ["java", "-jar", "/app/animalservice.jar"]
