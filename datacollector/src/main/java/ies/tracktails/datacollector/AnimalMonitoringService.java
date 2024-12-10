@@ -72,7 +72,6 @@ public class AnimalMonitoringService {
                 "{\"userId\":%d,\"animalId\":%d,\"title\":\"%s\",\"content\":\"%s\"}",
                 userId, animalId, title, content
         );
-
         kafkaTemplate.send("notification_topic", notificationMessage);
     }
 

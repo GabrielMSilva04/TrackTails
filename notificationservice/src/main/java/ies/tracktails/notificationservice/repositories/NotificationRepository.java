@@ -15,6 +15,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findByAnimalId(long animalId);
     List<Notification> findByUserIdAndAnimalId(long userId, long animalId);
     List<Notification> findByUserIdAndRead(long userId, boolean read);
+    boolean existsByUserIdAndAnimalIdAndTitleAndContentAndRead(
+            long userId, long animalId, String title, String content, boolean read
+    );
 
     Notification save(Notification notification);
 
