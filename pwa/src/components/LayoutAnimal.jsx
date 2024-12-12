@@ -47,7 +47,7 @@ export default function LayoutAnimal({ showButtons = "all" }) {
             console.log("Delete response:", response.data);
 
             setSelectedAnimal(null);
-            navigate("/mypets");
+            window.location.href = "/mypets";
         } catch (error) {
             console.error("Error deleting animal:", error);
             alert("Failed to delete the animal. Please try again.");
