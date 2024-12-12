@@ -13,6 +13,12 @@ services:
       - "3306:3306"
     volumes:
       - ./mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: always
 
   phpmyadmin:
@@ -37,6 +43,11 @@ services:
     volumes:
       - influxdb_data:/var/lib/influxdb
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail http://localhost:8086/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
@@ -49,6 +60,11 @@ services:
     volumes:
       - zookeeper_data:/var/lib/zookeeper
     restart: always
+    healthcheck:
+      test: nc -z localhost 2181 || exit -1
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.4.4
@@ -65,10 +81,16 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     restart: always
     volumes:
       - kafka_data:/var/lib/kafka
+    healthcheck:
+      test: [ "CMD-SHELL", "/usr/bin/kafka-topics --bootstrap-server localhost:19092 --list || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   kafdrop:
     image: obsidiandynamics/kafdrop:4.0.2
@@ -96,6 +118,11 @@ services:
     volumes:
       - ./gateway:/app/gateway
       - ~/.m2:/root/.m2
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:80/api/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   animalservice:
@@ -117,11 +144,18 @@ services:
       INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
       SPRING_PROFILES_ACTIVE: dev
     depends_on:
-      - mariadb
-      - influxdb
+      mariadb:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
     volumes:
       - ./animalservice:/app/animalservice
       - ~/.m2:/root/.m2
+    healthcheck:
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/animals/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   notificationservice:
@@ -138,10 +172,16 @@ services:
       - DB_PORT=3306
       - INFLUX_HOST=influxdb
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     volumes:
       - ./notificationservice:/app/notificationservice
       - ~/.m2:/root/.m2
+    healthcheck:
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/notifications/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   reportservice:
@@ -162,11 +202,18 @@ services:
       INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
       INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
     depends_on:
-      - mariadb
-      - influxdb
+      mariadb:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
     volumes:
       - ./reportservice:/app/reportservice
       - ~/.m2:/root/.m2
+    healthcheck:
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/reports/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   userservice:
@@ -184,11 +231,17 @@ services:
       - JWT_PRIVATE_KEY=/app/keys/private.key
       - JWT_PUBLIC_KEY=/app/keys/public.key
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     volumes:
       - ./security:/app/keys
       - ./userservice:/app/userservice
       - ~/.m2:/root/.m2
+    healthcheck:
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/users/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
   datacollector:
@@ -207,10 +260,14 @@ services:
       INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
       INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
     depends_on:
-      - mariadb
-      - influxdb
-      - zookeeper
-      - kafka
+      mariadb:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+      zookeeper:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
     volumes:
       - ./datacollector:/app/datacollector
       - ~/.m2:/root/.m2
