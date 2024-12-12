@@ -271,6 +271,11 @@ services:
     volumes:
       - ./datacollector:/app/datacollector
       - ~/.m2:/root/.m2
+    healthcheck:
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/datacollector/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: always
 
   actionservice:
@@ -284,10 +289,12 @@ services:
       - DB_HOST=mariadb
       - DB_PORT=3306
     depends_on:
-      - mariadb
-      - influxdb
-      - zookeeper
-      - kafka
+      mariadb:
+        condition: service_healthy
+      influxdb:
+          condition: service_healthy
+      kafka:
+          condition: service_healthy
     volumes:
       - ./actionservice:/app/actionservice
       - ~/.m2:/root/.m2
@@ -312,6 +319,11 @@ services:
     environment:
       NODE_ENV: development
       VITE_API_BASE_URL: ${BASE_URL}
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: always
 
 volumes:
