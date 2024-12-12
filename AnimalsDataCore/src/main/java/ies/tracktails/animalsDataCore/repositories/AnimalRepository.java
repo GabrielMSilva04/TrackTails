@@ -1,8 +1,9 @@
 package ies.tracktails.animalsDataCore.repositories;
 
+import ies.tracktails.animalsDataCore.entities.Animal;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ies.tracktails.animalsDataCore.entities.Animal;
+
 import java.util.List;
 
 @Repository

@@ -14,6 +14,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.util.matcher.PathPatternParserServerWebExchangeMatcher;
 
 import ies.tracktails.gateway.filters.JwtHeaderFilter;
+import ies.tracktails.gateway.filters.WebSocketAuthFilter;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -57,13 +58,26 @@ public class WebSecurityConfiguration {
                 "/api/v1/reports/**",
 				"/api/v1/finders/**"
             ).permitAll()
-            // Regras autenticadas
             .pathMatchers("/api/v1/**").authenticated()
-            // Qualquer outra rota
             .anyExchange().permitAll())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
-		// Adiciona o filtro de JWT (caso necessário)
+		http.addFilterAfter(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION);														// add userId
+
+		return http.build();
+	}
+
+	@Bean
+	@Order(2)
+	SecurityWebFilterChain websocketHttpSecurity(ServerHttpSecurity http) {
+		http
+			.securityMatcher(new PathPatternParserServerWebExchangeMatcher("/ws/**"))
+			.csrf(ServerHttpSecurity.CsrfSpec::disable)
+			.authorizeExchange(authorize -> authorize
+            .pathMatchers("/ws/**").authenticated())
+			.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+		
+        http.addFilterBefore(new WebSocketAuthFilter(), SecurityWebFiltersOrder.AUTHENTICATION);
 		http.addFilterAfter(new JwtHeaderFilter(), SecurityWebFiltersOrder.AUTHENTICATION);														// add userId
 
 		return http.build();
@@ -71,7 +85,7 @@ public class WebSecurityConfiguration {
 
 	// By default, permit all requests without authentication
 	@Bean
-	@Order(2)
+	@Order(3)
 	SecurityWebFilterChain defaultHttpSecurity(ServerHttpSecurity http) {
 		http
 				.authorizeExchange((exchanges) -> exchanges

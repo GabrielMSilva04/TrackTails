@@ -1,10 +1,11 @@
 package ies.tracktails.animalsDataCore.services.impl;
 
 import ies.tracktails.animalsDataCore.services.AnimalService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import ies.tracktails.animalsDataCore.repositories.AnimalRepository;
 import ies.tracktails.animalsDataCore.entities.Animal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -64,5 +65,11 @@ public class AnimalServiceImpl implements AnimalService {
     @Override
     public Animal getAnimalByDeviceId(Long deviceId) {
         return animalRepository.findByDeviceId(deviceId);
+    }
+
+    @Override
+    public Boolean userHasAccessToAnimal(String userId, String animalId) {
+        Animal animal = animalRepository.findById(Long.parseLong(animalId)).get();
+        return animal.getUserId().equals(Long.parseLong(userId));
     }
 }

@@ -1,70 +1,69 @@
+import asyncio
 import mariadb
 import os
 import sys
 import dotenv
-import time
-import multiprocessing
-from subprocess import Popen
+from asyncio.subprocess import create_subprocess_exec
+import aiomysql
+import logging
 
 dotenv.load_dotenv()
 
-def get_device_ids_from_db():
+async def get_device_ids_from_db():
     try:
-        conn = mariadb.connect(
+        conn = await aiomysql.connect(
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             host="127.0.0.1",
             port=3306,
-            database=os.getenv("DB_NAME")
+            db=os.getenv("DB_NAME")
         )
 
+        async with conn.cursor() as cursor:
+            await cursor.execute("SELECT device_id FROM animals")
+            device_ids = [device_id[0] for device_id in await cursor.fetchall()]
 
-        cursor = conn.cursor()
-        cursor.execute("SELECT device_id FROM animals")
-        device_ids = [device_id[0] for device_id in cursor]
-
-        cursor.close()
         conn.close()
-
         return device_ids
 
-    except mariadb.Error as e:
-        print(f"Error connecting to MariaDB Platform: {e}")
+    except Exception as e:
+        logging.error(f"Error connecting to Database: {e}")
         sys.exit(1)
 
-def run_simulation_for_device(device_id):
+async def run_simulation_for_device(device_id):
     device_id_str = str(device_id)
-
-    print(f"Iniciando simulação para o dispositivo: {device_id_str}")
-
-    process = Popen(['python3', 'producer.py', device_id_str])
-    process.communicate()
-
-def main():
-
-    device_ids = get_device_ids_from_db()
-
-
-    processes = []
-
-    for device_id in device_ids:
-
-        p = multiprocessing.Process(target=run_simulation_for_device, args=(device_id,))
-        processes.append(p)
-        p.start()
-
+    logging.info(f"Iniciando simulação para o dispositivo: {device_id_str}")
 
     try:
-        while True:
+        process = await create_subprocess_exec(
+            'python3', 'producer.py', device_id_str
+        )
+        await process.communicate()
+    except Exception as e:
+        logging.error(f"Error running simulation for device {device_id}: {e}")
 
-            time.sleep(1)
+async def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+
+    try:
+        device_ids = await get_device_ids_from_db()
+        tasks = [run_simulation_for_device(device_id) for device_id in device_ids]
+        await asyncio.gather(*tasks)
+
     except KeyboardInterrupt:
-        print("Simulação interrompida manualmente")
-        for p in processes:
-            p.terminate()
+        logging.info("Simulação interrompida manualmente")
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+    finally:
+        for task in asyncio.all_tasks():
+            if not task.done():
+                task.cancel()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
 
 
