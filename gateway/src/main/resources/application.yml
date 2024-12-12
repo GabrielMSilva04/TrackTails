@@ -18,6 +18,10 @@ spring:
             - Path=/ws/animaldata/**
           filters:
             - PreserveHostHeader=true
+        - id: actionservice
+          uri: http://actionservice:8080
+          predicates:
+            - Path=/api/v1/actions
         - id: notificationservice
           uri: http://notificationservice:8080
           predicates:
