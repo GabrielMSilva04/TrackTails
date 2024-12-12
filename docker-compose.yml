@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Database services
   mariadb:
-    image: mariadb:latest
+    image: mariadb:lts-noble
     container_name: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
