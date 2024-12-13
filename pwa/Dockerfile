@@ -3,12 +3,14 @@ FROM node:22.11.0 AS build
 
 WORKDIR /app
 
-# Install dependencies
+# Copy package files and install all dependencies, including devDependencies
 COPY ./pwa/package.json ./pwa/package-lock.json ./
-RUN npm install --production
+RUN npm install
 
-# Copy the source code and build the app
+# Copy the source code
 COPY ./pwa ./
+
+# Build the application using `vite`
 RUN npm run build
 
 # Stage 2: Serve the built application
