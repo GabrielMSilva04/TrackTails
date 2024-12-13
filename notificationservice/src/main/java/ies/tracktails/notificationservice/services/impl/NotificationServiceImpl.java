@@ -86,4 +86,9 @@ public class NotificationServiceImpl implements NotificationService {
                 userId, animalId, title, content, false
         );
     }
+
+    @Override
+    public void deleteNotificationsByAnimalId(long animalId) {
+        notificationRepository.deleteByAnimalId(animalId);
+    }
 }

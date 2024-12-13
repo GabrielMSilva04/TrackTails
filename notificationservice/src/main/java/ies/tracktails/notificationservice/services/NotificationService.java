@@ -14,5 +14,6 @@ public interface NotificationService {
     public List<Notification> getNotificationsByAnimalId(long animalId);
     public List<Notification> getNotificationsByUserIdAndAnimalId(long userId, long animalId);
     public List<Notification> getNotificationsUnreadByUserId(long userId);
-    boolean existsUnreadNotification(long userId, long animalId, String title, String content);
+    public boolean existsUnreadNotification(long userId, long animalId, String title, String content);
+    public void deleteNotificationsByAnimalId(long animalId);
 }

@@ -1,5 +1,6 @@
 package ies.tracktails.notificationservice.repositories;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ies.tracktails.notificationservice.entities.Notification;
@@ -22,4 +23,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Notification save(Notification notification);
 
     void deleteById(long id);
+    @Transactional
+    void deleteByAnimalId(long animalId);
 }

@@ -100,6 +100,17 @@ public class NotificationController {
         }
         return new ResponseEntity<>(notification, HttpStatus.OK);
     }
+
+    @Operation(summary = "Delete notifications for a specific animal")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notifications deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No notifications found for the animal")
+    })
+    @DeleteMapping("/animal/{animalId}")
+    public ResponseEntity<?> deleteNotificationsByAnimalId(@PathVariable long animalId) {
+        notificationService.deleteNotificationsByAnimalId(animalId);
+        return ResponseEntity.ok("All notifications for animal " + animalId + " have been deleted.");
+    }
 }
 
 class ErrorResponse {
