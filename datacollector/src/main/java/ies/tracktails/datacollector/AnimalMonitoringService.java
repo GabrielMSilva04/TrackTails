@@ -1,7 +1,5 @@
 package ies.tracktails.datacollector;
 
-// peso
-
 import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
 import ies.tracktails.animalsDataCore.services.AnimalService;
 import ies.tracktails.animalsDataCore.services.FenceService;
@@ -83,13 +81,13 @@ public class AnimalMonitoringService {
 
         double heartRate = data.getHeartRate().get();
         Date birthday = animal.getBirthday();
-        Optional<Double> optionalWeight = data.getWeight();
+        Optional<Double> optionalWeight = animalDataService.getLatestValue(animal.getId().toString(), "weight").getWeight();
         double weight = optionalWeight.orElse(Double.MAX_VALUE);
 
         int ageInMonths = (birthday != null) ? getAnimalAgeInMonths(birthday) : -1;
 
         if ("dog".equalsIgnoreCase(species)) {
-            if (ageInMonths == -1 && !optionalWeight.isPresent()) {
+            if (ageInMonths == -1 && optionalWeight.isEmpty()) {
                 return heartRate >= 60 && heartRate <= 200;
             } else if (ageInMonths == -1) {
                 if (weight < 10) {
@@ -111,7 +109,7 @@ public class AnimalMonitoringService {
                 }
             }
         } else if ("cat".equalsIgnoreCase(species)) {
-            return heartRate >= 150 && heartRate <= 220; // Gatos
+            return heartRate >= 150 && heartRate <= 220; // Cats
         }
 
         return true;

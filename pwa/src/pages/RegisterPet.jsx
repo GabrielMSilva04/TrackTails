@@ -127,6 +127,12 @@ export default function RegisterPet() {
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2 h-full w-full">
+                    {/* Disclaimer */}
+                    <div
+                        className="text-sm text-secondary mb-4 p-3 border border-dashed border-primary rounded-md bg-gray-50">
+                        <strong>Note:</strong> Filling in the optional fields especially weight and birthday can help better determine if
+                        an health parameter is out of the ordinary.
+                    </div>
                     {/* Scrollable Content */}
                     <div className="flex-grow overflow-y-auto space-y-4 px-4">
                         <label className="form-control w-full">
@@ -173,7 +179,7 @@ export default function RegisterPet() {
                                     message: 'Species is required',
                                 }}
                                 options={[
-                                    { value: '', label: 'Select a species' },
+                                    {value: '', label: 'Select a species'},
                                     ...speciesOptions,
                                 ]}
                                 error={errors.species && errors.species.message}
@@ -188,7 +194,7 @@ export default function RegisterPet() {
                                 register={register}
                                 required={false}
                                 options={[
-                                    { value: '', label: 'Select the sex' },
+                                    {value: '', label: 'Select the sex'},
                                     ...sexOptions,
                                 ]}
                                 error={errors.sex && errors.sex.message}
