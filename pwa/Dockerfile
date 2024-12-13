@@ -22,6 +22,7 @@ RUN npm install --production
 
 # Copy the source code and build the app
 COPY ./pwa ./
+RUN npm install vite
 RUN npm run build
 
 # Stage 2: Serve the built application
