@@ -9,6 +9,7 @@ import { wsBaseUrl, baseUrl } from '../consts';
 function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
     const [myPetsData, setMyPetsData] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
+    const [initialCenteringDone, setInitialCenteringDone] = useState(false);
 
     useEffect(() => {
         console.log('Map Page Rendered with Animals:', animals);

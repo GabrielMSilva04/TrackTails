@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
 import Profile from './pages/Profile'
-import Home from './pages/Home'
 import Pet from './pages/Pet'
 import Register from './pages/Register'
 import Login from './pages/Login'

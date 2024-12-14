@@ -1,6 +1,14 @@
 import { NavLink } from "react-router-dom";
 
 export default function InitialPage() {
+    const navPage = (page) => {
+        if (localStorage.getItem('authToken')) {
+            return page
+        } else {
+            return 'login'
+        }
+    }
+
     return (
         <>
             {/* Container principal */}
@@ -21,7 +29,8 @@ export default function InitialPage() {
                     <h1 className="text-white text-2xl mb-8 font-bold text-center">
                         Take care of your pet with us.
                     </h1>
-                    <NavLink to="login" className="btn btn-secondary text-white rounded-lg text-lg font-semibold shadow-lg">
+                    <NavLink to={navPage('/mypets')}
+                             className="btn btn-secondary text-white rounded-lg text-lg font-semibold shadow-lg">
                         Get Started
                     </NavLink>
                 </div>
