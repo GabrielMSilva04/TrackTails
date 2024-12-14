@@ -32,7 +32,7 @@ async def get_device_ids_from_db():
 
 async def run_simulation_for_device(device_id):
     device_id_str = str(device_id)
-    logging.info(f"Iniciando simulação para o dispositivo: {device_id_str}")
+    logging.info(f"Starting Simulation on Device: {device_id_str}")
 
     try:
         process = await create_subprocess_exec(
@@ -54,7 +54,7 @@ async def main():
         await asyncio.gather(*tasks)
 
     except KeyboardInterrupt:
-        logging.info("Simulação interrompida manualmente")
+        logging.info("Simulation interrupted")
     except Exception as e:
         logging.error(f"An error occurred: {e}")
     finally:

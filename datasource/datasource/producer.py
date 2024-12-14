@@ -1,12 +1,14 @@
 import json
 import random
+import threading
 import time
 import folium
 import matplotlib.pyplot as plt
 from datetime import datetime
 import numpy as np
-from confluent_kafka import Producer
+from confluent_kafka import Producer, Consumer, KafkaError, KafkaException
 import sys
+import logging
 
 def create_kafka_producer():
     conf = {
@@ -135,7 +137,78 @@ def simulate_location(last_location, current_speed, update_interval, estado):
 def calculate_transition_speed(current_speed, target_speed, transition_progress):
     return current_speed + (target_speed - current_speed) * transition_progress
 
+
+blinking = False
+
+def create_kafka_consumer(device_id):
+    consumer_config = {
+        'bootstrap.servers': 'localhost:9092',
+        'group.id': f'animal-simulation-consumer-{device_id}',
+        'enable.auto.commit': True,
+        'auto.offset.reset': 'earliest'
+    }
+    
+    consumer = Consumer(consumer_config)
+    consumer.subscribe(['action'])
+    return consumer
+
+def consume_messages(device_id):
+    consumer = create_kafka_consumer(device_id)
+    logging.info("Consumer created")
+    
+    try:
+        while True:
+            # Aguarda indefinidamente até que uma mensagem seja recebida
+            logging.debug("Waiting for messages")
+            msg_lst = consumer.consume()
+            logging.debug(f"Received {len(msg_lst)} messages")
+            
+            for msg in msg_lst:
+                logging.debug(f"Received message: {msg}")
+                if msg is None:
+                    continue  # Nenhuma mensagem ainda, continua aguardando
+                
+                if msg.error():
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        # Fim da partição, mensagem informativa
+                        logging.debug(f"End of partition reached {msg.partition()}")
+                    elif msg.error().code() == KafkaError.UNKNOWN_TOPIC_OR_PART:
+                        logging.debug(f"Topic {msg.topic()} does not exist")
+                    elif msg.error():
+                        raise KafkaException(msg.error())
+                    continue
+                
+                # Processa mensagem válida
+                message_key = msg.key().decode('utf-8') if msg.key() else None
+                if message_key == device_id:
+                    message_value = json.loads(msg.value().decode('utf-8'))
+                    action = message_value['actionType']
+                    if action == 'Blink':
+                        global blinking
+                        if blinking:
+                            logging.info("STOP blinking")
+                            blinking = False
+                        else:
+                            logging.info("START blinking")
+                            blinking = True
+                    elif action == 'Sound':
+                        logging.info("Playing sound")
+                    else:
+                        logging.warning(f"Unknown action: {action}")
+                    
+                # flush the logs
+                sys.stdout.flush()
+    except KeyboardInterrupt:
+        print("Consumer interrupted by user")
+    finally:
+        consumer.close()
+                        
 def main(device_id):
+    logging.basicConfig(
+        level=logging.INFO,
+        format=f'%(asctime)s - %(levelname)s - {device_id}: %(message)s'
+    )
+
     last_state = "adescansar"
     update_interval = 3
     last_location = None
@@ -154,6 +227,10 @@ def main(device_id):
     current_speed = simulate_animal_speed(last_state)
     next_state = None
 
+    consumer_thread = threading.Thread(target=consume_messages, args=(device_id,))
+    consumer_thread.daemon = True
+    consumer_thread.start()
+    
     try:
         while True:
             current_state_time += 1
@@ -194,6 +271,7 @@ def main(device_id):
                 'respiratory_rate': respiratory_rate,
                 'latitude': last_location['latitude'],
                 'longitude': last_location['longitude'],
+                'blinking': blinking,
             }
 
 
