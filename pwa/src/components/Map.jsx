@@ -1,18 +1,37 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import pin from '../assets/pin.png';
 import axios from 'axios';
-import { useWebSocket } from '../useWebSocket';
 import { wsBaseUrl, baseUrl } from '../consts';
 
 function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
     const [myPetsData, setMyPetsData] = useState([]);
+    const [userLocation, setUserLocation] = useState(null);
 
     useEffect(() => {
         console.log('Map Page Rendered with Animals:', animals);
     }, [animals]);
+
+    useEffect(() => {
+        // Obter a localização do usuário
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.error("Error fetching user location:", error);
+                }
+            );
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+        }
+    }, []);
 
     useEffect(() => {
         // Setup WebSocket connection to receive real-time data
@@ -106,9 +125,10 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
 
     const centerPosition = useMemo(() => {
         if (myPetsData.length > 0 && myPetsData[0].latitude && myPetsData[0].longitude) {
+            console.log("Centering map to animal position:", myPetsData[0]);
             return [myPetsData[0].latitude, myPetsData[0].longitude];
         }
-        return [40.63316, -8.65939];
+        return [40.63316, -8.65939]; // Default position
     }, [myPetsData]);
 
     const customIcon = (animal) =>
@@ -122,12 +142,26 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
         `,
             iconAnchor: [37.5, 70],
             className: '',
-        }
-        );
+        });
+
+    const UpdateMapCenter = ({ center }) => {
+        const map = useMap();
+
+        useEffect(() => {
+            if (center) {
+                map.setView(center, map.getZoom()); // Update map center dynamically
+            }
+        }, [center, map]);
+
+        return null;
+    };
 
     return (
-        <MapContainer center={centerPosition} zoom={17} zoomControl={false} style={{ height: "100vh", width: "100%" }}>
+        <MapContainer center={centerPosition} zoom={18} zoomControl={false} style={{ height: "100vh", width: "100%" }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+            {/* Atualiza o centro dinamicamente */}
+            <UpdateMapCenter center={centerPosition} />
 
             {/* Render Fence if showFence is true */}
             {showFence && fence.length > 0 && <Polygon positions={fence} color="green" />}
@@ -151,8 +185,17 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
 
             {/* Use Leaflet Events for adding a fence */}
             {addingFence && <MapEvents />}
+
+            {/* Marker para o usuário */}
+            {userLocation && (
+                <Marker position={[userLocation.lat, userLocation.lng]}>
+                    <Popup>You are here</Popup>
+                </Marker>
+            )}
         </MapContainer>
     );
 }
 
 export default Map;
+
+
