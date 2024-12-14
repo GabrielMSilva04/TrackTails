@@ -1,13 +1,70 @@
+import asyncio
+import mariadb
+import os
+import sys
+import dotenv
+import aiomysql
+import logging
+import requests
+from influxdb_client import InfluxDBClient
+from influxdb_client.client.query_api import QueryApi
 import json
 import random
 import time
-import folium
-import matplotlib.pyplot as plt
-from datetime import datetime
-import numpy as np
 from confluent_kafka import Producer
-import sys
-import argparse
+from datetime import datetime
+
+dotenv.load_dotenv()
+
+INFLUXDB_URL = f"http://localhost:{os.getenv('INFLUXDB_PORT')}"
+INFLUXDB_TOKEN = os.getenv('DOCKER_INFLUXDB_INIT_ADMIN_TOKEN')
+INFLUXDB_ORG = os.getenv('DOCKER_INFLUXDB_INIT_ORG')
+INFLUXDB_BUCKET = os.getenv('DOCKER_INFLUXDB_INIT_BUCKET')
+
+
+def get_last_battery_level(animal_id):
+    client = InfluxDBClient(
+        url=INFLUXDB_URL,
+        token=INFLUXDB_TOKEN,
+        org=INFLUXDB_ORG
+    )
+
+    query_api = client.query_api()
+    query = f'''
+        from(bucket: "{INFLUXDB_BUCKET}")
+        |> range(start: -1d)
+        |> filter(fn: (r) => r._measurement == "animal_data")
+        |> filter(fn: (r) => r._field == "batteryPercentage")
+        |> filter(fn: (r) => r.animalId == "{animal_id}")
+        |> last()
+    '''
+
+    try:
+        result = query_api.query(query=query)
+        for table in result:
+            for record in table.records:
+                return record.get_value()
+    except Exception as e:
+        print(f"Error querying InfluxDB for animal ID {animal_id}: {e}")
+    finally:
+        client.close()
+
+    return None
+
+
+def get_animal_id(device_id):
+    url = f"http://localhost/api/v1/finders/animal/{device_id}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        data = response.json()
+        return data['id']
+    except requests.exceptions.HTTPError as e:
+        print(f"HTTP Error: {e}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching animal ID: {e}")
+    return None
+
 
 def create_kafka_producer():
     conf = {
@@ -16,12 +73,14 @@ def create_kafka_producer():
     }
     return Producer(conf)
 
+
 def send_to_kafka(producer, topic, message):
     try:
         producer.produce(topic, value=message)
         producer.flush()
     except Exception as e:
-        print(f"Erro ao enviar para o Kafka: {e}")
+        logging.error(f"Erro ao enviar para o Kafka: {e}")
+
 
 def simulate_state_data(device_id, last_state):
     current_hour = datetime.now().hour
@@ -47,6 +106,7 @@ def simulate_state_data(device_id, last_state):
         'timestamp': int(time.time())
     }
 
+
 def simulate_animal_speed(estado):
     speed_ranges = {
         "acorrer": (15.0, 25.0),
@@ -56,6 +116,7 @@ def simulate_animal_speed(estado):
 
     speed_range = speed_ranges.get(estado, (0.0, 0.0))
     return round(random.uniform(speed_range[0], speed_range[1]), 2)
+
 
 def simulate_heart_rate(estado, current_speed):
     base_bpm = 60
@@ -74,27 +135,6 @@ def simulate_heart_rate(estado, current_speed):
 
     return round(final_bpm, 1)
 
-def simulate_device_battery(last_battery, time_elapsed=3):
-    if last_battery is None:
-        return 100.0
-
-    hourly_rate = 2.0
-
-    rate_per_second = hourly_rate / 3600
-
-    total_change = rate_per_second * time_elapsed
-
-    variation = random.uniform(-0.05, 0.05) * total_change
-    total_change += variation
-
-    if last_battery <= 20.0:
-        new_battery = last_battery + total_change
-    else:
-        new_battery = last_battery - total_change
-
-    new_battery = max(0.0, min(100.0, new_battery))
-
-    return int(new_battery)
 
 def simulate_respiratory_rate(estado, current_speed, bpm):
     base_respirations = 12
@@ -121,6 +161,7 @@ def simulate_respiratory_rate(estado, current_speed, bpm):
     final_rate = min(final_rate, 50)
 
     return round(final_rate, 1)
+
 
 def simulate_location(last_location, current_speed, update_interval, estado):
     if last_location is None:
@@ -153,17 +194,19 @@ def simulate_location(last_location, current_speed, update_interval, estado):
         "longitude": round(new_longitude, 6)
     }
 
+
 def calculate_transition_speed(current_speed, target_speed, transition_progress):
     return current_speed + (target_speed - current_speed) * transition_progress
 
-def main(device_id, last_battery, duration):
+
+async def simulate_device(device_id, animal_id, initial_battery):
+    producer = create_kafka_producer()
+    topic = "animal_tracking_topic"
+
     last_state = "adescansar"
     update_interval = 2
     last_location = None
-    tracking_data = []
-    topic = "animal_tracking_topic"
-
-    producer = create_kafka_producer()
+    last_battery = float(initial_battery)
 
     state_duration = {
         'adormir': random.randint(20, 40),
@@ -175,14 +218,40 @@ def main(device_id, last_battery, duration):
     current_speed = simulate_animal_speed(last_state)
     next_state = None
 
-    start_time = time.time()
+    if last_battery > 20.0:
+        state = 'discharging'
+    else:
+        state = 'charging'
 
-    try:
-        while True:
-            current_time = time.time()
-            elapsed_time = current_time - start_time
-            if elapsed_time >= duration:
-                break
+    battery_timer = 0
+
+    while True:
+        try:
+            start_time = time.time()
+
+            battery_timer += update_interval
+
+            if battery_timer >= 10:
+                if state == 'discharging':
+                    last_battery -= 1.0
+                    logging.info(f"Dispositivo {device_id}: Bateria diminuída para {last_battery}%")
+                    if last_battery <= 20.0:
+                        state = 'charging'
+                        logging.info(f"Dispositivo {device_id}: Mudar para estado 'charging'")
+                elif state == 'charging':
+                    if last_battery < 100.0:
+                        last_battery += 1.0
+                        logging.info(f"Dispositivo {device_id}: Bateria aumentada para {last_battery}%")
+                        if last_battery >= 100.0:
+                            state = 'discharging'
+                            logging.info(f"Dispositivo {device_id}: Bateria cheia. Mudar para estado 'discharging'")
+                    else:
+                        state = 'discharging'
+                        logging.info(f"Dispositivo {device_id}: Bateria já está em 100%. Mudar para estado 'discharging'")
+
+                last_battery = max(0.0, min(100.0, last_battery))
+
+                battery_timer = 0
 
             current_state_time += 1
             time_until_change = state_duration[last_state] - current_state_time
@@ -212,7 +281,6 @@ def main(device_id, last_battery, duration):
 
             bpm = simulate_heart_rate(last_state, current_speed)
             last_location = simulate_location(last_location, current_speed, update_interval, last_state)
-            batteryPercentage = simulate_device_battery(last_battery)
             respiratory_rate = simulate_respiratory_rate(last_state, current_speed, bpm)
 
             data = {
@@ -222,30 +290,84 @@ def main(device_id, last_battery, duration):
                 'respiratory_rate': respiratory_rate,
                 'latitude': last_location['latitude'],
                 'longitude': last_location['longitude'],
-                'batteryPercentage': batteryPercentage,
+                'batteryPercentage': round(last_battery, 2),
                 'timestamp': int(time.time())
             }
 
             send_to_kafka(producer, topic, json.dumps(data))
-            tracking_data.append(data)
 
-            time.sleep(update_interval)
+            await asyncio.sleep(update_interval)
+
+            elapsed_time = time.time() - start_time
+
+        except Exception as e:
+            logging.error(f"Erro na simulação para o dispositivo {device_id}: {e}")
+            await asyncio.sleep(5)
+
+
+async def run_simulation_for_device(device_id):
+    animal_id = get_animal_id(device_id)
+    if animal_id is None:
+        logging.error(f"Não foi possível obter o animal ID para o dispositivo {device_id}")
+        return
+
+    last_battery = get_last_battery_level(animal_id)
+    if last_battery is None:
+        logging.warning(f"Não foi possível obter o nível de bateria para o animal ID {animal_id}.")
+        last_battery = 100.0
+
+    await simulate_device(device_id, animal_id, last_battery)
+
+
+async def get_device_ids_from_db():
+    try:
+        conn = await aiomysql.connect(
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            host="127.0.0.1",
+            port=3306,
+            db=os.getenv("DB_NAME")
+        )
+
+        async with conn.cursor() as cursor:
+            await cursor.execute("SELECT device_id FROM animals")
+            device_ids = [device_id[0] for device_id in await cursor.fetchall()]
+
+        conn.close()
+        return device_ids
 
     except Exception as e:
-        print(f"Erro durante a simulação: {e}")
+        logging.error(f"Error connecting to Database: {e}")
+        sys.exit(1)
 
+
+async def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+
+    try:
+        device_ids = await get_device_ids_from_db()
+        tasks = [run_simulation_for_device(device_id) for device_id in device_ids]
+        await asyncio.gather(*tasks)
+
+    except KeyboardInterrupt:
+        logging.info("Simulação interrompida manualmente")
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
     finally:
-        producer.flush()
+        for task in asyncio.all_tasks():
+            if not task.done():
+                task.cancel()
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Simulador de Dispositivo Animal')
-    parser.add_argument('device_id', type=str, help='ID do dispositivo')
-    parser.add_argument('last_battery', type=float, help='Último nível de bateria')
-    parser.add_argument('--duration', type=int, default=20, help='Duração da simulação em segundos')
+    asyncio.run(main())
 
-    args = parser.parse_args()
 
-    main(args.device_id, args.last_battery, args.duration)
+
+
 
 
 
