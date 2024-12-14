@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Map from './Map';
 import { useAnimalContext } from '../contexts/AnimalContext';
@@ -35,7 +35,7 @@ function LayoutMap() {
                     )}
 
                     {isDrawerOpen && (
-                        <div className="bg-primary text-base-content w-60 rounded-lg">
+                        <div className="bg-primary text-base-content w-60 rounded-lg shadow-lg p-4">
                             <div className="flex flex-row justify-between mb-4">
                                 <button
                                     className="btn btn-ghost mt-2"
@@ -52,7 +52,7 @@ function LayoutMap() {
                                 </div>
                             </div>
 
-                            <div className="flex flex-col gap-2 p-2">
+                            <div className="flex flex-col gap-2 p-2 max-h-60 overflow-y-auto">
                                 {animals.map((animal) => (
                                     <div
                                         key={animal.id}
@@ -102,3 +102,4 @@ function LayoutMap() {
 }
 
 export default LayoutMap;
+

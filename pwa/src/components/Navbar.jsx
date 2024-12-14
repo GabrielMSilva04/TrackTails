@@ -17,28 +17,28 @@ export default function Navbar() {
             <button className="w-100% h-100%">
                 <NavLink to="/mypets" className="tooltip" data-tip="My Animals">
                     {({isActive}) => (
-                        <FontAwesomeIcon icon={faPaw} color={isActive ? '#1cb51c' : 'white'}/>
+                        <FontAwesomeIcon icon={faPaw} color={isActive ? '#1cb51c' : 'white'} size={isActive ? '2xl' : 'xl'}/>
                     )}
                 </NavLink>
             </button>
             <button className="w-100% h-100%">
                 <NavLink to="/map" className="tooltip" data-tip="Map">
                     {({isActive}) => (
-                        <FontAwesomeIcon icon={faLocationDot} color={isActive ? '#1cb51c' : 'white'}/>
+                        <FontAwesomeIcon icon={faLocationDot} color={isActive ? '#1cb51c' : 'white'} size={isActive ? '2xl' : 'xl'}/>
                     )}
                 </NavLink>
             </button>
             <button className="w-100% h-100%">
                 <NavLink to="/notifications" className="tooltip" data-tip="Notifications">
                     {({isActive}) => (
-                        <FontAwesomeIcon icon={faBell} color={isActive ? '#1cb51c' : 'white'}/>
+                        <FontAwesomeIcon icon={faBell} color={isActive ? '#1cb51c' : 'white'} size={isActive ? '2xl' : 'xl'}/>
                     )}
                 </NavLink>
             </button>
             <button>
                 <NavLink to="/profile" className="tooltip" data-tip="Profile">
                     {({ isActive }) => (
-                        <FontAwesomeIcon icon={faUser} color={isActive ? '#1cb51c' : 'white'} />
+                        <FontAwesomeIcon icon={faUser} color={isActive ? '#1cb51c' : 'white'} size={isActive ? '2xl' : 'xl'}/>
                     )}
                 </NavLink>
             </button>
