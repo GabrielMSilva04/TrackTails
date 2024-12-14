@@ -167,6 +167,12 @@ export default function EditPet() {
                     onSubmit={handleSubmit(onSubmit)}
                     className="flex flex-col gap-2 h-full w-full"
                 >
+                    {/* Disclaimer */}
+                    <div
+                        className="text-sm text-secondary mb-4 p-3 border border-dashed border-primary rounded-md bg-gray-50">
+                        <strong>Note:</strong> Filling in the optional fields especially weight and birthday can help better determine if
+                        an health parameter is out of the ordinary.
+                    </div>
                     {/* Scrollable Content */}
                     <div className="flex-grow overflow-y-auto space-y-4 px-4">
                         {/* Form Fields */}

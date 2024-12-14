@@ -63,6 +63,13 @@ public class AnimalMonitoringService {
             String content = String.format("%s has trespassed the fenced area.", name);
             sendNotification(animalId, userId, title, content);
         }
+
+        // Check Battery Percentage
+        if (!checkBatteryPercentage(data)) {
+            String title = "WARN - Low Battery";
+            String content = String.format("%s's device battery is below 20%%. Please recharge.", name);
+            sendNotification(animalId, userId, title, content);
+        }
     }
 
     private void sendNotification(Long animalId, Long userId, String title, String content) {
@@ -180,5 +187,10 @@ public class AnimalMonitoringService {
         double latitude = data.getLatitude().get();
         double longitude = data.getLongitude().get();
         return fenceService.isInsideFence(animalId, latitude, longitude);
+    }
+
+    private boolean checkBatteryPercentage(AnimalDataDTO data) {
+        Optional<Double> batteryPercentage = data.getBatteryPercentage();
+        return batteryPercentage.isEmpty() || batteryPercentage.get() >= 20.0;
     }
 }
