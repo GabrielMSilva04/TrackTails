@@ -19,6 +19,7 @@ import './App.css'
 import Notifications from "./pages/Notifications.jsx";
 import { AnimalProvider } from './contexts/AnimalContext';
 import { useNavigate } from 'react-router-dom'
+import InitialPage from "./pages/InitialPage.jsx";
 
 const ProtectedRoute = ({ loggedIn, children }) => {
     return loggedIn ? children : <Navigate to="/login" />;
@@ -43,6 +44,7 @@ export default function App() {
         <Router>
             <Routes>
                 {/* Public Pages */}
+                <Route index element={<InitialPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
@@ -79,9 +81,10 @@ function AppRoutes() {
     return (
         <AnimalProvider>
             <Routes>
+
                 {/* Public Layout */}
                 <Route path="/" element={<Layout />}>
-                  <Route index element={<Home />} />
+
                   <Route path="/about" element={<h2>About</h2>} />
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/mypets" element={<MyPets onAnimalSelect={handleSelectAnimal} />} />
