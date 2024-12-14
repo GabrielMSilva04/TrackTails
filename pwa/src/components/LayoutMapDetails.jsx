@@ -209,6 +209,7 @@ export default function LayoutMapDetails() {
                     routeData={showRoute ? routeData : []}
                     showRoute={showRoute}
                     clickHandler={() => {}}
+                    targetAnimal={selectedAnimal}
                 />
             </div>
 

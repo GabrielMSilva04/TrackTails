@@ -6,7 +6,7 @@ import pin from '../assets/pin.png';
 import axios from 'axios';
 import { wsBaseUrl, baseUrl } from '../consts';
 
-function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
+function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler, targetAnimal }) {
     const [myPetsData, setMyPetsData] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
     const [initialCenteringDone, setInitialCenteringDone] = useState(false);
@@ -104,12 +104,33 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
     };
 
     const centerPosition = useMemo(() => {
-        if (myPetsData.length > 0 && myPetsData[0].latitude && myPetsData[0].longitude) {
-            console.log("Centering map to animal position:", myPetsData[0]);
-            return [myPetsData[0].latitude, myPetsData[0].longitude];
+        // 1. If a targetAnimal exists, find its position in myPetsData
+        if (targetAnimal) {
+            const matchingAnimal = myPetsData.find(animal => animal.id === targetAnimal.id);
+            if (matchingAnimal?.latitude && matchingAnimal?.longitude) {
+                console.log("Centering map to target animal position from myPetsData:", matchingAnimal);
+                return [matchingAnimal.latitude, matchingAnimal.longitude];
+            }
         }
-        return [40.63316, -8.65939];
-    }, [myPetsData]);
+
+        // 2. If no targetAnimal, only center during the first render or if initial centering hasn't happened
+        if (!initialCenteringDone) {
+            if (userLocation?.[0] && userLocation?.[1]) {
+                console.log("Centering map to user location:", userLocation);
+                setInitialCenteringDone(true); // Mark as centered
+                return userLocation;
+            }
+
+            // 3. If no initial centering is possible, don't update the center
+            console.log("No valid center position available yet");
+            return null;
+        }
+
+        // 4. If initial centering is done and no target animal, retain current position
+        console.log("Retaining current map position");
+        return null;
+    }, [targetAnimal, myPetsData, userLocation, initialCenteringDone]);
+
 
     const customIcon = (animal) =>
         L.divIcon({
@@ -128,7 +149,7 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
         const map = useMap();
 
         useEffect(() => {
-            if (center) {
+            if (center && map) {
                 map.setView(center, map.getZoom());
             }
         }, [center, map]);
@@ -137,7 +158,12 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
     };
 
     return (
-        <MapContainer center={centerPosition} zoom={18} zoomControl={false} style={{ height: "100vh", width: "100%" }}>
+        <MapContainer
+            center={centerPosition || [40.63316, -8.65939]}
+            zoom={18}
+            zoomControl={false}
+            style={{ height: "100vh", width: "100%" }}
+        >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
 
