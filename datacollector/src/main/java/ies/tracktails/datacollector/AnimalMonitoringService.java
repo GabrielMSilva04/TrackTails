@@ -80,13 +80,16 @@ public class AnimalMonitoringService {
         }
 
         double heartRate = data.getHeartRate().get();
-        Date birthday = animal.getBirthday();
-        Optional<Double> optionalWeight = animalDataService.getLatestValue(animal.getId().toString(), "weight").getWeight();
-        double weight = optionalWeight.orElse(Double.MAX_VALUE);
-
-        int ageInMonths = (birthday != null) ? getAnimalAgeInMonths(birthday) : -1;
 
         if ("dog".equalsIgnoreCase(species)) {
+            Date birthday = animal.getBirthday();
+
+            // Retrieve the latest weight value safely
+            AnimalDataDTO latestWeightData = animalDataService.getLatestValue(animal.getId().toString(), "weight");
+            Optional<Double> optionalWeight = (latestWeightData != null) ? latestWeightData.getWeight() : Optional.empty();
+            double weight = optionalWeight.orElse(Double.MAX_VALUE);
+
+            int ageInMonths = (birthday != null) ? getAnimalAgeInMonths(birthday) : -1;
             if (ageInMonths == -1 && optionalWeight.isEmpty()) {
                 return heartRate >= 60 && heartRate <= 200;
             } else if (ageInMonths == -1) {
@@ -126,6 +129,10 @@ public class AnimalMonitoringService {
 
         int yearsDifference = now.get(Calendar.YEAR) - birthDate.get(Calendar.YEAR);
         int monthsDifference = now.get(Calendar.MONTH) - birthDate.get(Calendar.MONTH);
+
+        if (now.get(Calendar.DAY_OF_MONTH) < birthDate.get(Calendar.DAY_OF_MONTH)) {
+            monthsDifference--;
+        }
 
         int totalMonths = yearsDifference * 12 + monthsDifference;
 
