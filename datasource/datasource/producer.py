@@ -7,6 +7,7 @@ from datetime import datetime
 import numpy as np
 from confluent_kafka import Producer
 import sys
+import argparse
 
 def create_kafka_producer():
     conf = {
@@ -20,7 +21,7 @@ def send_to_kafka(producer, topic, message):
         producer.produce(topic, value=message)
         producer.flush()
     except Exception as e:
-        pass
+        print(f"Erro ao enviar para o Kafka: {e}")
 
 def simulate_state_data(device_id, last_state):
     current_hour = datetime.now().hour
@@ -73,16 +74,36 @@ def simulate_heart_rate(estado, current_speed):
 
     return round(final_bpm, 1)
 
+def simulate_device_battery(last_battery, time_elapsed=3):
+    if last_battery is None:
+        return 100.0
+
+    hourly_rate = 2.0
+
+    rate_per_second = hourly_rate / 3600
+
+    total_change = rate_per_second * time_elapsed
+
+    variation = random.uniform(-0.05, 0.05) * total_change
+    total_change += variation
+
+    if last_battery <= 20.0:
+        new_battery = last_battery + total_change
+    else:
+        new_battery = last_battery - total_change
+
+    new_battery = max(0.0, min(100.0, new_battery))
+
+    return int(new_battery)
+
 def simulate_respiratory_rate(estado, current_speed, bpm):
     base_respirations = 12
-
 
     respiratory_multipliers = {
         "adormir": 0.8,
         "adescansar": 1.0,
         "acorrer": 2.0
     }
-
 
     multiplier = respiratory_multipliers.get(estado, 1.0)
     speed_factor = current_speed / 25
@@ -135,9 +156,9 @@ def simulate_location(last_location, current_speed, update_interval, estado):
 def calculate_transition_speed(current_speed, target_speed, transition_progress):
     return current_speed + (target_speed - current_speed) * transition_progress
 
-def main(device_id):
+def main(device_id, last_battery, duration):
     last_state = "adescansar"
-    update_interval = 3
+    update_interval = 2
     last_location = None
     tracking_data = []
     topic = "animal_tracking_topic"
@@ -154,8 +175,15 @@ def main(device_id):
     current_speed = simulate_animal_speed(last_state)
     next_state = None
 
+    start_time = time.time()
+
     try:
         while True:
+            current_time = time.time()
+            elapsed_time = current_time - start_time
+            if elapsed_time >= duration:
+                break
+
             current_state_time += 1
             time_until_change = state_duration[last_state] - current_state_time
 
@@ -184,7 +212,7 @@ def main(device_id):
 
             bpm = simulate_heart_rate(last_state, current_speed)
             last_location = simulate_location(last_location, current_speed, update_interval, last_state)
-
+            batteryPercentage = simulate_device_battery(last_battery)
             respiratory_rate = simulate_respiratory_rate(last_state, current_speed, bpm)
 
             data = {
@@ -194,18 +222,30 @@ def main(device_id):
                 'respiratory_rate': respiratory_rate,
                 'latitude': last_location['latitude'],
                 'longitude': last_location['longitude'],
+                'batteryPercentage': batteryPercentage,
+                'timestamp': int(time.time())
             }
-
-
 
             send_to_kafka(producer, topic, json.dumps(data))
             tracking_data.append(data)
 
             time.sleep(update_interval)
 
-    except KeyboardInterrupt:
-        pass
+    except Exception as e:
+        print(f"Erro durante a simulação: {e}")
+
+    finally:
+        producer.flush()
 
 if __name__ == "__main__":
-    device_id = sys.argv[1]
-    main(device_id)
+    parser = argparse.ArgumentParser(description='Simulador de Dispositivo Animal')
+    parser.add_argument('device_id', type=str, help='ID do dispositivo')
+    parser.add_argument('last_battery', type=float, help='Último nível de bateria')
+    parser.add_argument('--duration', type=int, default=20, help='Duração da simulação em segundos')
+
+    args = parser.parse_args()
+
+    main(args.device_id, args.last_battery, args.duration)
+
+
+

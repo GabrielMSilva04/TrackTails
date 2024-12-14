@@ -34,6 +34,7 @@ public class Consumer {
         data.getSpeed().ifPresent(speed -> animalDataDTO.setSpeed(speed));
         data.getBpm().ifPresent(heartRate -> animalDataDTO.setHeartRate(heartRate));
         data.getRespiratory_rate().ifPresent(breathRate -> animalDataDTO.setBreathRate(breathRate));
+        data.getBatteryPercentage().ifPresent(batteryPercentage -> animalDataDTO.setBatteryPercentage(batteryPercentage));
 
         return animalDataDTO;
     }
