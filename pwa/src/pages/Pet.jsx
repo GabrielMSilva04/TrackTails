@@ -200,8 +200,6 @@ export default function Pet({ onMetricSelect }) {
                 link.href = window.URL.createObjectURL(blob);
                 link.download = `${animalId}_report.pdf`;
                 link.click();
-
-                alert('Report downloaded successfully!');
             } else {
                 console.error('Failed to generate report:', response);
                 alert('Failed to generate report. Please try again.');

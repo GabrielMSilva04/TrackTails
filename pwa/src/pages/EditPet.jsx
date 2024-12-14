@@ -61,7 +61,6 @@ export default function EditPet() {
         try {
             const token = localStorage.getItem("authToken");
             if (!token) {
-                alert("No authentication token found. Please log in.");
                 return;
             }
 
@@ -123,7 +122,6 @@ export default function EditPet() {
                 }
             }
 
-            alert("Pet updated successfully!");
             window.location.href = "/mypets";
         } catch (error) {
             console.error("Error updating pet or saving data:", error.response?.data || error.message);

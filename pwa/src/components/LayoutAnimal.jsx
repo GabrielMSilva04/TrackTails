@@ -43,14 +43,12 @@ export default function LayoutAnimal({ showButtons = "all" }) {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
             });
-            alert("Animal deleted successfully.");
             console.log("Delete response:", response.data);
 
             setSelectedAnimal(null);
             navigate("/mypets");
         } catch (error) {
             console.error("Error deleting animal:", error);
-            alert("Failed to delete the animal. Please try again.");
         }
     };
 

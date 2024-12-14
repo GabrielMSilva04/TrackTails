@@ -22,15 +22,12 @@ export default function Register() {
             password: data.password,
         };
 
-        console.log("Payload to send:", payload);
-
         try {
             const response = await axios.post(register_url, payload, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-            alert("Registration successful!");
             console.log("Registration Response:", response.data);
         } catch (error) {
             console.error("Registration Error:", error);
@@ -46,9 +43,6 @@ export default function Register() {
 
             const token = response.data.token;
             localStorage.setItem("authToken", token);
-            alert("Login successful!");
-
-            console.log("Token:", token);
 
             // Redirect user to mypets page
             window.location.href = "/mypets";

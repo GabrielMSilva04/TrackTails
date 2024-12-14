@@ -77,7 +77,6 @@ export default function Profile({ onAnimalSelect }) {
             });
             setUser(response.data);
             setEditMode(false);
-            alert('Profile updated successfully!');
         } catch (err) {
             console.error('Error updating user:', err);
             alert('Failed to update the profile. Please try again.');
