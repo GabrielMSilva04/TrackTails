@@ -9,6 +9,35 @@ import numpy as np
 from confluent_kafka import Producer, Consumer, KafkaError, KafkaException
 import sys
 import logging
+import qrcode
+import os
+
+base_url = os.getenv("BASE_URL", "http://localhost")
+
+def print_qrcode(device_id):
+    data = f"{base_url}/finders/{device_id}"
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=1,
+        border=1,
+    )
+
+    # Generate QR code
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    # Generate an image from the QR Code instance
+    qr_code_ascii = qr.make_image(fill_color='black', back_color='white')
+    #qr_code_ascii.show()  # Open in a image viewer
+
+    # Print the qr code matrix on the console
+    qr_code_text = qr.get_matrix()  # Obter a matriz do QR Code
+    str = ""
+    for row in qr_code_text:
+        str += ("".join(['██' if cell else '  ' for cell in row])) + "\n"
+    logging.info(f"QR Code for device {device_id}:\n{str}")
 
 def create_kafka_producer():
     conf = {
@@ -208,6 +237,8 @@ def main(device_id):
         level=logging.INFO,
         format=f'%(asctime)s - %(levelname)s - {device_id}: %(message)s'
     )
+
+    print_qrcode(device_id)
 
     last_state = "adescansar"
     update_interval = 3
