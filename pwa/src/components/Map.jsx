@@ -5,76 +5,91 @@ import L from 'leaflet';
 import pin from '../assets/pin.png';
 import axios from 'axios';
 import { useWebSocket } from '../useWebSocket';
-import { baseUrl } from '../consts';
+import { wsBaseUrl, baseUrl } from '../consts';
 
 function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
     const [myPetsData, setMyPetsData] = useState([]);
-    // useWebSocket(1);
 
     useEffect(() => {
         console.log('Map Page Rendered with Animals:', animals);
     }, [animals]);
 
     useEffect(() => {
+        // Setup WebSocket connection to receive real-time data
+        const websockets = [];
+        const authToken = localStorage.getItem("authToken");
+        const wsUrl = `${wsBaseUrl}/animaldata?auth=${authToken}`;
+
         const fetchDynamicData = async () => {
-            try {
-                const headers = {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                }
-                
-                const updatedAnimals = await Promise.all(
-                    animals.map(async (animal) => {
-                        const response = await axios.get(
-                            `${baseUrl}/animaldata/latest/${animal.id}`,
-                            { headers }
-                        );
-                      
-                        return { ...animal, ...response.data };
-                      
-                    })
-                );
-                setMyPetsData(updatedAnimals);
-            } catch (error) {
-                console.error('Failed to fetch dynamic data:', error);
+            const headers = {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
             }
+
+            const updatedAnimals = await Promise.all(
+                animals.map(async (animal) => {
+                    const socket = new WebSocket(wsUrl);
+
+                    socket.onopen = () => {
+                        console.log("WebSocket connection established");
+                        // Subscribe animal
+                        socket.send(
+                            JSON.stringify({
+                                action: "subscribe",
+                                animalId: animal.id,
+                            })
+                        );
+                    };
+
+                    socket.onmessage = (event) => {
+                        console.log("Message received:", event.data);
+                        const data = JSON.parse(event.data);
+
+                        setMyPetsData((prevData) => {
+                            const updatedData = prevData.map((animal) => {
+                                if (animal.id == data.animalId) {
+                                    console.log("Updating animal data:", data);
+                                    return { ...animal, ...data };
+                                }
+                                return animal;
+                            });
+
+                            return updatedData;
+                        });
+                    };
+
+                    socket.onerror = (error) => {
+                        console.error("WebSocket error:", error);
+                    };
+
+                    socket.onclose = () => {
+                        console.log("WebSocket connection closed");
+                    };
+
+                    websockets.push(socket);
+
+                    const response = await axios.get(
+                        `${baseUrl}/animaldata/latest/${animal.id}`,
+                        { headers }
+                    );
+                    return { ...animal, ...response.data };
+
+                })
+            );
+            setMyPetsData(updatedAnimals);
         };
 
         if (animals && animals.length > 0) {
             fetchDynamicData();
         }
-    }, [animals]);
 
-    // useEffect(() => {
-    //     // Set up WebSocket for real-time updates
-    //     const socket = new WebSocket('ws://localhost:8080/realtime/updates');
-    //
-    //     socket.onopen = () => {
-    //         console.log('WebSocket connection established.');
-    //     };
-    //
-    //     socket.onmessage = (event) => {
-    //         const updatedAnimal = JSON.parse(event.data);
-    //
-    //         // Update the specific animal's data
-    //         setMyPetsData((prevData) =>
-    //             prevData.map((animal) =>
-    //                 animal.id === updatedAnimal.id ? { ...animal, ...updatedAnimal } : animal
-    //             )
-    //         );
-    //     };
-    //
-    //     socket.onerror = (error) => {
-    //         console.error('WebSocket error:', error);
-    //     };
-    //
-    //     socket.onclose = () => {
-    //         console.log('WebSocket connection closed.');
-    //     };
-    //
-    //     return () => {
-    //         socket.close(); // Clean up WebSocket on component unmount
-    //     };
-    // }, []);
+        return () => {
+            for (let ws of websockets) {
+                ws.close();
+                console.log("WebSocket connection closed by unmounting component");
+            }
+        };
+
+    }, [animals]);
 
     const MapEvents = () => {
         useMapEvents({
@@ -95,7 +110,7 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
         }
         return [40.63316, -8.65939];
     }, [myPetsData]);
-  
+
     const customIcon = (animal) =>
         L.divIcon({
             html: `
@@ -108,7 +123,7 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
             iconAnchor: [37.5, 70],
             className: '',
         }
-    );
+        );
 
     return (
         <MapContainer center={centerPosition} zoom={17} zoomControl={false} style={{ height: "100vh", width: "100%" }}>
