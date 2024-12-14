@@ -6,16 +6,18 @@ import 'swiper/css';
 import axios from 'axios';
 import { useAnimalContext } from "../contexts/AnimalContext";
 import { baseUrl } from '../consts';
+import {useNavigate} from "react-router-dom";
 
-export default function Profile() {
+export default function Profile({ onAnimalSelect }) {
     const [user, setUser] = useState(null);
     const [editMode, setEditMode] = useState(false);
-    const { animals } = useAnimalContext();
+    const { animals,setSelectedAnimal } = useAnimalContext();
     const [formData, setFormData] = useState({
         displayName: '',
         email: '',
         password: '',
     });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -91,6 +93,17 @@ export default function Profile() {
         F: <FontAwesomeIcon icon={faVenus} />,
         M: <FontAwesomeIcon icon={faMars} />,
     };
+
+    const selectHandle = (pet) => {
+        // Atualiza o animal selecionado no contexto e chama a prop
+        if (onAnimalSelect) {
+            onAnimalSelect(pet.id);
+        }
+        console.log("SET SELECTED ANIMAL", pet); // Debug
+        setSelectedAnimal(pet);
+        navigate('/animal/monitoring', { state: { fromProfile: true } });// Redireciona para a rota
+    };
+
 
     const PetCard = ({ pet }) => (
         <div className="flex flex-col items-center bg-primary rounded-xl p-4 pt-16 w-40 shadow-lg mt-12">
@@ -188,7 +201,9 @@ export default function Profile() {
                             <Swiper spaceBetween={40} slidesPerView={2} className="w-full">
                                 {animals.map((animal) => (
                                     <SwiperSlide key={animal.id}>
-                                        <PetCard pet={animal} />
+                                        <button onClick={() => selectHandle(animal)} className="focus:outline-none">
+                                            <PetCard pet={animal}/>
+                                        </button>
                                     </SwiperSlide>
                                 ))}
                             </Swiper>

@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import {Outlet, Link, useNavigate, useLocation} from "react-router-dom";
 import NavBar from "./Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +11,7 @@ import { baseUrl } from "../consts";
 export default function LayoutAnimal({ showButtons = "all" }) {
     const { selectedAnimal, setSelectedAnimal } = useAnimalContext();
     const navigate = useNavigate();
-
+    const location = useLocation();
     LayoutAnimal.propTypes = {
         showButtons: PropTypes.oneOf(["all", "back-only", "none"]),
     };
@@ -58,8 +58,14 @@ export default function LayoutAnimal({ showButtons = "all" }) {
         navigate(`/editpet`);
     };
 
+    const fromProfile = location.state?.fromProfile;
+
     const onBackClick = () => {
-        window.location.href = "/mypets";
+        if (fromProfile) {
+            navigate('/profile');
+        } else {
+            navigate(-1);
+        }
     }
 
     return (
