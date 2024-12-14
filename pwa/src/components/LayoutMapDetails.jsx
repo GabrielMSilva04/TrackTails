@@ -43,14 +43,13 @@ export default function LayoutMapDetails() {
                 const headers = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                 };
-
                 const [latitudeResponse, longitudeResponse, latestResponse] = await Promise.all([
                     axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/latitude`, {
-                        params: { start: "-1d", end: "now()", interval: "15m", aggregate: "last" },
+                        params: { start: "-10m", end: "now()", interval: "10s", aggregate: "last" },
                         headers,
                     }),
                     axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/longitude`, {
-                        params: { start: "-1d", end: "now()", interval: "15m", aggregate: "last" },
+                        params: { start: "-10m", end: "now()", interval: "10s", aggregate: "last" },
                         headers,
                     }),
                     axios.get(`${baseUrl}/animaldata/latest/${selectedAnimal.id}`, { headers }),
@@ -81,6 +80,15 @@ export default function LayoutMapDetails() {
         };
 
         fetchAnimalData();
+
+        const intervalId = setInterval(() => {
+            fetchAnimalData();
+        }, 10000); // Fetch every 10 seconds
+
+        // Cleanup interval on component unmount or dependency change
+        return () => {
+            clearInterval(intervalId);
+        };
     }, [selectedAnimal]);
 
     // Fetch existing fence data
