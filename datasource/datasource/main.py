@@ -4,7 +4,7 @@ import logging
 import dotenv
 import os
 import sys
-from producer import run_simulation_for_device, consume_messages, logger, create_device_logger
+from device import run_simulation_for_device, consume_messages, logger, create_device_logger
 
 dotenv.load_dotenv()
 

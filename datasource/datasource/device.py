@@ -33,13 +33,13 @@ INFLUXDB_BUCKET = os.getenv('DOCKER_INFLUXDB_INIT_BUCKET')
 
 logger = {}
 
-def create_device_logger(device_id):
+def create_device_logger(device_id, level=logging.INFO):
     logger = logging.getLogger(f"device_{device_id}")
     handler = logging.StreamHandler()
     formatter = logging.Formatter(f'%(asctime)s - %(levelname)s - {device_id}: %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(level)
     
     return logger
 
@@ -122,8 +122,9 @@ def create_kafka_producer():
 
 
 def send_to_kafka(producer, topic, key, message):
+    key_bytes = str(key).encode('utf-8')
     try:
-        producer.produce(topic, key=key, value=message)
+        producer.produce(topic, key=key_bytes, value=message)
         producer.flush()
     except Exception as e:
         logger[key].error(f"Error sending to kafka: {e}")
