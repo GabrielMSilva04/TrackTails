@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Map from './Map';
 import { useAnimalContext } from '../contexts/AnimalContext';
@@ -35,24 +35,17 @@ function LayoutMap() {
                     )}
 
                     {isDrawerOpen && (
-                        <div className="bg-primary text-base-content w-60 rounded-lg">
-                            <div className="flex flex-row justify-between mb-4">
+                        <div className="bg-primary text-base-content w-60 rounded-lg shadow-lg">
+                            <div className="flex flex-row justify-between">
                                 <button
-                                    className="btn btn-ghost mt-2"
+                                    className="btn btn-ghost"
                                     onClick={toggleDrawer}
                                 >
-                                    <FontAwesomeIcon icon={faTimes} className="text-white" size="2x" />
+                                    <FontAwesomeIcon icon={faTimes} className="text-white" size="xl" />
                                 </button>
-                                <div className="form-control">
-                                    <input
-                                        type="text"
-                                        placeholder="Search..."
-                                        className="input input-bordered w-40 mt-2 mr-2"
-                                    />
-                                </div>
                             </div>
 
-                            <div className="flex flex-col gap-2 p-2">
+                            <div className="flex flex-col gap-2 pb-2 px-2 max-h-60 overflow-y-auto">
                                 {animals.map((animal) => (
                                     <div
                                         key={animal.id}
@@ -102,3 +95,4 @@ function LayoutMap() {
 }
 
 export default LayoutMap;
+
