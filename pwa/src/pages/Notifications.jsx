@@ -2,68 +2,76 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleCheck } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState } from "react";
 import NotificationComponent from "../components/NotificationComponent";
+import { useAnimalContext } from "../contexts/AnimalContext";
 import axios from "axios";
 import { baseUrl } from "../consts";
 
 const notificationsBaseUrl = `${baseUrl}/notifications`;
-const animalsBaseUrl = `${baseUrl}/animals`;
 
 export default function Notifications() {
     const [notifications, setNotifications] = useState([]);
-    const [markedAsRead, setMarkedAsRead] = useState(false);
+    const { animals } = useAnimalContext(); // Access animal context
 
     const authHeaders = {
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
     };
 
     useEffect(() => {
+        let timeoutId;
+        let isMounted = true; // Track if the component is mounted
+
         const fetchNotifications = async () => {
             try {
                 // Fetch notifications
+                const token = localStorage.getItem("authToken");
                 const response = await axios.get(`${notificationsBaseUrl}`, {
-                    headers: authHeaders,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 });
                 const notificationData = response.data;
-                console.log("Notification Data:", notificationData);
 
-                // Enrich notifications with animal data
-                const enrichedNotifications = await Promise.all(
-                    notificationData.map(async (notification) => {
-                        try {
-                            const animalResponse = await axios.get(`${animalsBaseUrl}/${notification.animalId}`, {
-                                headers: authHeaders,
-                            });
-                            const animalData = animalResponse.data;
+                // Enrich notifications with animal data from context
+                const enrichedNotifications = notificationData.map((notification) => {
+                    const animal = animals.find((a) => a.id === notification.animalId) || {};
+                    return {
+                        ...notification,
+                        name: animal.name || "Unknown",
+                        notification: notification.content.replace("{name}", animal.name || "Unknown"),
+                        imageUrl: animal.imageUrl || "https://placehold.co/150",
+                        highlight:
+                            !notification.read && notification.title.startsWith("WARN"), // Highlight logic
+                    };
+                });
 
-                            return {
-                                ...notification,
-                                name: animalData.name || "Unknown",
-                                notification: notification.content.replace("{name}", animalData.name || "Unknown"),
-                                img: animalData.imagePath || "https://via.placeholder.com/150",
-                                highlight: ["Off Limits", "Acceleration"].includes(notification.title),
-                            };
-                        } catch (error) {
-                            console.error(`Error fetching animal data for ID ${notification.animalId}:`, error);
-                        }
-                    })
-                );
+                enrichedNotifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-                setNotifications(enrichedNotifications);
+                if (isMounted) {
+                    setNotifications(enrichedNotifications);
 
-                // Simulate marking notifications as read after a delay
-                setTimeout(() => markNotificationsAsRead(enrichedNotifications), 5000);
+                    // Schedule marking notifications as read
+                    timeoutId = setTimeout(() => {
+                        if (isMounted) markNotificationsAsRead(enrichedNotifications);
+                    }, 10000);
+                }
             } catch (error) {
                 console.error("Error fetching notifications:", error);
             }
         };
 
         fetchNotifications();
-    }, []);
+
+        // Cleanup function to cancel the timeout and set isMounted to false
+        return () => {
+            isMounted = false;
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                console.log("Timeout cleared");
+            }
+        };
+    }, [animals]); // Add animals to dependencies
 
     const markNotificationsAsRead = async (notificationList) => {
-        if (markedAsRead) return;
-        setMarkedAsRead(true);
-
         try {
             await Promise.all(
                 notificationList
@@ -84,6 +92,7 @@ export default function Notifications() {
             setNotifications((prev) =>
                 prev.map((notification) => ({ ...notification, read: true }))
             );
+            console.log("Marked notifications as read");
         } catch (error) {
             console.error("Error marking notifications as read:", error);
         }
@@ -119,18 +128,26 @@ export default function Notifications() {
                 )}
             </div>
 
-            {notifications.map((notification) => (
-                <div key={notification.id}>
-                    <NotificationComponent
-                        id={notification.id}
-                        name={notification.name}
-                        notification={notification.notification}
-                        image={notification.img}
-                        highlight={notification.highlight}
-                        onDelete={() => setNotifications((prev) => prev.filter((n) => n.id !== notification.id))}
-                    />
-                </div>
-            ))}
+            {/* Scrollable Notifications Container */}
+            <div
+                className="mt-5 overflow-y-auto mb-10"
+                style={{ maxHeight: "600px" /* Adjust height as needed */ }}
+            >
+                {notifications.map((notification) => (
+                    <div key={notification.id}>
+                        <NotificationComponent
+                            id={notification.id}
+                            name={notification.name}
+                            notification={notification.notification}
+                            image={notification.imageUrl}
+                            highlight={notification.highlight}
+                            onDelete={() =>
+                                setNotifications((prev) => prev.filter((n) => n.id !== notification.id))
+                            }
+                        />
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

@@ -18,6 +18,9 @@ public class Consumer {
     @Autowired
     private AnimalService animalService;
 
+    @Autowired
+    private AnimalMonitoringService animalMonitoringService;
+
     public AnimalDataDTO convertToAnimalDataDTO(DataDTO data) {
         AnimalDataDTO animalDataDTO = new AnimalDataDTO();
 
@@ -37,6 +40,8 @@ public class Consumer {
         data.getBlinking().ifPresent(blinking -> animalDataDTO.setBlinking(blinking));
         data.getBatteryPercentage().ifPresent(batteryPercentage -> animalDataDTO.setBatteryPercentage(batteryPercentage));
 
+        animalMonitoringService.check(animalDataDTO);
+
         return animalDataDTO;
     }
 
@@ -51,7 +56,3 @@ public class Consumer {
         }
     }
 }
-
-
-
-

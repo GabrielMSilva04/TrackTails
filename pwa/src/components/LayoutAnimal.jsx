@@ -71,18 +71,28 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
         }
 
         try {
-            const response = await axios.delete(`${baseUrl}/animals/${animal.id}`, {
+            const token = localStorage.getItem("authToken");
+
+            // Delete animal
+            await axios.delete(`${baseUrl}/animals/${selectedAnimal.id}`, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
-            console.log("Delete response:", response.data);
 
+            // Delete notifications for the animal
+            await axios.delete(`${baseUrl}/notifications/animal/${selectedAnimal.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            alert("Animal and its notifications deleted successfully.");
             setSelectedAnimal(null);
             window.location.href = "/mypets";
-
         } catch (error) {
-            console.error("Error deleting animal:", error);
+            console.error("Error deleting animal or its notifications:", error);
+            alert("Failed to delete the animal. Please try again.");
         }
     };
 

@@ -2,6 +2,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import axios from "axios";
+import { baseUrl } from "../consts";
 
 export default function NotificationComponent({ id, name, notification, image, highlight, onDelete }) {
     NotificationComponent.propTypes = {
@@ -15,9 +17,24 @@ export default function NotificationComponent({ id, name, notification, image, h
 
     const [isVisible, setIsVisible] = useState(true);
 
-    const handleClear = () => {
-        setIsVisible(false);
-        if (onDelete) onDelete();
+    const handleClear = async () => {
+        const token = localStorage.getItem("authToken");
+
+        try {
+            // API call to delete the notification
+            await axios.delete(`${baseUrl}/notifications/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            // Update UI
+            setIsVisible(false);
+            if (onDelete) onDelete();
+        } catch (error) {
+            console.error("Error deleting notification:", error);
+            alert("Failed to delete the notification. Please try again.");
+        }
     };
 
     if (!isVisible) return null;
