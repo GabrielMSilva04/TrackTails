@@ -18,7 +18,7 @@ export default function RegisterPet() {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) {
-                alert('No authentication token found. Please log in.');
+                // alert('No authentication token found. Please log in.');
                 return;
             }
 
@@ -90,15 +90,10 @@ export default function RegisterPet() {
 
             console.log('Animal data saved successfully:', animalDataResponse.data);
 
-            alert('Pet, image, and data registered successfully!');
+            // alert('Pet, image, and data registered successfully!');
             window.location.href = '/mypets';
         } catch (error) {
             console.error('Error registering pet, uploading image, or saving data:', error.response?.data || error.message);
-            if (error.response?.data?.message) {
-                alert(error.response.data.message);
-            } else {
-                alert('Failed to register the pet. Please try again.');
-            }
         }
     };
 

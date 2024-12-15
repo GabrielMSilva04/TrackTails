@@ -15,7 +15,6 @@ export default function MyPets({ onAnimalSelect }) {
 
     const selectHandle = (pet) => {
         onAnimalSelect(pet.id);
-        console.log("SET SELECTED ANIMAL", pet);
         setSelectedAnimal(pet);
         navigate(`/animal/monitoring`);
     }
