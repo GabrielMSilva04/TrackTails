@@ -1,3 +1,4 @@
+# Stage 1: Build the application
 FROM maven:3.8.5-openjdk-17 AS builder
 
 # Build AnimalsDataCore
@@ -7,22 +8,22 @@ RUN mvn dependency:go-offline -B
 COPY AnimalsDataCore/src /app/AnimalsDataCore/src
 RUN mvn clean install
 
-
+# Build reportservice
 WORKDIR /app/reportservice
+
 COPY reportservice/pom.xml /app/reportservice/pom.xml
 RUN mvn dependency:go-offline -B
+
 COPY reportservice/src /app/reportservice/src
 RUN mvn clean package -DskipTests
 
-FROM openjdk:17-jdk-slim
+# Stage 2: Run the application
+FROM openjdk:17-jdk-slim AS production
+RUN apt-get update && apt-get install -y wget
 
 WORKDIR /app
 
-COPY --from=builder /app/reportservice/target/*.jar app.jar
+COPY --from=builder /app/reportservice/target/*.jar report-service.jar
 
-EXPOSE 8080
-
-COPY ./wait-for-it.sh /app/wait-for-it.sh
-RUN chmod +x /app/wait-for-it.sh
-
-ENTRYPOINT ["/app/wait-for-it.sh", "mariadb:3306", "--", "java", "-jar", "app.jar"]
+## Run the Spring Boot application
+CMD ["java", "-jar", "report-service.jar"]
