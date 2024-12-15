@@ -28,6 +28,11 @@ public class AnimalController {
         this.animalService = animalService;
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<?> healthCheck() {
+        return new ResponseEntity<>("Service is up and running", HttpStatus.OK);
+    }
+
     private ResponseEntity<?> validateAndGetUserId(String userIdHeader) {
         if (userIdHeader == null || userIdHeader.isBlank()) {
             return new ResponseEntity<>("Unauthorized: Missing X-User-Id header", HttpStatus.UNAUTHORIZED);
