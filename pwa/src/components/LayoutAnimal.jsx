@@ -38,7 +38,9 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
             // Fetch animal data by deviceId from the URL
             const fetchAnimal = async () => {
                 try {
-                    const response = await axios.get(`${baseUrl}/finders/animal/${deviceId}`);
+                    const response = await axios.post(`${baseUrl}/finders/animal`, {
+                        deviceId: parseInt(deviceId),
+                    });
                     const fetchedAnimal = response.data;
 
                     const imageUrl = await fetchImageUrl(fetchedAnimal.id);

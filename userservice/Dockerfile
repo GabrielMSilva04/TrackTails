@@ -1,6 +1,11 @@
 # Stage 1: Build the application
 FROM maven:3.8.5-openjdk-17 AS builder
 
+COPY AnimalsDataCore /app/AnimalsDataCore
+WORKDIR /app/AnimalsDataCore
+RUN mvn dependency:go-offline -B
+RUN mvn clean install
+
 WORKDIR /app/userservice
 COPY userservice/pom.xml /app/userservice/pom.xml
 RUN mvn dependency:go-offline -B

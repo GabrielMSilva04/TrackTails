@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 	"ies.tracktails.animalsDataCore",
 	"ies.tracktails.animalsDataCore.services",
 	"ies.tracktails.animalsDataCore.configurations",
-	"ies.tracktails.animalsDataCore.controllers",
 	"ies.tracktails.animalservice",
 	"ies.tracktails.animalservice.configurations",
 	"ies.tracktails.animalservice.controllers"
