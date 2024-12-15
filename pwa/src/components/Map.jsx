@@ -1,21 +1,21 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import pin from '../assets/pin.png';
 import axios from 'axios';
-import { useWebSocket } from '../useWebSocket';
 import { wsBaseUrl, baseUrl } from '../consts';
 
-function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler }) {
+function Map({ animals, fence, showFence, routeData, showRoute, addingFence, setFence, clickHandler, targetAnimal }) {
     const [myPetsData, setMyPetsData] = useState([]);
+    const [userLocation, setUserLocation] = useState(null);
+    const [initialCenteringDone, setInitialCenteringDone] = useState(false);
 
     useEffect(() => {
         console.log('Map Page Rendered with Animals:', animals);
     }, [animals]);
 
     useEffect(() => {
-        // Setup WebSocket connection to receive real-time data
         const websockets = [];
         const authToken = localStorage.getItem("authToken");
         const wsUrl = `${wsBaseUrl}/animaldata?auth=${authToken}`;
@@ -31,7 +31,6 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
 
                     socket.onopen = () => {
                         console.log("WebSocket connection established");
-                        // Subscribe animal
                         socket.send(
                             JSON.stringify({
                                 action: "subscribe",
@@ -105,11 +104,33 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
     };
 
     const centerPosition = useMemo(() => {
-        if (myPetsData.length > 0 && myPetsData[0].latitude && myPetsData[0].longitude) {
-            return [myPetsData[0].latitude, myPetsData[0].longitude];
+        // 1. If a targetAnimal exists, find its position in myPetsData
+        if (targetAnimal) {
+            const matchingAnimal = myPetsData.find(animal => animal.id === targetAnimal.id);
+            if (matchingAnimal?.latitude && matchingAnimal?.longitude) {
+                console.log("Centering map to target animal position from myPetsData:", matchingAnimal);
+                return [matchingAnimal.latitude, matchingAnimal.longitude];
+            }
         }
-        return [40.63316, -8.65939];
-    }, [myPetsData]);
+
+        // 2. If no targetAnimal, only center during the first render or if initial centering hasn't happened
+        if (!initialCenteringDone) {
+            if (userLocation?.[0] && userLocation?.[1]) {
+                console.log("Centering map to user location:", userLocation);
+                setInitialCenteringDone(true); // Mark as centered
+                return userLocation;
+            }
+
+            // 3. If no initial centering is possible, don't update the center
+            console.log("No valid center position available yet");
+            return null;
+        }
+
+        // 4. If initial centering is done and no target animal, retain current position
+        console.log("Retaining current map position");
+        return null;
+    }, [targetAnimal, myPetsData, userLocation, initialCenteringDone]);
+
 
     const customIcon = (animal) =>
         L.divIcon({
@@ -122,20 +143,37 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
         `,
             iconAnchor: [37.5, 70],
             className: '',
-        }
-        );
+        });
+
+    const UpdateMapCenter = ({ center }) => {
+        const map = useMap();
+
+        useEffect(() => {
+            if (center && map) {
+                map.setView(center, map.getZoom());
+            }
+        }, [center, map]);
+
+        return null;
+    };
 
     return (
-        <MapContainer center={centerPosition} zoom={17} zoomControl={false} style={{ height: "100vh", width: "100%" }}>
+        <MapContainer
+            center={centerPosition || [40.63316, -8.65939]}
+            zoom={18}
+            zoomControl={false}
+            style={{ height: "100vh", width: "100%" }}
+        >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-            {/* Render Fence if showFence is true */}
+
+            <UpdateMapCenter center={centerPosition} />
+
             {showFence && fence.length > 0 && <Polygon positions={fence} color="green" />}
 
-            {/* Render Routes if showRoute is true */}
+
             {showRoute && routeData.length > 0 && <Polyline positions={routeData} color="blue" className="z-30" />}
 
-            {/* Render Animal Markers */}
             {myPetsData.map(animal =>
                 animal.latitude && animal.longitude ? (
                     <Marker
@@ -151,8 +189,11 @@ function Map({ animals, fence, showFence, routeData, showRoute, addingFence, set
 
             {/* Use Leaflet Events for adding a fence */}
             {addingFence && <MapEvents />}
+
         </MapContainer>
     );
 }
 
 export default Map;
+
+

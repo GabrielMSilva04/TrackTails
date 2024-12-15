@@ -43,14 +43,13 @@ export default function LayoutMapDetails() {
                 const headers = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                 };
-
                 const [latitudeResponse, longitudeResponse, latestResponse] = await Promise.all([
                     axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/latitude`, {
-                        params: { start: "-1d", end: "now()", interval: "15m", aggregate: "last" },
+                        params: { start: "-10m", end: "now()", interval: "10s", aggregate: "last" },
                         headers,
                     }),
                     axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/longitude`, {
-                        params: { start: "-1d", end: "now()", interval: "15m", aggregate: "last" },
+                        params: { start: "-10m", end: "now()", interval: "10s", aggregate: "last" },
                         headers,
                     }),
                     axios.get(`${baseUrl}/animaldata/latest/${selectedAnimal.id}`, { headers }),
@@ -81,6 +80,15 @@ export default function LayoutMapDetails() {
         };
 
         fetchAnimalData();
+
+        const intervalId = setInterval(() => {
+            fetchAnimalData();
+        }, 10000); // Fetch every 10 seconds
+
+        // Cleanup interval on component unmount or dependency change
+        return () => {
+            clearInterval(intervalId);
+        };
     }, [selectedAnimal]);
 
     // Fetch existing fence data
@@ -112,7 +120,6 @@ export default function LayoutMapDetails() {
     const saveFence = async () => {
         console.log("Fence Coordinates:", fence);
         if (fence.length < 4) {
-            alert("You need to define all four points of the fence.");
             setFence([]);
             return;
         }
@@ -135,11 +142,9 @@ export default function LayoutMapDetails() {
             console.log("Fence Data:", fenceData);
             const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
             await axios.post(`${baseUrl}/fences`, fenceData, { headers });
-            alert("Fence saved successfully!");
             setAddingFence(false);
         } catch (error) {
             console.error("Failed to save fence:", error);
-            alert("Failed to save fence.");
         }
     };
 
@@ -148,11 +153,9 @@ export default function LayoutMapDetails() {
         try {
             const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
             await axios.delete(`${baseUrl}/fences/${selectedAnimal.id}`, { headers });
-            alert("Fence deleted successfully!");
             setFence([]);
         } catch (error) {
             console.error("Failed to delete fence:", error);
-            alert("Failed to delete fence.");
         }
     };
 
@@ -209,6 +212,7 @@ export default function LayoutMapDetails() {
                     routeData={showRoute ? routeData : []}
                     showRoute={showRoute}
                     clickHandler={() => {}}
+                    targetAnimal={selectedAnimal}
                 />
             </div>
 
