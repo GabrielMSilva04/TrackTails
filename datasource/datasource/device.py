@@ -35,6 +35,7 @@ logger = {}
 
 def create_device_logger(device_id, level=logging.INFO):
     logger = logging.getLogger(f"device_{device_id}")
+    logger.propagate = False
     handler = logging.StreamHandler()
     formatter = logging.Formatter(f'%(asctime)s - %(levelname)s - {device_id}: %(message)s')
     handler.setFormatter(formatter)
@@ -247,7 +248,7 @@ def calculate_transition_speed(current_speed, target_speed, transition_progress)
     return current_speed + (target_speed - current_speed) * transition_progress
 
 
-blinking = False
+blinking = {}
 
 def create_kafka_consumer(device_id):
     consumer_config = {
@@ -262,6 +263,8 @@ def create_kafka_consumer(device_id):
     return consumer
 
 async def consume_messages(device_id):
+
+    blinking[device_id] = False
         
     consumer = create_kafka_consumer(device_id)
     logger[device_id].info("Consumer created")
@@ -296,13 +299,12 @@ async def consume_messages(device_id):
                     message_value = json.loads(msg.value().decode('utf-8'))
                     action = message_value['actionType']
                     if action == 'Blink':
-                        global blinking
-                        if blinking:
+                        if blinking[device_id]:
                             logger[device_id].info("STOP blinking")
-                            blinking = False
+                            blinking[device_id] = False
                         else:
                             logger[device_id].info("START blinking")
-                            blinking = True
+                            blinking[device_id] = True
                     elif action == 'Sound':
                         logger[device_id].info("Playing sound")
                     else:
