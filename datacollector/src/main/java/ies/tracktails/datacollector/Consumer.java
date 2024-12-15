@@ -35,6 +35,7 @@ public class Consumer {
         data.getBpm().ifPresent(heartRate -> animalDataDTO.setHeartRate(heartRate));
         data.getRespiratory_rate().ifPresent(breathRate -> animalDataDTO.setBreathRate(breathRate));
         data.getBlinking().ifPresent(blinking -> animalDataDTO.setBlinking(blinking));
+        data.getBatteryPercentage().ifPresent(batteryPercentage -> animalDataDTO.setBatteryPercentage(batteryPercentage));
 
         return animalDataDTO;
     }

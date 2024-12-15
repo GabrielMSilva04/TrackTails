@@ -1,11 +1,10 @@
 import asyncio
-import mariadb
-import os
-import sys
-import dotenv
-from asyncio.subprocess import create_subprocess_exec
 import aiomysql
 import logging
+import dotenv
+import os
+import sys
+from producer import run_simulation_for_device, consume_messages, logger, create_device_logger
 
 dotenv.load_dotenv()
 
@@ -30,17 +29,6 @@ async def get_device_ids_from_db():
         logging.error(f"Error connecting to Database: {e}")
         sys.exit(1)
 
-async def run_simulation_for_device(device_id):
-    device_id_str = str(device_id)
-    logging.info(f"Starting Simulation on Device: {device_id_str}")
-
-    try:
-        process = await create_subprocess_exec(
-            'python3', 'producer.py', device_id_str
-        )
-        await process.communicate()
-    except Exception as e:
-        logging.error(f"Error running simulation for device {device_id}: {e}")
 
 async def main():
     logging.basicConfig(
@@ -50,11 +38,14 @@ async def main():
 
     try:
         device_ids = await get_device_ids_from_db()
+        for device_id in device_ids:
+            logger[device_id] = create_device_logger(device_id)
         tasks = [run_simulation_for_device(device_id) for device_id in device_ids]
+        tasks += [consume_messages(device_id) for device_id in device_ids]
         await asyncio.gather(*tasks)
 
     except KeyboardInterrupt:
-        logging.info("Simulation interrupted")
+        logging.info("Simulation stopped by user")
     except Exception as e:
         logging.error(f"An error occurred: {e}")
     finally:
@@ -62,8 +53,6 @@ async def main():
             if not task.done():
                 task.cancel()
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
