@@ -114,7 +114,8 @@ services:
       - "80:80"
       - "443:443"
     depends_on:
-      - userservice
+      userservice:
+        condition: service_healthy
     volumes:
       - ./gateway:/app/gateway
       - ~/.m2:/root/.m2
@@ -286,8 +287,13 @@ services:
     env_file:
       - .env
     environment:
-      - DB_HOST=mariadb
-      - DB_PORT=3306
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      INFLUXDB_HOST: influxdb
+      INFLUXDB_PORT: 8086
+      INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
+      INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
     depends_on:
       mariadb:
         condition: service_healthy
@@ -303,7 +309,7 @@ services:
   pwa:
     build:
       context: ./
-      dockerfile: ./pwa/Dockerfile
+      dockerfile: ./pwa/Dockerfile.dev
     container_name: pwa
     ports:
       - "8080:8080"
@@ -318,7 +324,8 @@ services:
       - gateway
     environment:
       NODE_ENV: development
-      VITE_API_BASE_URL: ${BASE_URL}
+      VITE_API_BASE_URL: ${BASE_URL}/api/v1
+      VITE_WS_BASE_URL: ${BASE_URL}/ws
     healthcheck:
       test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
       interval: 10s

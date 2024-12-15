@@ -13,6 +13,7 @@ public class DataDTO {
     private Optional<Double> speed;
     private Optional<Double> bpm;
     private Optional<Double> respiratory_rate;
+    private Optional<Boolean> blinking;
     private Optional<Double> batteryPercentage;
 
     public DataDTO() {
@@ -24,7 +25,7 @@ public class DataDTO {
         batteryPercentage = Optional.empty();
     }
 
-    public DataDTO(String device_id, Optional<Double> latitude, Optional<Double> longitude, Optional<Double> speed, Optional<Double> bpm, Optional<Double> respiratory_rate, Optional<Double> batteryPercentage) {
+    public DataDTO(String device_id, Optional<Double> latitude, Optional<Double> longitude, Optional<Double> speed, Optional<Double> bpm, Optional<Double> respiratory_rate, Optional<Double> batteryPercentage, Optional<Boolean> blinking) {
         this.device_id = device_id;
         this.latitude = Optional.ofNullable(latitude.orElse(null));
         this.longitude = Optional.ofNullable(longitude.orElse(null));
@@ -32,6 +33,7 @@ public class DataDTO {
         this.bpm = Optional.ofNullable(bpm.orElse(null));
         this.respiratory_rate = Optional.ofNullable(respiratory_rate.orElse(null));
         this.batteryPercentage = Optional.ofNullable(batteryPercentage.orElse(null));
+        this.blinking = Optional.ofNullable(blinking.orElse(null));
     }
 
 
@@ -45,6 +47,7 @@ public class DataDTO {
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", batteryPercentage=" + batteryPercentage +
+                ", blinking=" + blinking +
                 '}';
     }
 
@@ -102,6 +105,14 @@ public class DataDTO {
 
     public void setBatteryPercentage(Double batteryPercentage) {
         this.batteryPercentage = Optional.ofNullable(batteryPercentage);
+    }
+    
+    public Optional<Boolean> getBlinking() {
+        return blinking;
+    }
+
+    public void setBlinking(Optional<Boolean> blinking) {
+        this.blinking = blinking;
     }
 
 }

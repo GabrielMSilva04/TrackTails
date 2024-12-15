@@ -76,6 +76,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_LOG_RETENTION_MS: 10000
       KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 5000
     volumes:
@@ -255,7 +256,8 @@ services:
       - gateway
     environment:
       NODE_ENV: production
-      VITE_API_BASE_URL: ${BASE_URL}
+      VITE_API_BASE_URL: ${BASE_URL}/api/v1
+      VITE_WS_BASE_URL: ${BASE_URL}/ws
     logging:
       driver: "json-file"
       options:

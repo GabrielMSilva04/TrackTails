@@ -57,6 +57,7 @@ public class AnimalDataService {
         animalDataDTO.getHeartRate().ifPresent(heartRate -> point.addField("heartRate", heartRate));
         animalDataDTO.getBreathRate().ifPresent(breathRate -> point.addField("breathRate", breathRate));
         animalDataDTO.getBatteryPercentage().ifPresent(batteryPercentage -> point.addField("batteryPercentage", batteryPercentage));
+        animalDataDTO.getBlinking().ifPresent(blinking -> point.addField("blinking", blinking));
         animalDataDTO.getTimestamp().ifPresent(timestamp -> point.time(timestamp.toEpochMilli(), WritePrecision.MS));
 
         // Aditional tags
@@ -95,11 +96,21 @@ public class AnimalDataService {
             if (!records.isEmpty()) {
                 FluxRecord record = records.get(0);
                 AnimalDataDTO animalDataDTO = new AnimalDataDTO(animalId);
-                Double value = record.getValueByKey("_value") != null ? 
-                            ((Number) record.getValueByKey("_value")).doubleValue() : null;
-                animalDataDTO.addField(field, value.toString());
+                Object rawValue = record.getValueByKey("_value");
+                String value = null;
+
+                if (rawValue instanceof Number) {
+                    value = String.valueOf(((Number) rawValue).doubleValue());
+                } else if (rawValue instanceof Boolean) {
+                    value = String.valueOf(rawValue);
+                } else if (rawValue != null) {
+                    value = rawValue.toString(); // Fallback para outros tipos que você não esperava.
+                }
+
+                if (value != null) {
+                    animalDataDTO.addField(field, value);
+                }
                 animalDataDTO.setTimestamp(record.getTime());
-                return animalDataDTO;
             }
         }
         return null;
@@ -128,9 +139,20 @@ public class AnimalDataService {
                 if (!records.isEmpty()) {
                     for (FluxRecord record : records) {
                         String field = record.getValueByKey("_field").toString();
-                        Double value = record.getValueByKey("_value") != null ? 
-                                    ((Number) record.getValueByKey("_value")).doubleValue() : null;
-                        animalDataDTO.addField(field, value.toString());
+                        Object rawValue = record.getValueByKey("_value");
+                        String value = null;
+        
+                        if (rawValue instanceof Number) {
+                            value = String.valueOf(((Number) rawValue).doubleValue());
+                        } else if (rawValue instanceof Boolean) {
+                            value = String.valueOf(rawValue);
+                        } else if (rawValue != null) {
+                            value = rawValue.toString(); // Fallback para outros tipos que você não esperava.
+                        }
+        
+                        if (value != null) {
+                            animalDataDTO.addField(field, value);
+                        }
                         animalDataDTO.setTimestamp(record.getTime());
                     }
                 }
@@ -167,12 +189,21 @@ public class AnimalDataService {
                     for (FluxRecord record : records) {
                         AnimalDataDTO animalDataDTO = new AnimalDataDTO(animalId);
 
-                        Double value = record.getValueByKey("_value") != null ? 
-                                    ((Number) record.getValueByKey("_value")).doubleValue() : null;
-                        animalDataDTO.addField(field, value.toString());
+                        Object rawValue = record.getValueByKey("_value");
+                        String value = null;
+        
+                        if (rawValue instanceof Number) {
+                            value = String.valueOf(((Number) rawValue).doubleValue());
+                        } else if (rawValue instanceof Boolean) {
+                            value = String.valueOf(rawValue);
+                        } else if (rawValue != null) {
+                            value = rawValue.toString(); // Fallback para outros tipos que você não esperava.
+                        }
+        
+                        if (value != null) {
+                            animalDataDTO.addField(field, value);
+                        }
                         animalDataDTO.setTimestamp(record.getTime());
-
-                        result.add(animalDataDTO);
                     }
                 }
             }

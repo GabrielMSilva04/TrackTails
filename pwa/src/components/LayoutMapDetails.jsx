@@ -18,6 +18,8 @@ export default function LayoutMapDetails() {
     const [showRoute, setShowRoute] = useState(false);
     const [showFenceControls, setShowFenceControls] = useState(false);
     const [routeData, setRouteData] = useState([]);
+    const [light_on, setLightOn] = useState(false);
+    const [playing_sound, setPlayingSound] = useState(false);
 
     useEffect(() => {
         if (!selectedAnimal) {
@@ -58,6 +60,12 @@ export default function LayoutMapDetails() {
                 const latitudeData = latitudeResponse.data;
                 const longitudeData = longitudeResponse.data;
                 const latestData = latestResponse.data;
+
+                // verify if latestData includes blinking
+                console.log("Latest Animal Data:", latestData);
+                if (latestData.blinking) {
+                    setLightOn(true);
+                }
 
                 const combinedData = latitudeData.map(latPoint => {
                     const matchingLonPoint = longitudeData.find(
@@ -170,6 +178,21 @@ export default function LayoutMapDetails() {
         }
     };
 
+    const execAction = (actionType) => {
+        const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+        axios.post(`${baseUrl}/actions`, {
+            actionType: actionType,
+            animalId: selectedAnimal.id,
+        }, { headers })
+
+        if (actionType === "Sound" && !playing_sound) {
+            setPlayingSound(true);
+            setTimeout(() => setPlayingSound(false), 2000);
+        } else if (actionType === "Blink") {
+            setLightOn(!light_on);
+        }
+    }
+
     if (!selectedAnimal) {
         return <div>Loading...</div>;
     }
@@ -266,14 +289,14 @@ export default function LayoutMapDetails() {
                         </>
                     ) : (
                         <>
-                            <div className="tooltip" data-tip="Light">
-                                <FontAwesomeIcon icon={faLightbulb} color="white" size="lg" />
+                            <button onClick={() => execAction("Blink")}>
+                                <FontAwesomeIcon icon={faLightbulb} color={light_on ? "yellow" : "white"} size="lg" />
                                 <div className="text-white text-sm mt-1">Light</div>
-                            </div>
-                            <div className="tooltip" data-tip="Sound">
-                                <FontAwesomeIcon icon={faVolumeHigh} color="white" size="lg" />
+                            </button>
+                            <button onClick={() => execAction("Sound")}>
+                                <FontAwesomeIcon icon={faVolumeHigh} color={playing_sound ? "yellow" : "white"} size="lg" />
                                 <div className="text-white text-sm mt-1">Sound</div>
-                            </div>
+                            </button>
                             <button onClick={() => setShowRoute((prev) => !prev)}>
                                 <FontAwesomeIcon icon={faRoute} color="white" size="lg" />
                                 <div className="text-white text-sm mt-1">
