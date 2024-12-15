@@ -2,6 +2,7 @@ package ies.tracktails.animalservice.controllers;
 
 import ies.tracktails.animalsDataCore.entities.Animal;
 import ies.tracktails.animalsDataCore.services.AnimalService;
+import ies.tracktails.animalservice.dtos.FindersRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -26,9 +27,9 @@ class FindersController {
     }
 
     @Operation(summary = "Get Animal By DeviceId", description = "Get an animal by the id of the device that is attached to it")
-    @GetMapping("{deviceId}")
-    public ResponseEntity<?> getAnimal(@PathVariable long deviceId) {
-        Animal animal = animalService.getAnimalByDeviceId(deviceId);
+    @PostMapping()
+    public ResponseEntity<?> getAnimal(@RequestBody FindersRequest findersRequest) {
+        Animal animal = animalService.getAnimalByDeviceId(findersRequest.getDeviceId());
         if (animal == null) {
             return new ResponseEntity<>("Animal not found", HttpStatus.NOT_FOUND);
         }
