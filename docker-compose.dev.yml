@@ -17,8 +17,8 @@ services:
       test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       start_period: 10s
       interval: 10s
-      timeout: 5s
-      retries: 3
+      timeout: 30s
+      retries: 10
     restart: always
 
   phpmyadmin:
@@ -46,8 +46,8 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "curl --fail http://localhost:8086/health || exit 1" ]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
@@ -63,8 +63,8 @@ services:
     healthcheck:
       test: nc -z localhost 2181 || exit -1
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
 
   kafka:
     image: confluentinc/cp-kafka:7.4.4
@@ -88,9 +88,9 @@ services:
       - kafka_data:/var/lib/kafka
     healthcheck:
       test: [ "CMD-SHELL", "/usr/bin/kafka-topics --bootstrap-server localhost:19092 --list || exit 1" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      interval: 10s
+      timeout: 300s
+      retries: 10
 
   kafdrop:
     image: obsidiandynamics/kafdrop:4.0.2
@@ -118,12 +118,12 @@ services:
         condition: service_healthy
     volumes:
       - ./gateway:/app/gateway
-      - ~/.m2:/root/.m2
+      - m2_cache:/root/.m2
     healthcheck:
       test: [ "CMD-SHELL", "wget -q --spider http://localhost:80/api/health || exit 1" ]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
     restart: always
 
   animalservice:
@@ -149,14 +149,16 @@ services:
         condition: service_healthy
       influxdb:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
     volumes:
       - ./animalservice:/app/animalservice
-      - ~/.m2:/root/.m2
+      - m2_cache:/root/.m2
     healthcheck:
       test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/animals/health" ]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
     restart: always
 
   notificationservice:
@@ -175,14 +177,16 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
     volumes:
       - ./notificationservice:/app/notificationservice
-      - ~/.m2:/root/.m2
+      - m2_cache:/root/.m2
     healthcheck:
       test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/notifications/health" ]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
     restart: always
 
   reportservice:
@@ -209,12 +213,12 @@ services:
         condition: service_healthy
     volumes:
       - ./reportservice:/app/reportservice
-      - ~/.m2:/root/.m2
+      - m2_cache:/root/.m2
     healthcheck:
       test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/reports/health" ]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
     restart: always
 
   userservice:
@@ -242,12 +246,12 @@ services:
     volumes:
       - ./security:/app/keys
       - ./userservice:/app/userservice
-      - ~/.m2:/root/.m2
+      - m2_cache:/root/.m2
     healthcheck:
       test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/users/health" ]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
     restart: always
 
   datacollector:
@@ -276,12 +280,12 @@ services:
         condition: service_healthy
     volumes:
       - ./datacollector:/app/datacollector
-      - ~/.m2:/root/.m2
+      - m2_cache:/root/.m2
     healthcheck:
       test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/datacollector/health" ]
       interval: 10s
-      timeout: 5s
-      retries: 3
+      timeout: 30s
+      retries: 10
     restart: always
 
   actionservice:
@@ -308,7 +312,7 @@ services:
           condition: service_healthy
     volumes:
       - ./actionservice:/app/actionservice
-      - ~/.m2:/root/.m2
+      - m2_cache:/root/.m2
     restart: always
 
   pwa:
@@ -334,8 +338,8 @@ services:
     healthcheck:
       test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
     restart: always
 
 volumes:
@@ -345,3 +349,4 @@ volumes:
   kafka_data:
   animal-images:
   security:
+  m2_cache:
