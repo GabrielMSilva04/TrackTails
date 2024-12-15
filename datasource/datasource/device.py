@@ -101,9 +101,9 @@ def get_last_battery_level(animal_id, device_id):
 
 
 def get_animal_id(device_id):
-    url = f"http://localhost/api/v1/finders/animal/{device_id}"
+    url = f"http://localhost/api/v1/finders/animal"
     try:
-        response = requests.get(url)
+        response = requests.post(url, json={"deviceId": device_id})
         response.raise_for_status()
         data = response.json()
         return data['id']
