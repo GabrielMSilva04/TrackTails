@@ -16,6 +16,7 @@ python-dotenv = "^1.0.1"
 aiomysql = "^0.2.0"
 influxdb-client = "^1.48.0"
 influxdb = "^5.3.2"
+qrcode = "^8.0"
 
 
 [build-system]

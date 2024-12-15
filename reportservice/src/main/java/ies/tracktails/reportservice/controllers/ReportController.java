@@ -23,6 +23,11 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        return new ResponseEntity<>("{\"status\": \"UP\"}", HttpStatus.OK);
+    }
+
     @Operation(summary = "Create a new report as PDF")
     @PostMapping
     public ResponseEntity<?> createReport(

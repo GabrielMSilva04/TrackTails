@@ -22,13 +22,9 @@ export default function Login() {
                 password: data.password,
             });
 
-            console.log("Login Response:", response.data);
             // Store token in localStorage
             const token = response.data.token;
             localStorage.setItem("authToken", token);
-            alert("Login successful!");
-
-            console.log("Token:", token);
 
             window.location.href = "/mypets";
         } catch (error) {

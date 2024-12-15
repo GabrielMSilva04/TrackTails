@@ -1,28 +1,76 @@
 import asyncio
+import traceback
 import mariadb
 import os
 import sys
 import dotenv
-import aiomysql
 import logging
 import requests
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.query_api import QueryApi
 import json
 import random
+import threading
 import time
-from confluent_kafka import Producer
+import folium
+import matplotlib.pyplot as plt
 from datetime import datetime
+import numpy as np
+from confluent_kafka import Producer, Consumer, KafkaError, KafkaException
+import sys
+import logging
+import qrcode
+import os
 
 dotenv.load_dotenv()
+
+base_url = os.getenv("BASE_URL", "http://localhost")
 
 INFLUXDB_URL = f"http://localhost:{os.getenv('INFLUXDB_PORT')}"
 INFLUXDB_TOKEN = os.getenv('DOCKER_INFLUXDB_INIT_ADMIN_TOKEN')
 INFLUXDB_ORG = os.getenv('DOCKER_INFLUXDB_INIT_ORG')
 INFLUXDB_BUCKET = os.getenv('DOCKER_INFLUXDB_INIT_BUCKET')
 
+logger = {}
 
-def get_last_battery_level(animal_id):
+def create_device_logger(device_id, level=logging.INFO):
+    logger = logging.getLogger(f"device_{device_id}")
+    logger.propagate = False
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter(f'%(asctime)s - %(levelname)s - {device_id}: %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(level)
+    
+    return logger
+
+def print_qrcode(device_id):
+    data = f"{base_url}/finders/{device_id}"
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=1,
+        border=1,
+    )
+
+    # Generate QR code
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    # Generate an image from the QR Code instance
+    qr_code_ascii = qr.make_image(fill_color='black', back_color='white')
+    #qr_code_ascii.show()  # Open in a image viewer
+
+    # Print the qr code matrix on the console
+    qr_code_text = qr.get_matrix()  # Obter a matriz do QR Code
+    str = ""
+    for row in qr_code_text:
+        str += ("".join(['██' if cell else '  ' for cell in row])) + "\n"
+    logger[device_id].info(f"QR Code for pet finders:\n{str}")
+
+
+def get_last_battery_level(animal_id, device_id):
     client = InfluxDBClient(
         url=INFLUXDB_URL,
         token=INFLUXDB_TOKEN,
@@ -45,7 +93,7 @@ def get_last_battery_level(animal_id):
             for record in table.records:
                 return record.get_value()
     except Exception as e:
-        print(f"Error querying InfluxDB for animal ID {animal_id}: {e}")
+        logger[device_id].debug(f"Error querying InfluxDB for animal ID {animal_id}: {e}")
     finally:
         client.close()
 
@@ -74,12 +122,13 @@ def create_kafka_producer():
     return Producer(conf)
 
 
-def send_to_kafka(producer, topic, message):
+def send_to_kafka(producer, topic, key, message):
+    key_bytes = str(key).encode('utf-8')
     try:
-        producer.produce(topic, value=message)
+        producer.produce(topic, key=key_bytes, value=message)
         producer.flush()
     except Exception as e:
-        logging.error(f"Erro ao enviar para o Kafka: {e}")
+        logger[key].error(f"Error sending to kafka: {e}")
 
 
 def simulate_state_data(device_id, last_state):
@@ -199,7 +248,82 @@ def calculate_transition_speed(current_speed, target_speed, transition_progress)
     return current_speed + (target_speed - current_speed) * transition_progress
 
 
+blinking = {}
+
+def create_kafka_consumer(device_id):
+    consumer_config = {
+        'bootstrap.servers': 'localhost:9092',
+        'group.id': f'animal-simulation-consumer-{device_id}',
+        'enable.auto.commit': True,
+        'auto.offset.reset': 'earliest'
+    }
+    
+    consumer = Consumer(consumer_config)
+    consumer.subscribe(['action'])
+    return consumer
+
+async def consume_messages(device_id):
+
+    blinking[device_id] = False
+        
+    consumer = create_kafka_consumer(device_id)
+    logger[device_id].info("Consumer created")
+    
+    try:
+        while True:
+            await asyncio.sleep(0.5)
+
+            # Aguarda indefinidamente até que uma mensagem seja recebida
+            logger[device_id].debug("Waiting for messages")
+            msg_lst = consumer.consume(timeout=0.3)
+            logger[device_id].debug(f"Received {len(msg_lst)} messages")
+            
+            for msg in msg_lst:
+                logger[device_id].debug(f"Received message: key={msg.key()}, value={msg.value()}")
+                if msg is None:
+                    continue  # Nenhuma mensagem ainda, continua aguardando
+                
+                if msg.error():
+                    if msg.error().code() == KafkaError._PARTITION_EOF:
+                        # Fim da partição, mensagem informativa
+                        logger[device_id].debug(f"End of partition reached {msg.partition()}")
+                    elif msg.error().code() == KafkaError.UNKNOWN_TOPIC_OR_PART:
+                        logger[device_id].debug(f"Topic {msg.topic()} does not exist")
+                    elif msg.error():
+                        raise KafkaException(msg.error())
+                    continue
+                
+                # Processa mensagem válida
+                message_key = msg.key().decode('utf-8') if msg.key() else None
+                if message_key == str(device_id):
+                    message_value = json.loads(msg.value().decode('utf-8'))
+                    action = message_value['actionType']
+                    if action == 'Blink':
+                        if blinking[device_id]:
+                            logger[device_id].info("STOP blinking")
+                            blinking[device_id] = False
+                        else:
+                            logger[device_id].info("START blinking")
+                            blinking[device_id] = True
+                    elif action == 'Sound':
+                        logger[device_id].info("Playing sound")
+                    else:
+                        logger[device_id].warning(f"Unknown action: {action}")
+                    
+    except KeyboardInterrupt:
+        logger[device_id].info("Consumer interrupted by user")
+    finally:
+        consumer.close()
+                        
 async def simulate_device(device_id, animal_id, initial_battery):
+    print_qrcode(device_id)
+    blinking[device_id] = False
+
+    last_state = "adescansar"
+    update_interval = 3
+    last_location = None
+    tracking_data = []
+
     producer = create_kafka_producer()
     topic = "animal_tracking_topic"
 
@@ -234,20 +358,20 @@ async def simulate_device(device_id, animal_id, initial_battery):
             if battery_timer >= 10:
                 if state == 'discharging':
                     last_battery -= 1.0
-                    logging.info(f"Dispositivo {device_id}: Bateria diminuída para {last_battery}%")
+                    logger[device_id].debug(f"Dispositivo {device_id}: Battery reduced to {last_battery}%")
                     if last_battery <= 20.0:
                         state = 'charging'
-                        logging.info(f"Dispositivo {device_id}: Mudar para estado 'charging'")
+                        logger[device_id].debug(f"Dispositivo {device_id}: Battery state changed to 'charging'")
                 elif state == 'charging':
                     if last_battery < 100.0:
                         last_battery += 1.0
-                        logging.info(f"Dispositivo {device_id}: Bateria aumentada para {last_battery}%")
+                        logger[device_id].debug(f"Dispositivo {device_id}: Battery increased to {last_battery}%")
                         if last_battery >= 100.0:
                             state = 'discharging'
-                            logging.info(f"Dispositivo {device_id}: Bateria cheia. Mudar para estado 'discharging'")
+                            logger[device_id].debug(f"Dispositivo {device_id}: Battery full. Changing battery state to 'discharging'")
                     else:
                         state = 'discharging'
-                        logging.info(f"Dispositivo {device_id}: Bateria já está em 100%. Mudar para estado 'discharging'")
+                        logger[device_id].debug(f"Dispositivo {device_id}: Battery is already at 100%. Changing battery state to 'discharging'")
 
                 last_battery = max(0.0, min(100.0, last_battery))
 
@@ -290,80 +414,49 @@ async def simulate_device(device_id, animal_id, initial_battery):
                 'respiratory_rate': respiratory_rate,
                 'latitude': last_location['latitude'],
                 'longitude': last_location['longitude'],
+                'blinking': blinking[device_id],
                 'batteryPercentage': round(last_battery, 2),
                 'timestamp': int(time.time())
             }
 
-            send_to_kafka(producer, topic, json.dumps(data))
+            
+            send_to_kafka(producer, topic, device_id, json.dumps(data))
+            logger[device_id].debug(f"Sended data: {data}")
 
             await asyncio.sleep(update_interval)
 
             elapsed_time = time.time() - start_time
 
+            logger[device_id].debug(f"Elapsed time: {elapsed_time}")
+
         except Exception as e:
-            logging.error(f"Erro na simulação para o dispositivo {device_id}: {e}")
+            logger[device_id].error(f"Error simulating device: {e}\n{traceback.format_exc()}")
             await asyncio.sleep(5)
 
 
 async def run_simulation_for_device(device_id):
     animal_id = get_animal_id(device_id)
     if animal_id is None:
-        logging.error(f"Não foi possível obter o animal ID para o dispositivo {device_id}")
+        logger[device_id].error(f"Was not possible to retrieve animal id")
         return
 
-    last_battery = get_last_battery_level(animal_id)
+    last_battery = get_last_battery_level(animal_id, device_id)
     if last_battery is None:
-        logging.warning(f"Não foi possível obter o nível de bateria para o animal ID {animal_id}.")
+        logger[device_id].warning(f"Was not possible to retrieve the battery level for the animal ID {animal_id}.")
         last_battery = 100.0
 
-    await simulate_device(device_id, animal_id, last_battery)
+    await simulate_device(device_id, animal_id, last_battery)    
 
-
-async def get_device_ids_from_db():
-    try:
-        conn = await aiomysql.connect(
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            host="127.0.0.1",
-            port=3306,
-            db=os.getenv("DB_NAME")
-        )
-
-        async with conn.cursor() as cursor:
-            await cursor.execute("SELECT device_id FROM animals")
-            device_ids = [device_id[0] for device_id in await cursor.fetchall()]
-
-        conn.close()
-        return device_ids
-
-    except Exception as e:
-        logging.error(f"Error connecting to Database: {e}")
-        sys.exit(1)
-
-
-async def main():
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s'
-    )
-
-    try:
-        device_ids = await get_device_ids_from_db()
-        tasks = [run_simulation_for_device(device_id) for device_id in device_ids]
-        await asyncio.gather(*tasks)
-
-    except KeyboardInterrupt:
-        logging.info("Simulação interrompida manualmente")
-    except Exception as e:
-        logging.error(f"An error occurred: {e}")
-    finally:
-        for task in asyncio.all_tasks():
-            if not task.done():
-                task.cancel()
-
+async def main(device_id):
+    await asyncio.gather(run_simulation_for_device(device_id), consume_messages(device_id))
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    if len(sys.argv) < 2:
+        print("Usage: python producer.py <device_id>")
+        sys.exit(1)
+    device_id = sys.argv[1]
+    logger[device_id] = create_device_logger(device_id)
+    asyncio.run(main(device_id))
 
 
 

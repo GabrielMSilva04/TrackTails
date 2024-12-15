@@ -1,0 +1,8 @@
+FROM maven:3.8.5-openjdk-17-slim AS development
+RUN apt-get update && apt-get install -y wget
+
+COPY gateway /app/gateway
+WORKDIR /app/gateway
+EXPOSE 80
+
+CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.profiles=dev"]

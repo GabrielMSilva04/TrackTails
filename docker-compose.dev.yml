@@ -1,48 +1,52 @@
 version: '3.8'
 
 services:
-  # Database services
   mariadb:
-    image: mariadb:lts-noble
+    image: mariadb:latest
     container_name: mariadb
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
     volumes:
       - ./mariadb_data:/var/lib/mysql
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       start_period: 10s
-      interval: 30s
-      timeout: 15s
+      interval: 10s
+      timeout: 5s
       retries: 3
+    restart: always
 
-  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: ${DB_ROOT_PASSWORD}
+    ports:
+      - "8008:80"
+    depends_on:
+      - mariadb
+    restart: always
+
   influxdb:
     image: influxdb:2
     container_name: influxdb
     env_file:
       - .env
+    ports:
+      - "8086:8086"
     volumes:
       - influxdb_data:/var/lib/influxdb
     restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:8086/health || exit 1"]
-      interval: 30s
-      timeout: 15s
+      test: [ "CMD-SHELL", "curl --fail http://localhost:8086/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   zookeeper:
@@ -51,80 +55,84 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
     volumes:
       - zookeeper_data:/var/lib/zookeeper
     restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
     healthcheck:
       test: nc -z localhost 2181 || exit -1
-      interval: 30s
-      timeout: 15s
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.4.4
     container_name: kafka
+    ports:
+      - "9092:9092"
+      - "19092:19092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,EXTERNAL://localhost:9092
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:19092,EXTERNAL://0.0.0.0:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
-      KAFKA_LOG_RETENTION_MS: 10000
-      KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 5000
-    volumes:
-      - kafka_data:/var/lib/kafka
     depends_on:
       zookeeper:
         condition: service_healthy
     restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    volumes:
+      - kafka_data:/var/lib/kafka
     healthcheck:
-      test: ["CMD-SHELL", "/usr/bin/kafka-topics --bootstrap-server localhost:19092 --list || exit 1"]
+      test: [ "CMD-SHELL", "/usr/bin/kafka-topics --bootstrap-server localhost:19092 --list || exit 1" ]
       interval: 30s
-      timeout: 30s
+      timeout: 10s
       retries: 3
 
-  # Spring Boot Cloud Gateway as a reverse proxy
+  kafdrop:
+    image: obsidiandynamics/kafdrop:4.0.2
+    container_name: kafdrop
+    ports:
+      - "9009:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:19092"
+      SERVER_PORT: 9000
+      SERVER_SERVLET_CONTEXTPATH: "/"
+    depends_on:
+      - kafka
+    restart: always
+
   gateway:
     build:
       context: ./
-      dockerfile: ./gateway/Dockerfile
+      dockerfile: ./gateway/Dockerfile.dev
     container_name: gateway
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       userservice:
         condition: service_healthy
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    volumes:
+      - ./gateway:/app/gateway
+      - ~/.m2:/root/.m2
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:80/api/health"]
-      interval: 30s
-      timeout: 15s
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:80/api/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
     restart: always
 
-  # Application services
   animalservice:
     build:
       context: ./
-      dockerfile: ./animalservice/Dockerfile
+      dockerfile: ./animalservice/Dockerfile.dev
     container_name: animalservice
+    ports:
+      - "8082:8080"
     env_file:
       - .env
     environment:
@@ -135,30 +143,29 @@ services:
       INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
       INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
       INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
+      SPRING_PROFILES_ACTIVE: dev
     depends_on:
       mariadb:
         condition: service_healthy
       influxdb:
         condition: service_healthy
     volumes:
-      - animal-images:/uploads/animals
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      - ./animalservice:/app/animalservice
+      - ~/.m2:/root/.m2
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/animals/health"]
-      interval: 30s
-      timeout: 15s
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/animals/health" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
     restart: always
 
   notificationservice:
     build:
       context: ./
-      dockerfile: ./notificationservice/Dockerfile
+      dockerfile: ./notificationservice/Dockerfile.dev
     container_name: notificationservice
+    ports:
+      - "8083:8080"
     env_file:
       - .env
     environment:
@@ -168,27 +175,25 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
-      influxdb:
-        condition: service_healthy
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    volumes:
+      - ./notificationservice:/app/notificationservice
+      - ~/.m2:/root/.m2
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/notifications/health"]
-      interval: 30s
-      timeout: 15s
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/notifications/health" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
     restart: always
 
   reportservice:
     build:
       context: ./
-      dockerfile: ./reportservice/Dockerfile
+      dockerfile: ./reportservice/Dockerfile.dev
     container_name: reportservice
+    ports:
+      - "8084:8080"
     env_file:
-        - .env
+      - .env
     environment:
       DB_HOST: mariadb
       DB_PORT: 3306
@@ -202,23 +207,23 @@ services:
         condition: service_healthy
       influxdb:
         condition: service_healthy
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    volumes:
+      - ./reportservice:/app/reportservice
+      - ~/.m2:/root/.m2
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/reports/health"]
-      interval: 30s
-      timeout: 15s
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/reports/health" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
     restart: always
 
   userservice:
     build:
       context: ./
-      dockerfile: ./userservice/Dockerfile
+      dockerfile: ./userservice/Dockerfile.dev
     container_name: userservice
+    ports:
+      - "8085:8080"
     env_file:
       - .env
     environment:
@@ -231,56 +236,24 @@ services:
       INFLUXDB_TOKEN: ${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
       INFLUXDB_ORG: ${DOCKER_INFLUXDB_INIT_ORG}
       INFLUXDB_BUCKET: ${DOCKER_INFLUXDB_INIT_BUCKET}
-
-    volumes:
-      - ./security:/app/keys
     depends_on:
       mariadb:
         condition: service_healthy
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    volumes:
+      - ./security:/app/keys
+      - ./userservice:/app/userservice
+      - ~/.m2:/root/.m2
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/users/health"]
-      interval: 30s
-      timeout: 15s
+      test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/users/health" ]
+      interval: 10s
+      timeout: 5s
       retries: 5
     restart: always
-
-  pwa:
-    build:
-      context: ./
-      dockerfile: ./pwa/Dockerfile
-    container_name: pwa
-    depends_on:
-      - animalservice
-      - notificationservice
-      - reportservice
-      - userservice
-      - gateway
-    environment:
-      NODE_ENV: production
-      VITE_API_BASE_URL: ${BASE_URL}/api/v1
-      VITE_WS_BASE_URL: ${BASE_URL}/ws
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    healthcheck:
-        test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5173"]
-        interval: 30s
-        timeout: 15s
-        retries: 5
-    restart: always
-
 
   datacollector:
     build:
       context: ./
-      dockerfile: ./datacollector/Dockerfile
+      dockerfile: ./datacollector/Dockerfile.dev
     container_name: datacollector
     env_file:
       - .env
@@ -297,19 +270,24 @@ services:
         condition: service_healthy
       influxdb:
         condition: service_healthy
+      zookeeper:
+        condition: service_healthy
       kafka:
-       condition: service_healthy
+        condition: service_healthy
+    volumes:
+      - ./datacollector:/app/datacollector
+      - ~/.m2:/root/.m2
     healthcheck:
       test: [ "CMD", "wget", "-qO", "/dev/null", "http://localhost:8080/api/v1/datacollector/health" ]
-      interval: 30s
-      timeout: 15s
+      interval: 10s
+      timeout: 5s
       retries: 3
     restart: always
 
   actionservice:
     build:
       context: ./
-      dockerfile: ./actionservice/Dockerfile
+      dockerfile: ./actionservice/Dockerfile.dev
     container_name: actionservice
     env_file:
       - .env
@@ -325,9 +303,40 @@ services:
       mariadb:
         condition: service_healthy
       influxdb:
-        condition: service_healthy
+          condition: service_healthy
       kafka:
-        condition: service_healthy
+          condition: service_healthy
+    volumes:
+      - ./actionservice:/app/actionservice
+      - ~/.m2:/root/.m2
+    restart: always
+
+  pwa:
+    build:
+      context: ./
+      dockerfile: ./pwa/Dockerfile.dev
+    container_name: pwa
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./pwa:/app
+      - /app/node_modules
+    depends_on:
+      - animalservice
+      - notificationservice
+      - reportservice
+      - userservice
+      - gateway
+    environment:
+      NODE_ENV: development
+      VITE_API_BASE_URL: ${BASE_URL}/api/v1
+      VITE_WS_BASE_URL: ${BASE_URL}/ws
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
 
 volumes:
   mariadb_data:

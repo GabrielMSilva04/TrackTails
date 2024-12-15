@@ -46,7 +46,7 @@ public class ActionsController {
         }
 
         actionService.triggerAction(actionDTO);
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
 

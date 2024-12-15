@@ -18,6 +18,8 @@ export default function LayoutMapDetails() {
     const [showRoute, setShowRoute] = useState(false);
     const [showFenceControls, setShowFenceControls] = useState(false);
     const [routeData, setRouteData] = useState([]);
+    const [light_on, setLightOn] = useState(false);
+    const [playing_sound, setPlayingSound] = useState(false);
 
     useEffect(() => {
         if (!selectedAnimal) {
@@ -43,14 +45,13 @@ export default function LayoutMapDetails() {
                 const headers = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                 };
-
                 const [latitudeResponse, longitudeResponse, latestResponse] = await Promise.all([
                     axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/latitude`, {
-                        params: { start: "-1d", end: "now()", interval: "15m", aggregate: "last" },
+                        params: { start: "-10m", end: "now()", interval: "10s", aggregate: "last" },
                         headers,
                     }),
                     axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/longitude`, {
-                        params: { start: "-1d", end: "now()", interval: "15m", aggregate: "last" },
+                        params: { start: "-10m", end: "now()", interval: "10s", aggregate: "last" },
                         headers,
                     }),
                     axios.get(`${baseUrl}/animaldata/latest/${selectedAnimal.id}`, { headers }),
@@ -59,6 +60,12 @@ export default function LayoutMapDetails() {
                 const latitudeData = latitudeResponse.data;
                 const longitudeData = longitudeResponse.data;
                 const latestData = latestResponse.data;
+
+                // verify if latestData includes blinking
+                console.log("Latest Animal Data:", latestData);
+                if (latestData.blinking) {
+                    setLightOn(true);
+                }
 
                 const combinedData = latitudeData.map(latPoint => {
                     const matchingLonPoint = longitudeData.find(
@@ -81,6 +88,15 @@ export default function LayoutMapDetails() {
         };
 
         fetchAnimalData();
+
+        const intervalId = setInterval(() => {
+            fetchAnimalData();
+        }, 10000); // Fetch every 10 seconds
+
+        // Cleanup interval on component unmount or dependency change
+        return () => {
+            clearInterval(intervalId);
+        };
     }, [selectedAnimal]);
 
     // Fetch existing fence data
@@ -112,7 +128,6 @@ export default function LayoutMapDetails() {
     const saveFence = async () => {
         console.log("Fence Coordinates:", fence);
         if (fence.length < 4) {
-            alert("You need to define all four points of the fence.");
             setFence([]);
             return;
         }
@@ -135,11 +150,9 @@ export default function LayoutMapDetails() {
             console.log("Fence Data:", fenceData);
             const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
             await axios.post(`${baseUrl}/fences`, fenceData, { headers });
-            alert("Fence saved successfully!");
             setAddingFence(false);
         } catch (error) {
             console.error("Failed to save fence:", error);
-            alert("Failed to save fence.");
         }
     };
 
@@ -148,11 +161,9 @@ export default function LayoutMapDetails() {
         try {
             const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
             await axios.delete(`${baseUrl}/fences/${selectedAnimal.id}`, { headers });
-            alert("Fence deleted successfully!");
             setFence([]);
         } catch (error) {
             console.error("Failed to delete fence:", error);
-            alert("Failed to delete fence.");
         }
     };
 
@@ -166,6 +177,21 @@ export default function LayoutMapDetails() {
             setFence(fence.slice(0, -1));
         }
     };
+
+    const execAction = (actionType) => {
+        const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+        axios.post(`${baseUrl}/actions`, {
+            actionType: actionType,
+            animalId: selectedAnimal.id,
+        }, { headers })
+
+        if (actionType === "Sound" && !playing_sound) {
+            setPlayingSound(true);
+            setTimeout(() => setPlayingSound(false), 2000);
+        } else if (actionType === "Blink") {
+            setLightOn(!light_on);
+        }
+    }
 
     if (!selectedAnimal) {
         return <div>Loading...</div>;
@@ -209,6 +235,7 @@ export default function LayoutMapDetails() {
                     routeData={showRoute ? routeData : []}
                     showRoute={showRoute}
                     clickHandler={() => {}}
+                    targetAnimal={selectedAnimal}
                 />
             </div>
 
@@ -262,14 +289,14 @@ export default function LayoutMapDetails() {
                         </>
                     ) : (
                         <>
-                            <div className="tooltip" data-tip="Light">
-                                <FontAwesomeIcon icon={faLightbulb} color="white" size="lg" />
+                            <button onClick={() => execAction("Blink")}>
+                                <FontAwesomeIcon icon={faLightbulb} color={light_on ? "yellow" : "white"} size="lg" />
                                 <div className="text-white text-sm mt-1">Light</div>
-                            </div>
-                            <div className="tooltip" data-tip="Sound">
-                                <FontAwesomeIcon icon={faVolumeHigh} color="white" size="lg" />
+                            </button>
+                            <button onClick={() => execAction("Sound")}>
+                                <FontAwesomeIcon icon={faVolumeHigh} color={playing_sound ? "yellow" : "white"} size="lg" />
                                 <div className="text-white text-sm mt-1">Sound</div>
-                            </div>
+                            </button>
                             <button onClick={() => setShowRoute((prev) => !prev)}>
                                 <FontAwesomeIcon icon={faRoute} color="white" size="lg" />
                                 <div className="text-white text-sm mt-1">

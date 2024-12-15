@@ -1,4 +1,5 @@
-import { Outlet, Link, useNavigate, useParams } from "react-router-dom";
+import {Outlet, Link, useNavigate, useLocation, useParams} from "react-router-dom";
+import NavBar from "./Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
@@ -12,6 +13,7 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
     const { selectedAnimal, setSelectedAnimal } = animalContext || {};
     const [animal, setAnimal] = useState(null); // For URL-based animal loading
     const navigate = useNavigate();
+    const location = useLocation();
     const { deviceId } = useParams(); // Get deviceId from URL if useUrl is true
 
     LayoutAnimal.propTypes = {
@@ -74,7 +76,6 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
             });
-            alert("Animal deleted successfully.");
             console.log("Delete response:", response.data);
 
             setSelectedAnimal(null);
@@ -82,7 +83,6 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
 
         } catch (error) {
             console.error("Error deleting animal:", error);
-            alert("Failed to delete the animal. Please try again.");
         }
     };
 
@@ -90,7 +90,14 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
         navigate(`/editpet`);
     };
 
+    const fromProfile = location.state?.fromProfile;
+
     const onBackClick = () => {
+        if (fromProfile) {
+            navigate('/profile');
+        } else {
+            navigate(-1);
+        }
         window.location.href = "/mypets";
     };
 

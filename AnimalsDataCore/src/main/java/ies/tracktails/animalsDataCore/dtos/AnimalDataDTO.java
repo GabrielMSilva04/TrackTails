@@ -18,6 +18,7 @@ public class AnimalDataDTO {
     private Optional<Double> heartRate;
     private Optional<Double> breathRate;
     private Optional<Double> batteryPercentage;
+    private Optional<Boolean> blinking;
     private Map<String, String> additionalTags;
     private Optional<Instant> timestamp;
 
@@ -30,6 +31,7 @@ public class AnimalDataDTO {
         this.heartRate = Optional.empty();
         this.breathRate = Optional.empty();
         this.batteryPercentage = Optional.empty();
+        this.blinking = Optional.empty();
         this.additionalTags = new HashMap<>();
         this.timestamp = Optional.empty();
     }
@@ -44,11 +46,12 @@ public class AnimalDataDTO {
         this.heartRate = Optional.empty();
         this.breathRate = Optional.empty();
         this.batteryPercentage = Optional.empty();
+        this.blinking = Optional.empty();
         this.additionalTags = new HashMap<>();
         this.timestamp = Optional.empty();
     }
 
-    public AnimalDataDTO(String animalId, Double weight, Double height, Double latitude, Double longitude, Double speed, Double heartRate, Double breathRate, Double batteryPercentage, Instant timestamp) {
+    public AnimalDataDTO(String animalId, Double weight, Double height, Double latitude, Double longitude, Double speed, Double heartRate, Double breathRate, Double batteryPercentage, Boolean blinking, Instant timestamp) {
         this.animalId = animalId;
         this.weight = Optional.ofNullable(weight);
         this.height = Optional.ofNullable(height);
@@ -58,6 +61,7 @@ public class AnimalDataDTO {
         this.heartRate = Optional.ofNullable(heartRate);
         this.breathRate = Optional.ofNullable(breathRate);
         this.batteryPercentage = Optional.ofNullable(batteryPercentage);
+        this.blinking = Optional.ofNullable(blinking);
         this.additionalTags = new HashMap<>();
         this.timestamp = Optional.ofNullable(timestamp);
     }
@@ -135,6 +139,14 @@ public class AnimalDataDTO {
         this.batteryPercentage = Optional.ofNullable(batteryPercentage);
     }
 
+    public void setBlinking(Boolean blinking) {
+        this.blinking = Optional.ofNullable(blinking);
+    }
+
+    public Optional<Boolean> getBlinking() {
+        return blinking;
+    }
+
     public Optional<Instant> getTimestamp() {
         return timestamp;
     }
@@ -177,6 +189,9 @@ public class AnimalDataDTO {
             case "batteryPercentage":
                 this.setBatteryPercentage(Double.parseDouble(value));
                 break;
+            case "blinking":
+                this.setBlinking(Boolean.parseBoolean(value));
+                break;
             default:
                 break;
         }
@@ -194,6 +209,7 @@ public class AnimalDataDTO {
         heartRate.ifPresent(value -> sb.append("\"heartRate\": ").append(value).append(", "));
         breathRate.ifPresent(value -> sb.append("\"breathRate\": ").append(value).append(", "));
         batteryPercentage.ifPresent(value -> sb.append("\"batteryPercentage\": ").append(value).append(", "));
+        blinking.ifPresent(value -> sb.append("\"blinking\": ").append(value).append(", "));
         timestamp.ifPresent(value -> sb.append("\"timestamp\": ").append(value.toEpochMilli()).append(", "));
         sb.append("\"additionalTags\": {");
         for (Map.Entry<String, String> entry : additionalTags.entrySet()) {
