@@ -317,6 +317,7 @@ async def consume_messages(device_id):
                         
 async def simulate_device(device_id, animal_id, initial_battery):
     print_qrcode(device_id)
+    blinking[device_id] = False
 
     last_state = "adescansar"
     update_interval = 3
@@ -413,7 +414,7 @@ async def simulate_device(device_id, animal_id, initial_battery):
                 'respiratory_rate': respiratory_rate,
                 'latitude': last_location['latitude'],
                 'longitude': last_location['longitude'],
-                'blinking': blinking,
+                'blinking': blinking[device_id],
                 'batteryPercentage': round(last_battery, 2),
                 'timestamp': int(time.time())
             }
