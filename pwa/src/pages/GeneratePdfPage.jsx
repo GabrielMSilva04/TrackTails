@@ -2,16 +2,20 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { baseUrl } from "../consts";
-import {InputField} from "../components/InputField.jsx";
+import { InputField } from "../components/InputField.jsx";
 import { convertToInfluxDBFormat } from "../utils";
+import { useState } from "react";
 
 export default function GeneratePdfPage({ animal }) {
     const {
         register,
         handleSubmit,
         formState: { errors },
-        watch,
     } = useForm();
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [reportLink, setReportLink] = useState("");
+    const [tooltipVisible, setTooltipVisible] = useState(false);
 
     const onSubmit = async (data) => {
         try {
@@ -20,8 +24,6 @@ export default function GeneratePdfPage({ animal }) {
                 alert("No authentication token found. Please log in.");
                 return;
             }
-
-            console.log("Form data:", data);
 
             const metrics = Object.keys(data.metrics || {}).filter((key) => data.metrics[key]);
 
@@ -39,11 +41,9 @@ export default function GeneratePdfPage({ animal }) {
                 include: metrics.join(","),
             };
 
-            console.log("Report params:", params);
-
             const reportPayload = {
                 animalId: animal,
-                fileName: data.reportName || "Generated_Report",
+                fileName: data.reportName || "Report.pdf",
             };
 
             const headers = {
@@ -51,24 +51,33 @@ export default function GeneratePdfPage({ animal }) {
                 "Content-Type": "application/json",
             };
 
-            console.log("Creating report with payload:", reportPayload);
             const response = await axios.post(url, reportPayload, { params, headers });
 
-            console.log("Report created successfully:", response.data);
-            alert("Report created successfully!");
-
+            const reportUUID = response.data.id;
+            const reportUrl = `${baseUrl}/reports/${reportUUID}/download`;
+            setReportLink(reportUrl);
+            setModalVisible(true);
         } catch (error) {
             console.error("Error creating report:", error.response?.data || error.message);
             alert("An error occurred while creating the report.");
         }
     };
 
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(reportLink)
+            .then(() => {
+                setTooltipVisible(true);
+                setTimeout(() => setTooltipVisible(false), 2000); // Hide tooltip after 2 seconds
+            })
+            .catch(() => alert("Failed to copy link."));
+    };
+
     const metricOptions = [
-        { value: 'weight', label: 'Weight' },
-        { value: 'height', label: 'Height' },
-        { value: 'heartRate', label: 'Heart Rate' },
-        { value: 'respiratoryRate', label: 'Respiratory Rate' },
-        { value: 'speed', label: 'Speed' },
+        { value: "weight", label: "Weight" },
+        { value: "height", label: "Height" },
+        { value: "heartRate", label: "Heart Rate" },
+        { value: "respiratoryRate", label: "Respiratory Rate" },
+        { value: "speed", label: "Speed" },
     ];
 
     return (
@@ -86,7 +95,6 @@ export default function GeneratePdfPage({ animal }) {
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2 h-full w-full">
-
                     {/* Metric Checkboxes */}
                     <div className="flex-grow overflow-y-auto space-y-4 px-4">
                         <div className="text-lg font-semibold text-primary">Select Metrics</div>
@@ -132,6 +140,46 @@ export default function GeneratePdfPage({ animal }) {
                     </div>
                 </form>
             </div>
+
+            {/* Modal Section */}
+            {modalVisible && (
+                <div className="modal modal-open">
+                    <div className="modal-box">
+                        <h3 className="font-bold text-lg">Report Generated Successfully!</h3>
+                        <p className="py-4">Your report has been generated. Use the link below to download it.</p>
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text">Report URL</span>
+                            </label>
+                            <input
+                                type="text"
+                                value={reportLink}
+                                readOnly
+                                className="input input-bordered"
+                            />
+                        </div>
+                        <div className="modal-action">
+                            <div
+                                className={`tooltip tooltip-top ${tooltipVisible ? "tooltip-open" : ""}`}
+                                data-tip="Link copied!"
+                            >
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={copyToClipboard}
+                                >
+                                    Copy Link
+                                </button>
+                            </div>
+                            <button
+                                onClick={() => setModalVisible(false)}
+                                className="btn"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
