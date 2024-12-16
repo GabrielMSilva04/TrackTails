@@ -70,7 +70,6 @@ public class ReportServiceImpl implements ReportService {
 
         String populatedHtml = templateEngine.process("animal-report", context);
 
-        // Convert the populated HTML to PDF
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             HtmlConverter.convertToPdf(populatedHtml, outputStream);
             return outputStream.toByteArray();
@@ -79,17 +78,13 @@ public class ReportServiceImpl implements ReportService {
 
 
     private void populateTemplate(Context context, Long animalId, String start, String end, String interval, List<String> metrics) {
-        // Preencher o contexto com os dados básicos
         context.setVariable("generatedAt", Instant.now().toString());
         
-        // Cria uma estrutura de tabelas
         List<TableData> tables = createTables(animalId, start, end, interval, metrics);
         context.setVariable("tables", tables);
     }
 
     private List<TableData> createTables(Long animalId, String start, String end, String interval, List<String> metrics) {
-        // Aqui criamos uma tabela exemplo com o título e as linhas
-        // Para simplificar, vamos assumir que cada métrica é uma tabela
         List<TableData> tables = new ArrayList<>();
         
         for (String metric : metrics) {
@@ -103,10 +98,10 @@ public class ReportServiceImpl implements ReportService {
             }
 
             TableData tableData = new TableData();
-            tableData.setTableTitle("Data for " + metric);  // Título da tabela
-            tableData.setColumnTitle(metric); // Título da coluna
+            String title = convertCamelCaseToTitleCase(metric);
+            tableData.setTableTitle("Data for " + title);
+            tableData.setColumnTitle("Mean " + convertCamelCaseToTitleCase(title));  // Título da coluna
 
-            // Cria linhas de exemplo com timestamp e valores dinâmicos
             List<TableRow> rows = new ArrayList<>();
             for (AnimalDataDTO data : animalDataDTOs_mean) {
                 TableRow row = new TableRow();
@@ -126,6 +121,24 @@ public class ReportServiceImpl implements ReportService {
         }
 
         return tables;
+    }
+
+    private String convertCamelCaseToTitleCase(String camelCase) {
+        if (camelCase == null || camelCase.isEmpty()) {
+            return camelCase;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append(Character.toUpperCase(camelCase.charAt(0)));
+        for (char c : camelCase.substring(1).toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                sb.append(" ");
+            }
+            sb.append(c);
+        }
+
+        return sb.toString().trim();
     }
 
     private Double round(Double value) {
