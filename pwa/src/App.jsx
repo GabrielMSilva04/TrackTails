@@ -19,6 +19,7 @@ import Notifications from "./pages/Notifications.jsx";
 import { AnimalProvider } from './contexts/AnimalContext';
 import { useNavigate } from 'react-router-dom'
 import InitialPage from "./pages/InitialPage.jsx";
+import GeneratePdfPage from "./pages/GeneratePdfPage.jsx";
 
 const ProtectedRoute = ({ loggedIn, children }) => {
     return loggedIn ? children : <Navigate to="/login" />;
@@ -125,6 +126,8 @@ function AppRoutes() {
                         element={<Pet onMetricSelect={handleSelectMetric} />}
                     />
                 </Route>
+
+                <Route path="/generate-pdf" element={<GeneratePdfPage animal={selectedAnimal} />} />
             </Routes>
         </AnimalProvider>
     );

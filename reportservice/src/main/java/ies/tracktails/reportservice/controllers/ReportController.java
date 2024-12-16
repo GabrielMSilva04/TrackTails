@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -34,6 +35,7 @@ public class ReportController {
             @RequestParam(defaultValue = "-1d") String start,
             @RequestParam(defaultValue = "now()") String end,
             @RequestParam(defaultValue = "15m") String interval,
+            @RequestParam(defaultValue = "all") String include,
             @RequestBody Report report) {
 
         Report savedReport = reportService.createReport(
@@ -41,7 +43,8 @@ public class ReportController {
                 report.getFileName(),
                 start,
                 end,
-                interval
+                interval,
+                include
         );
 
         return new ResponseEntity<>(savedReport, HttpStatus.CREATED);
@@ -49,7 +52,7 @@ public class ReportController {
 
     @Operation(summary = "Download a report by ID")
     @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> downloadReport(@PathVariable Long id) {
+    public ResponseEntity<byte[]> downloadReport(@PathVariable UUID id) {
         Report report = reportService.getReport(id);
         if (report == null || report.getFileContent() == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

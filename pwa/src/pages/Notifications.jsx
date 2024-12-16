@@ -116,7 +116,7 @@ export default function Notifications() {
     };
 
     return (
-        <div className="items-center">
+        <div className="h-full">
             <div className="mt-10 flex justify-between">
                 <h1 className="text-primary text-2xl font-extrabold">
                     {notifications.length > 0 ? "Notifications" : "No notifications to show"}
@@ -130,8 +130,7 @@ export default function Notifications() {
 
             {/* Scrollable Notifications Container */}
             <div
-                className="mt-5 overflow-y-auto mb-10"
-                style={{ maxHeight: "600px" /* Adjust height as needed */ }}
+                className="mt-5 overflow-y-auto"
             >
                 {notifications.map((notification) => (
                     <div key={notification.id}>

@@ -197,6 +197,31 @@ public class AnimalDataDTO {
         }
     }
 
+    public String getField(String key) {
+        switch (key) {
+            case "weight":
+                return this.getWeight().map(Object::toString).orElse(null);
+            case "height":
+                return this.getHeight().map(Object::toString).orElse(null);
+            case "latitude":
+                return this.getLatitude().map(Object::toString).orElse(null);
+            case "longitude":
+                return this.getLongitude().map(Object::toString).orElse(null);
+            case "speed":
+                return this.getSpeed().map(Object::toString).orElse(null);
+            case "heartRate":
+                return this.getHeartRate().map(Object::toString).orElse(null);
+            case "breathRate":
+                return this.getBreathRate().map(Object::toString).orElse(null);
+            case "batteryPercentage":
+                return this.getBatteryPercentage().map(Object::toString).orElse(null);
+            case "blinking":
+                return this.getBlinking().map(Object::toString).orElse(null);
+            default:
+                return null;
+        }
+    }
+
     public String serialize() {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
