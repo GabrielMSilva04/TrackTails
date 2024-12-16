@@ -1,6 +1,7 @@
 package ies.tracktails.animalsDataCore.entities;
 
 import jakarta.persistence.*;
+
 import java.util.Date;
 
 @Table(name = "animals")

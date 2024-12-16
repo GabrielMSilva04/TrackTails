@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ies.tracktails</groupId>
 	<artifactId>datacollector</artifactId>
-	<version>0.4.0-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>Data Collector</name>
 	<description>Data Collector component from TrackTails project</description>
 	<url/>
@@ -61,11 +61,7 @@
 		<dependency>
 			<groupId>ies.tracktails</groupId>
 			<artifactId>animals-data-core</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

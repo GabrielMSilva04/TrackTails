@@ -1,6 +1,7 @@
 package ies.tracktails.animalsDataCore.services;
 
 import ies.tracktails.animalsDataCore.entities.Animal;
+
 import java.util.List;
 
 public interface AnimalService {
@@ -12,4 +13,5 @@ public interface AnimalService {
     public List<Animal> getAllAnimals();
     public List<Animal> getAnimalsByUserId(Long userId);
     public Animal getAnimalByDeviceId(Long deviceId);
+    public Boolean userHasAccessToAnimal(String userId, String animalId);
 }

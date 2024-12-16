@@ -1,37 +1,68 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import {Outlet, useNavigate, useParams} from "react-router-dom";
 import NavBar from "./Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import PropTypes from "prop-types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAnimalContext } from "../contexts/AnimalContext";
 import axios from "axios";
+import { baseUrl } from "../consts";
 
-const baseUrl = "http://localhost/api/v1";
-
-export default function LayoutAnimal({ showButtons = "all" }) {
-    const { selectedAnimal, setSelectedAnimal } = useAnimalContext();
+export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
+    const animalContext = useAnimalContext?.();
+    const { selectedAnimal, setSelectedAnimal } = animalContext || {};
+    const [animal, setAnimal] = useState(null);
     const navigate = useNavigate();
+    const { deviceId } = useParams();
 
     LayoutAnimal.propTypes = {
         showButtons: PropTypes.oneOf(["all", "back-only", "none"]),
+        useUrl: PropTypes.bool,
     };
 
-    if (!selectedAnimal) {
-        return (
-            <div className="text-center text-primary mt-10">
-                <h2>Loading animal data...</h2>
-            </div>
-        );
-    }
+    const fetchImageUrl = async (petId) => {
+        try {
+            const response = await axios.get(`${baseUrl}/finders/animal/${petId}/image`, {
+                responseType: 'blob',
+            });
+
+            // Convert Blob to URL and return
+            return URL.createObjectURL(response.data);
+        } catch (err) {
+            console.error(`Failed to fetch image for pet ID ${petId}:`, err);
+            return 'https://placehold.co/300';
+        }
+    };
 
     useEffect(() => {
-        console.log("Selected animal in LayoutAnimal:", selectedAnimal);
-    }, [selectedAnimal]);
+        if (useUrl && deviceId) {
+            // Fetch animal data by deviceId from the URL
+            const fetchAnimal = async () => {
+                try {
+                    const response = await axios.post(`${baseUrl}/finders/animal`, {
+                        deviceId: parseInt(deviceId),
+                    });
+                    const fetchedAnimal = response.data;
+
+                    const imageUrl = await fetchImageUrl(fetchedAnimal.id);
+
+                    setAnimal({ ...fetchedAnimal, imageUrl });
+                } catch (error) {
+                    console.error("Error fetching animal by deviceId:", error);
+                }
+            };
+            fetchAnimal();
+        } else {
+            // Use the context-based animal data
+            setAnimal(selectedAnimal);
+        }
+    }, [useUrl, deviceId, selectedAnimal]);
 
     const handleDelete = async () => {
+        if (!animal) return;
+
         const confirmDelete = window.confirm(
-            `Are you sure you want to delete ${selectedAnimal.name}? This action cannot be undone.`
+            `Are you sure you want to delete ${animal.name}? This action cannot be undone.`
         );
 
         if (!confirmDelete) {
@@ -39,18 +70,27 @@ export default function LayoutAnimal({ showButtons = "all" }) {
         }
 
         try {
-            const response = await axios.delete(`${baseUrl}/animals/${selectedAnimal.id}`, {
+            const token = localStorage.getItem("authToken");
+
+            // Delete animal
+            await axios.delete(`${baseUrl}/animals/${selectedAnimal.id}`, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
-            alert("Animal deleted successfully.");
-            console.log("Delete response:", response.data);
 
+            // Delete notifications for the animal
+            await axios.delete(`${baseUrl}/notifications/animal/${selectedAnimal.id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            alert("Animal and its notifications deleted successfully.");
             setSelectedAnimal(null);
-            navigate("/mypets");
+            window.location.href = "/mypets";
         } catch (error) {
-            console.error("Error deleting animal:", error);
+            console.error("Error deleting animal or its notifications:", error);
             alert("Failed to delete the animal. Please try again.");
         }
     };
@@ -59,14 +99,21 @@ export default function LayoutAnimal({ showButtons = "all" }) {
         navigate(`/editpet`);
     };
 
-    const onBackClick = () => {
-        window.location.href = "/mypets";
+    if (!animal) {
+        return (
+            <div className="text-center text-primary mt-10">
+                <h2>Loading animal data...</h2>
+            </div>
+        );
     }
 
     return (
         <div className="bg-primary h-screen flex flex-col overflow-hidden">
             {showButtons !== "none" && (
-                <button className="text-white text-2xl font-bold absolute left-4 mt-5 z-10 fixed" onClick={onBackClick}>
+                <button
+                    className="text-white text-2xl font-bold absolute left-4 mt-5 z-10"
+                    onClick={() => navigate(-1)}
+                >
                     <FontAwesomeIcon icon={faArrowLeft} />
                 </button>
             )}
@@ -75,7 +122,7 @@ export default function LayoutAnimal({ showButtons = "all" }) {
             </div>
             <div className="avatar placeholder justify-center">
                 <div className="bg-neutral border-8 border-base-100 text-neutral-content w-32 rounded-full z-10 mx-auto mt-4 absolute">
-                    <img src={selectedAnimal.imageUrl || "https://via.placeholder.com/150"} alt={selectedAnimal.name} />
+                    <img src={animal.imageUrl || "https://via.placeholder.com/150"} alt={animal.name} />
                 </div>
             </div>
             <div className="h-full pt-20">
@@ -90,7 +137,7 @@ export default function LayoutAnimal({ showButtons = "all" }) {
                     )}
                     {showButtons === "all" ? (
                         <div className="mt-4 text-primary font-bold text-2xl items-center justify-center">
-                            {selectedAnimal.name}
+                            {animal.name}
                             <button
                                 onClick={handleEdit}
                                 className="ml-1.5 text-lg text-neutral border rounded-full border-neutral w-7 h-7 items-center justify-center"
@@ -100,12 +147,12 @@ export default function LayoutAnimal({ showButtons = "all" }) {
                         </div>
                     ) : (
                         <div className="mt-14 text-primary font-bold text-2xl items-center justify-center">
-                            {selectedAnimal.name}
+                            {animal.name}
                         </div>
                     )}
 
                     <div className="overflow-y-auto">
-                        <Outlet context={{ selectedAnimal }} />
+                        <Outlet context={{ animal }} />
                     </div>
                 </div>
             </div>

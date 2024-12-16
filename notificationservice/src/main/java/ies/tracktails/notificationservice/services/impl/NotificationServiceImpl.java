@@ -79,4 +79,23 @@ public class NotificationServiceImpl implements NotificationService {
     public List<Notification> getAllNotifications() {
         return notificationRepository.findAll();
     }
+
+    @Override
+    public boolean existsUnreadNotification(long userId, long animalId, String title, String content) {
+        return notificationRepository.existsByUserIdAndAnimalIdAndTitleAndContentAndRead(
+                userId, animalId, title, content, false
+        );
+    }
+
+    @Override
+    public boolean existsNotification(long userId, long animalId, String title, String content, LocalDateTime minimumDate) {
+        return notificationRepository.existsByUserIdAndAnimalIdAndTitleAndContentAndCreatedAtAfter(
+                userId, animalId, title, content, minimumDate
+        );
+    }
+
+    @Override
+    public void deleteNotificationsByAnimalId(long animalId) {
+        notificationRepository.deleteByAnimalId(animalId);
+    }
 }

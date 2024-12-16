@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "body-parser": "^1.20.3",
+    "canvas": "^2.11.2",
+    "chart.js": "^4.4.7",
+    "express": "^4.21.2",
     "react-leaflet": "^4.2.1",
     "swiper": "^11.1.15"
   }

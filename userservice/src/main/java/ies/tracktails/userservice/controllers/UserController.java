@@ -30,6 +30,11 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        return new ResponseEntity<>("{\"status\": \"UP\"}", HttpStatus.OK);
+    }
+
     @GetMapping("/user_id")
     public ResponseEntity<String> getUser(@RequestHeader("X-User-Id") String userId) {
         return ResponseEntity.ok("User ID: " + userId);

@@ -6,8 +6,7 @@ import { PiBoundingBoxFill } from "react-icons/pi";
 import { useAnimalContext } from '../contexts/AnimalContext';
 import Map from './Map';
 import axios from 'axios';
-
-const base_url = "http://localhost/api/v1";
+import { baseUrl } from '../consts';
 
 export default function LayoutMapDetails() {
     const { selectedAnimal } = useAnimalContext();
@@ -19,7 +18,8 @@ export default function LayoutMapDetails() {
     const [showRoute, setShowRoute] = useState(false);
     const [showFenceControls, setShowFenceControls] = useState(false);
     const [routeData, setRouteData] = useState([]);
-
+    const [light_on, setLightOn] = useState(false);
+    const [playing_sound, setPlayingSound] = useState(false);
 
     useEffect(() => {
         if (!selectedAnimal) {
@@ -33,6 +33,7 @@ export default function LayoutMapDetails() {
         }
     }, [selectedAnimal, navigate]);
 
+    // Fetch latest animal data and route data
     useEffect(() => {
         if (!selectedAnimal || !selectedAnimal.id) {
             console.log('No selected animal to fetch data for.');
@@ -44,36 +45,27 @@ export default function LayoutMapDetails() {
                 const headers = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`,
                 };
-
-                // Fetch latitude, longitude, and battery data
                 const [latitudeResponse, longitudeResponse, latestResponse] = await Promise.all([
-                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.id}/latitude`, {
-                        params: {
-                            start: "-1d",
-                            end: "now()",
-                            interval: "15m",
-                            aggregate: "last",
-                        },
+                    axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/latitude`, {
+                        params: { start: "-10m", end: "now()", interval: "10s", aggregate: "last" },
                         headers,
                     }),
-                    axios.get(`${base_url}/animaldata/historic/${selectedAnimal.id}/longitude`, {
-                        params: {
-                            start: "-1d",
-                            end: "now()",
-                            interval: "15m",
-                            aggregate: "last",
-                        },
+                    axios.get(`${baseUrl}/animaldata/historic/${selectedAnimal.id}/longitude`, {
+                        params: { start: "-10m", end: "now()", interval: "10s", aggregate: "last" },
                         headers,
                     }),
-                    axios.get(`${base_url}/animaldata/latest/${selectedAnimal.id}`, {
-                        headers,
-                    }),
+                    axios.get(`${baseUrl}/animaldata/latest/${selectedAnimal.id}`, { headers }),
                 ]);
 
                 const latitudeData = latitudeResponse.data;
                 const longitudeData = longitudeResponse.data;
                 const latestData = latestResponse.data;
 
+                // verify if latestData includes blinking
+                console.log("Latest Animal Data:", latestData);
+                if (latestData.blinking) {
+                    setLightOn(true);
+                }
 
                 const combinedData = latitudeData.map(latPoint => {
                     const matchingLonPoint = longitudeData.find(
@@ -96,10 +88,88 @@ export default function LayoutMapDetails() {
         };
 
         fetchAnimalData();
+
+        const intervalId = setInterval(() => {
+            fetchAnimalData();
+        }, 10000); // Fetch every 10 seconds
+
+        // Cleanup interval on component unmount or dependency change
+        return () => {
+            clearInterval(intervalId);
+        };
     }, [selectedAnimal]);
+
+    // Fetch existing fence data
+    useEffect(() => {
+        if (!selectedAnimal || !selectedAnimal.id) return;
+
+        const fetchFenceData = async () => {
+            try {
+                const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+                const response = await axios.get(`${baseUrl}/fences/${selectedAnimal.id}`, { headers });
+                const fenceData = response.data;
+                console.log("Fetched fence data:", fenceData);
+
+                setFence([
+                    [fenceData.point1Latitude, fenceData.point1Longitude],
+                    [fenceData.point2Latitude, fenceData.point2Longitude],
+                    [fenceData.point3Latitude, fenceData.point3Longitude],
+                    [fenceData.point4Latitude, fenceData.point4Longitude],
+                ]);
+            } catch (error) {
+                console.error("Failed to fetch fence data:", error);
+            }
+        };
+
+        fetchFenceData();
+    }, [selectedAnimal]);
+
+    // Save or update fence
+    const saveFence = async () => {
+        console.log("Fence Coordinates:", fence);
+        if (fence.length < 4) {
+            setFence([]);
+            return;
+        }
+
+        const [point1, point2, point3, point4] = fence;
+
+        const fenceData = {
+            animalId: selectedAnimal.id,
+            point1Latitude: fence[0].lat,
+            point1Longitude: fence[0].lng,
+            point2Latitude: fence[1].lat,
+            point2Longitude: fence[1].lng,
+            point3Latitude: fence[2].lat,
+            point3Longitude: fence[2].lng,
+            point4Latitude: fence[3].lat,
+            point4Longitude: fence[3].lng,
+        };
+
+        try {
+            console.log("Fence Data:", fenceData);
+            const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+            await axios.post(`${baseUrl}/fences`, fenceData, { headers });
+            setAddingFence(false);
+        } catch (error) {
+            console.error("Failed to save fence:", error);
+        }
+    };
+
+    // Delete fence
+    const deleteFence = async () => {
+        try {
+            const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+            await axios.delete(`${baseUrl}/fences/${selectedAnimal.id}`, { headers });
+            setFence([]);
+        } catch (error) {
+            console.error("Failed to delete fence:", error);
+        }
+    };
 
     const closeCurrentFence = () => {
         setAddingFence(false);
+        saveFence();
     };
 
     const undoLastVertex = () => {
@@ -107,6 +177,21 @@ export default function LayoutMapDetails() {
             setFence(fence.slice(0, -1));
         }
     };
+
+    const execAction = (actionType) => {
+        const headers = { Authorization: `Bearer ${localStorage.getItem('authToken')}` };
+        axios.post(`${baseUrl}/actions`, {
+            actionType: actionType,
+            animalId: selectedAnimal.id,
+        }, { headers })
+
+        if (actionType === "Sound" && !playing_sound) {
+            setPlayingSound(true);
+            setTimeout(() => setPlayingSound(false), 2000);
+        } else if (actionType === "Blink") {
+            setLightOn(!light_on);
+        }
+    }
 
     if (!selectedAnimal) {
         return <div>Loading...</div>;
@@ -150,6 +235,7 @@ export default function LayoutMapDetails() {
                     routeData={showRoute ? routeData : []}
                     showRoute={showRoute}
                     clickHandler={() => {}}
+                    targetAnimal={selectedAnimal}
                 />
             </div>
 
@@ -166,15 +252,21 @@ export default function LayoutMapDetails() {
                                             setAddingFence(true);
                                             setShowFence(true);
                                         }}
-                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                        className="bg-white text-primary text-xs font-bold mx-2 p-2 rounded-lg"
                                     >
                                         Start Fence
                                     </button>
                                     <button
                                         onClick={() => setShowFence((prev) => !prev)}
-                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                        className="bg-white text-primary text-xs font-bold mx-2 p-2 rounded-lg"
                                     >
                                         {showFence ? "Hide Fence" : "Show Fence"}
+                                    </button>
+                                    <button
+                                        onClick={deleteFence}
+                                        className="bg-white text-primary text-xs font-bold mx-2 p-2 rounded-lg"
+                                    >
+                                        Delete Fence
                                     </button>
                                 </>
                             )}
@@ -182,7 +274,7 @@ export default function LayoutMapDetails() {
                                 <>
                                     <button
                                         onClick={closeCurrentFence}
-                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                        className="bg-white text-primary text-xs font-bold mx-2 p-2 rounded-lg"
                                     >
                                         Close Fence
                                     </button>
@@ -203,14 +295,14 @@ export default function LayoutMapDetails() {
                         </>
                     ) : (
                         <>
-                            <div className="tooltip" data-tip="Light">
-                                <FontAwesomeIcon icon={faLightbulb} color="white" size="lg" />
+                            <button onClick={() => execAction("Blink")}>
+                                <FontAwesomeIcon icon={faLightbulb} color={light_on ? "yellow" : "white"} size="lg" />
                                 <div className="text-white text-sm mt-1">Light</div>
-                            </div>
-                            <div className="tooltip" data-tip="Sound">
-                                <FontAwesomeIcon icon={faVolumeHigh} color="white" size="lg" />
+                            </button>
+                            <button onClick={() => execAction("Sound")}>
+                                <FontAwesomeIcon icon={faVolumeHigh} color={playing_sound ? "yellow" : "white"} size="lg" />
                                 <div className="text-white text-sm mt-1">Sound</div>
-                            </div>
+                            </button>
                             <button onClick={() => setShowRoute((prev) => !prev)}>
                                 <FontAwesomeIcon icon={faRoute} color="white" size="lg" />
                                 <div className="text-white text-sm mt-1">

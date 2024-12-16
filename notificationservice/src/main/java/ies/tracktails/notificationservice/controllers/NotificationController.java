@@ -22,6 +22,11 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        return new ResponseEntity<>("{\"status\": \"UP\"}", HttpStatus.OK);
+    }
+
     @Operation(summary = "Create a new notification")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Notification created",
@@ -99,6 +104,17 @@ public class NotificationController {
             return new ResponseEntity<>(new ErrorResponse("Notification not found", HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(notification, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Delete notifications for a specific animal")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notifications deleted successfully"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "No notifications found for the animal")
+    })
+    @DeleteMapping("/animal/{animalId}")
+    public ResponseEntity<?> deleteNotificationsByAnimalId(@PathVariable long animalId) {
+        notificationService.deleteNotificationsByAnimalId(animalId);
+        return ResponseEntity.ok("All notifications for animal " + animalId + " have been deleted.");
     }
 }
 

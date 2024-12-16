@@ -4,18 +4,20 @@ import { faCat, faDog, faVenus, faMars } from '@fortawesome/free-solid-svg-icons
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import axios from 'axios';
+import { useAnimalContext } from "../contexts/AnimalContext";
+import { baseUrl } from '../consts';
+import {useNavigate} from "react-router-dom";
 
-const base_url = "http://localhost/api/v1";
-
-export default function Profile() {
-    const [pets, setPets] = useState([]);
+export default function Profile({ onAnimalSelect }) {
     const [user, setUser] = useState(null);
     const [editMode, setEditMode] = useState(false);
+    const { animals,setSelectedAnimal } = useAnimalContext();
     const [formData, setFormData] = useState({
         displayName: '',
         email: '',
         password: '',
     });
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -25,12 +27,11 @@ export default function Profile() {
                 return;
             }
             try {
-                const response = await axios.get(`${base_url}/users/me`, {
+                const response = await axios.get(`${baseUrl}/users/me`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                console.log('User API Response:', response.data);
                 setUser(response.data);
                 setFormData({
                     displayName: response.data.displayName || '',
@@ -45,36 +46,12 @@ export default function Profile() {
         fetchUser();
     }, []);
 
-    useEffect(() => {
-        const fetchPets = async () => {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                console.warn('No token found. User is not logged in.');
-                return;
-            }
-            try {
-                const response = await axios.get(`${base_url}/animals`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                console.log('Pets API Response:', response.data);
-                setPets(response.data);
-            } catch (err) {
-                console.error('Error fetching pets:', err);
-            }
-        };
-
-        fetchPets();
-    }, []);
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleLogout = () => {
-        console.log('Logout clicked');
         localStorage.removeItem('authToken');
         window.location.href = '/';
     };
@@ -91,19 +68,15 @@ export default function Profile() {
             return;
         }
 
-        console.log(formData);
-
         try {
-            const response = await axios.put(`${base_url}/users/${userId}`, formData, {
+            const response = await axios.put(`${baseUrl}/users/${userId}`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
             });
-            console.log('User updated:', response.data);
             setUser(response.data);
             setEditMode(false);
-            alert('Profile updated successfully!');
         } catch (err) {
             console.error('Error updating user:', err);
             alert('Failed to update the profile. Please try again.');
@@ -120,11 +93,22 @@ export default function Profile() {
         M: <FontAwesomeIcon icon={faMars} />,
     };
 
+    const selectHandle = (pet) => {
+        // Atualiza o animal selecionado no contexto e chama a prop
+        if (onAnimalSelect) {
+            onAnimalSelect(pet.id);
+        }
+        console.log("SET SELECTED ANIMAL", pet); // Debug
+        setSelectedAnimal(pet);
+        navigate('/animal/monitoring', { state: { fromProfile: true } });// Redireciona para a rota
+    };
+
+
     const PetCard = ({ pet }) => (
         <div className="flex flex-col items-center bg-primary rounded-xl p-4 pt-16 w-40 shadow-lg mt-12">
             <div className="absolute -translate-y-24 rounded-full overflow-hidden h-20 w-20 shadow-md">
                 <img
-                    src={pet.imagePath || 'https://placehold.co/300'}
+                    src={pet.imageUrl || 'https://placehold.co/300'}
                     alt={pet.name}
                     className="object-cover w-full h-full"
                 />
@@ -212,11 +196,13 @@ export default function Profile() {
             ) : (
                 <>
                     <div className="w-full max-w-lg">
-                        {pets.length > 0 ? (
+                        {animals.length > 0 ? (
                             <Swiper spaceBetween={40} slidesPerView={2} className="w-full">
-                                {pets.map((pet) => (
-                                    <SwiperSlide key={pet.id}>
-                                        <PetCard pet={pet} />
+                                {animals.map((animal) => (
+                                    <SwiperSlide key={animal.id}>
+                                        <button onClick={() => selectHandle(animal)} className="focus:outline-none">
+                                            <PetCard pet={animal}/>
+                                        </button>
                                     </SwiperSlide>
                                 ))}
                             </Swiper>
@@ -244,6 +230,7 @@ export default function Profile() {
         </div>
     );
 }
+
 
 
 

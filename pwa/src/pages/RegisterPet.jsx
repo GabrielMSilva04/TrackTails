@@ -1,11 +1,11 @@
 import { InputField } from "../components/InputField.jsx";
-import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import axios from "axios";
-
-const base_url = "http://localhost/api/v1";
+import { baseUrl } from "../consts";
 
 export default function RegisterPet() {
+    const navigate = useNavigate();
     const {
         register,
         handleSubmit,
@@ -19,7 +19,7 @@ export default function RegisterPet() {
         try {
             const token = localStorage.getItem('authToken');
             if (!token) {
-                alert('No authentication token found. Please log in.');
+                // alert('No authentication token found. Please log in.');
                 return;
             }
 
@@ -40,7 +40,7 @@ export default function RegisterPet() {
 
             // Register pet (without image)
             const petResponse = await axios.post(
-                `${base_url}/animals`,
+                `${baseUrl}/animals`,
                 data,
                 {
                     headers: {
@@ -58,7 +58,7 @@ export default function RegisterPet() {
                 formData.append('image', file);
 
                 const uploadResponse = await axios.post(
-                    `${base_url}/animals/${savedPet.id}/upload`,
+                    `${baseUrl}/animals/${savedPet.id}/upload`,
                     formData,
                     {
                         headers: {
@@ -80,7 +80,7 @@ export default function RegisterPet() {
             };
 
             const animalDataResponse = await axios.post(
-                `${base_url}/animaldata`,
+                `${baseUrl}/animaldata`,
                 animalData,
                 {
                     headers: {
@@ -91,15 +91,10 @@ export default function RegisterPet() {
 
             console.log('Animal data saved successfully:', animalDataResponse.data);
 
-            alert('Pet, image, and data registered successfully!');
+            // alert('Pet, image, and data registered successfully!');
             window.location.href = '/mypets';
         } catch (error) {
             console.error('Error registering pet, uploading image, or saving data:', error.response?.data || error.message);
-            if (error.response?.data?.message) {
-                alert(error.response.data.message);
-            } else {
-                alert('Failed to register the pet. Please try again.');
-            }
         }
     };
 
@@ -123,11 +118,22 @@ export default function RegisterPet() {
             {/* Formulary Section */}
             <div className="bg-white w-full rounded-t-3xl p-8 flex flex-col items-center h-5/6 overflow-hidden">
                 <div className="flex items-center justify-between w-full relative mb-6">
-                    <Link to={"/mypets"} className="text-primary font-bold text-lg absolute left-0">← Back</Link>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-primary font-bold text-lg absolute left-0"
+                    >
+                        ← Back
+                    </button>
                     <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2 h-full w-full">
+                    {/* Disclaimer */}
+                    <div
+                        className="text-sm text-secondary mb-4 p-3 border border-dashed border-primary rounded-md bg-gray-50">
+                        <strong>Note:</strong> Filling in the optional fields especially weight and birthday can help better determine if
+                        an health parameter is out of the ordinary.
+                    </div>
                     {/* Scrollable Content */}
                     <div className="flex-grow overflow-y-auto space-y-4 px-4">
                         <label className="form-control w-full">
@@ -174,7 +180,7 @@ export default function RegisterPet() {
                                     message: 'Species is required',
                                 }}
                                 options={[
-                                    { value: '', label: 'Select a species' },
+                                    {value: '', label: 'Select a species'},
                                     ...speciesOptions,
                                 ]}
                                 error={errors.species && errors.species.message}
@@ -189,7 +195,7 @@ export default function RegisterPet() {
                                 register={register}
                                 required={false}
                                 options={[
-                                    { value: '', label: 'Select the sex' },
+                                    {value: '', label: 'Select the sex'},
                                     ...sexOptions,
                                 ]}
                                 error={errors.sex && errors.sex.message}

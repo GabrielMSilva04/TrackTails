@@ -2,8 +2,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { baseUrl } from "../consts";
+import axios from "axios";
 
-const baseUrl = "http://localhost/api/v1";
 const usersBaseUrl = `${baseUrl}/finders/user`;
 const animalsBaseUrl = `${baseUrl}/finders/animal`;
 
@@ -23,9 +24,10 @@ export default function Finders() {
 
             const fetchOwnerData = async () => {
                 try {
-                    const response = await fetch(`${usersBaseUrl}/${userId}`);
-                    const ownerData = await response.json();
-                    const { phoneNumber, displayName } = ownerData;
+                    const response = await axios.post(usersBaseUrl, {
+                        deviceId: parseInt(deviceId),
+                    });
+                    const { phoneNumber, displayName } = response.data;
 
                     setInformation({
                         phone: phoneNumber,
@@ -42,18 +44,11 @@ export default function Finders() {
     }, [animal]);
 
     useEffect(() => {
-        const fetchAnimal = async () => {
-            try {
-                const response = await fetch(`${animalsBaseUrl}/${deviceId}`);
-                const animalData = await response.json();
-
-                setAnimal(animalData);
-            } catch (error) {
-                console.error("Error fetching animal:", error);
-            }
-        };
-
-        fetchAnimal();
+        axios.post(animalsBaseUrl, {
+            deviceId: parseInt(deviceId),
+        }).then((response) => {
+            setAnimal(response.data);
+        });
     }, [deviceId]);
 
     const copyToClipboard = (text) => {

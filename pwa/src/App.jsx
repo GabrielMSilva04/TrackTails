@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Layout from './components/Layout'
 import LayoutAnimal from './components/LayoutAnimal'
 import Profile from './pages/Profile'
-import Home from './pages/Home'
 import Pet from './pages/Pet'
 import Register from './pages/Register'
 import Login from './pages/Login'
@@ -19,6 +18,8 @@ import './App.css'
 import Notifications from "./pages/Notifications.jsx";
 import { AnimalProvider } from './contexts/AnimalContext';
 import { useNavigate } from 'react-router-dom'
+import InitialPage from "./pages/InitialPage.jsx";
+import GeneratePdfPage from "./pages/GeneratePdfPage.jsx";
 
 const ProtectedRoute = ({ loggedIn, children }) => {
     return loggedIn ? children : <Navigate to="/login" />;
@@ -43,8 +44,14 @@ export default function App() {
         <Router>
             <Routes>
                 {/* Public Pages */}
+                <Route index element={<InitialPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+
+                {/* Finder Page */}
+                <Route path="/finders" element={<LayoutAnimal showButtons="none" useUrl={true}/>}>
+                    <Route path="/finders/:deviceId" element={<Finders />} />
+                </Route>
 
                 {/* Protected Pages */}
                 <Route
@@ -79,9 +86,10 @@ function AppRoutes() {
     return (
         <AnimalProvider>
             <Routes>
+
                 {/* Public Layout */}
                 <Route path="/" element={<Layout />}>
-                  <Route index element={<Home />} />
+
                   <Route path="/about" element={<h2>About</h2>} />
                   <Route path="/notifications" element={<Notifications />} />
                   <Route path="/mypets" element={<MyPets onAnimalSelect={handleSelectAnimal} />} />
@@ -119,10 +127,7 @@ function AppRoutes() {
                     />
                 </Route>
 
-                {/* Finder Page */}
-                <Route path="/finders" element={<LayoutAnimal showButtons="none"/>}>
-                    <Route path="/finders/:deviceId" element={<Finders />} />
-                </Route>
+                <Route path="/generate-pdf" element={<GeneratePdfPage animal={selectedAnimal} />} />
             </Routes>
         </AnimalProvider>
     );
