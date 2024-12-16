@@ -56,6 +56,8 @@ export default function Pet({ onMetricSelect }) {
         location: { latitude: "Unknown", longitude: "Unknown" },
     });
 
+    const [sleepDuration, setSleepDuration] = useState("Calculating...");
+
     useEffect(() => {
         if (!selectedAnimal) return;
 
@@ -111,8 +113,29 @@ export default function Pet({ onMetricSelect }) {
             }
         };
 
-        fetchLatestData();
+        const fetchSleepDuration = async () => {
+            try {
+                const response = await axios.get(`${animalDataBaseUrl}/sleep/duration/${selectedAnimal.id}`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+                    },
+                });
 
+                const durationInMinutes = response.data.sleepDurationMinutes;
+
+                // Converter minutos para horas e minutos
+                const hours = Math.floor(durationInMinutes / 60);
+                const minutes = durationInMinutes % 60;
+
+                setSleepDuration(`${hours}h ${minutes}min`);
+            } catch (error) {
+                console.error("Error fetching sleep duration:", error);
+                setSleepDuration("Unknown");
+            }
+        };
+
+        fetchLatestData();
+        fetchSleepDuration();
 
         // Setup WebSocket connection to receive real-time data
         const authToken = localStorage.getItem("authToken");
@@ -216,7 +239,7 @@ export default function Pet({ onMetricSelect }) {
 
     const stats = [
         { icon: faHeartPulse, label: "Heart Rate", value: `${latestData.heartRate} BPM`, trigger: (() => onMetricSelect("heartRate")), image: null },
-        { icon: null, label: "Sleep", value: "Sleep", trigger: (() => null), image: sleepLogo },
+        { icon: null, label: "Sleep", value: sleepDuration, trigger: (() => null), image: sleepLogo },
         { icon: faGauge, label: "Speed", value: `${latestData.speed} KM/H`, trigger: (() => onMetricSelect("speed")), image: null },
         { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, trigger: (() => onMetricSelect("breathRate")), image: null },
         { icon: faMapLocationDot, label: "Location", value: "Location", trigger: (() => onLocationSelect()), image: null },

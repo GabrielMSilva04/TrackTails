@@ -31,7 +31,7 @@ public class AnimalDataService {
     public void removeListener(AnimalDataChangeListener listener) {
         listeners.remove(listener);
     }
-    
+
     // InfluxDB client
     private final InfluxDBClient influxDBClient;
 
@@ -56,7 +56,8 @@ public class AnimalDataService {
         animalDataDTO.getSpeed().ifPresent(speed -> point.addField("speed", speed));
         animalDataDTO.getHeartRate().ifPresent(heartRate -> point.addField("heartRate", heartRate));
         animalDataDTO.getBreathRate().ifPresent(breathRate -> point.addField("breathRate", breathRate));
-        animalDataDTO.getBatteryPercentage().ifPresent(batteryPercentage -> point.addField("batteryPercentage", batteryPercentage));
+        animalDataDTO.getBatteryPercentage()
+                .ifPresent(batteryPercentage -> point.addField("batteryPercentage", batteryPercentage));
         animalDataDTO.getBlinking().ifPresent(blinking -> point.addField("blinking", blinking));
         animalDataDTO.getTimestamp().ifPresent(timestamp -> point.time(timestamp.toEpochMilli(), WritePrecision.MS));
 
@@ -75,22 +76,21 @@ public class AnimalDataService {
     }
 
     // Read Operations
-    //  1. Latest value of a field
+    // 1. Latest value of a field
     public AnimalDataDTO getLatestValue(String animalId, String field) {
         // Query
         String query = "from(bucket: \"" + bucket + "\")\n" +
-               "  |> range(start: 0)\n" +
-               "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
-               "  |> filter(fn: (r) => r[\"_field\"] == \"" + field + "\")\n" +
-               "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
-               "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
-               "  |> last()";
-        
-        
+                "  |> range(start: 0)\n" +
+                "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
+                "  |> filter(fn: (r) => r[\"_field\"] == \"" + field + "\")\n" +
+                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+                "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
+                "  |> last()";
+
         QueryApi queryApi = influxDBClient.getQueryApi();
         List<FluxTable> tables = queryApi.query(query);
         debugTables(tables);
-        
+
         if (!tables.isEmpty()) {
             List<FluxRecord> records = tables.get(0).getRecords();
             if (!records.isEmpty()) {
@@ -120,14 +120,14 @@ public class AnimalDataService {
     public AnimalDataDTO getLatestValues(String animalId) {
         // Query
         String query = "from(bucket: \"" + bucket + "\")\n" +
-               "  |> range(start: 0)\n" +
-               "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
-               "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
-               "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
-               "  |> last()";
-        
+                "  |> range(start: 0)\n" +
+                "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
+                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+                "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
+                "  |> last()";
+
         System.out.println("Query: " + query);
-        
+
         QueryApi queryApi = influxDBClient.getQueryApi();
         List<FluxTable> tables = queryApi.query(query);
         debugTables(tables);
@@ -141,7 +141,7 @@ public class AnimalDataService {
                         String field = record.getValueByKey("_field").toString();
                         Object rawValue = record.getValueByKey("_value");
                         String value = null;
-        
+
                         if (rawValue instanceof Number) {
                             value = String.valueOf(((Number) rawValue).doubleValue());
                         } else if (rawValue instanceof Boolean) {
@@ -149,7 +149,7 @@ public class AnimalDataService {
                         } else if (rawValue != null) {
                             value = rawValue.toString(); // Fallback para outros tipos que você não esperava.
                         }
-        
+
                         if (value != null) {
                             animalDataDTO.addField(field, value);
                         }
@@ -163,20 +163,21 @@ public class AnimalDataService {
     }
 
     // 3. One fields in a given time range (one value for each timeslot)
-    public List<AnimalDataDTO> getRangeValues(String animalId, String field, String start, String end, String timeWindow, String aggregateFunc) {
+    public List<AnimalDataDTO> getRangeValues(String animalId, String field, String start, String end,
+            String timeWindow, String aggregateFunc) {
         // Query
         String query = "from(bucket: \"" + bucket + "\")\n" +
-               "  |> range(start: " + start + ", stop: " + end + ")\n" +
-               "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
-               "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
-               "  |> filter(fn: (r) => r[\"_field\"] == \"" + field + "\")\n" +
-               "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
-               "  |> aggregateWindow(every: " + timeWindow + ", fn: " + aggregateFunc + ", createEmpty: false)\n" +
-               "  |> yield(name: \"" + aggregateFunc + "\")";
-        
+                "  |> range(start: " + start + ", stop: " + end + ")\n" +
+                "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
+                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+                "  |> filter(fn: (r) => r[\"_field\"] == \"" + field + "\")\n" +
+                "  |> group(columns: [\"_measurement\", \"_field\"], mode: \"by\")\n" +
+                "  |> aggregateWindow(every: " + timeWindow + ", fn: " + aggregateFunc + ", createEmpty: false)\n" +
+                "  |> yield(name: \"" + aggregateFunc + "\")";
+
         System.out.println("Query: " + query);
         QueryApi queryApi = influxDBClient.getQueryApi();
-        
+
         List<FluxTable> tables = queryApi.query(query);
         debugTables(tables);
 
@@ -191,7 +192,7 @@ public class AnimalDataService {
 
                         Object rawValue = record.getValueByKey("_value");
                         String value = null;
-        
+
                         System.out.println("Raw value: " + rawValue);
                         if (rawValue instanceof Number) {
                             value = String.valueOf(((Number) rawValue).doubleValue());
@@ -202,7 +203,7 @@ public class AnimalDataService {
                         }
 
                         System.out.println("Value: " + value);
-        
+
                         if (value != null) {
                             animalDataDTO.addField(field, value);
                         }
@@ -216,6 +217,81 @@ public class AnimalDataService {
             return result;
         }
         return null;
+    }
+
+    public void calculateAndStoreSleepDuration(String animalId) {
+        // Query para calcular a duração do sono no dia atual
+        String query = "from(bucket: \"" + bucket + "\")\n" +
+                "  |> range(start: -1d)\n" + // Últimas 24 horas
+                "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
+                "  |> filter(fn: (r) => r[\"_field\"] == \"speed\")\n" +
+                "  |> filter(fn: (r) => r[\"_value\"] < 0.1)\n" +
+                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+                "  |> stateDuration(fn: (r) => true, column: \"duration\", unit: 1m)\n" +
+                "  |> keep(columns: [\"_time\", \"duration\"])";
+
+        System.out.println("Query: " + query);
+
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        List<FluxTable> tables = queryApi.query(query);
+        debugTables(tables);
+
+        long totalDuration = 0;
+
+        if (!tables.isEmpty()) {
+            FluxTable table = tables.get(tables.size() - 1);
+            List<FluxRecord> records = table.getRecords();
+            FluxRecord record = records.get(records.size() - 1);
+            Object duration = record.getValueByKey("duration");
+            if (duration instanceof Number) {
+                totalDuration = ((Number) duration).longValue();
+            }
+        }
+
+        // Armazenar a duração total em uma nova tabela
+        storeDailySleepDuration(animalId, totalDuration);
+    }
+
+    private void storeDailySleepDuration(String animalId, long totalDuration) {
+        // Cria um ponto para armazenar os dados no InfluxDB
+        Point point = Point.measurement("daily_sleep_duration")
+                .addTag("animalId", animalId)
+                .addField("totalSleepDurationMinutes", totalDuration)
+                .time(System.currentTimeMillis(), WritePrecision.MS); // Define o timestamp
+
+        try (WriteApi writeApi = influxDBClient.getWriteApi()) {
+            writeApi.writePoint(point);
+            System.out.println("Daily sleep duration stored successfully for animalId: " + animalId);
+        }
+    }
+
+    public long getStoredSleepDuration(String animalId) {
+        // Query para obter o valor armazenado
+        calculateAndStoreSleepDuration(animalId);
+        String query = "from(bucket: \"" + bucket + "\")\n" +
+                "  |> range(start: -1d)\n" + // Últimas 24 horas
+                "  |> filter(fn: (r) => r[\"_measurement\"] == \"daily_sleep_duration\")\n" +
+                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+                "  |> keep(columns: [\"_field\", \"_value\"])\n" +
+                "  |> last()";
+
+        System.out.println("Query: " + query);
+
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        List<FluxTable> tables = queryApi.query(query);
+        debugTables(tables);
+
+        if (!tables.isEmpty()) {
+            List<FluxRecord> records = tables.get(0).getRecords();
+            if (!records.isEmpty()) {
+                Object duration = records.get(0).getValueByKey("_value");
+                if (duration instanceof Number) {
+                    return ((Number) duration).longValue();
+                }
+            }
+        }
+
+        return 0;
     }
 
     public void debugTables(List<FluxTable> tables) {
