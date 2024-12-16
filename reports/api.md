@@ -22,11 +22,14 @@ Base URL: `/api/v1/animaldata`
     ```json
     POST /api/v1/animaldata
     {
-      "animalId": "12345",
-      "weight": 10.5,
-      "latitude": 40.73061,
-      "longitude": -73.935242,
-      "timestamp": "2024-11-03T16:48:00Z"
+      "animalId": "A12345",
+      "weight": 20.3,
+      "latitude": -34.6118,
+      "longitude": -58.4173,
+      "speed": 15.5,
+      "batteryPercentage": 85.0,
+      "blinking": true,
+      "timestamp": "2024-12-01T12:30:00Z"
     }
     ```
 
@@ -41,12 +44,12 @@ Base URL: `/api/v1/animaldata`
   - `field` (String) - Field of the data to be retrieved.
 - **Responses:**
   - **200 OK**: Data retrieved successfully.
-    - **Schema:** `AnimalDataDTO` - Value of the specific field.
+    - **Schema:** Value of the specific field (`Double`, `Boolean`, or other depending on the field).
   - **404 Not Found**: Data not found.
     - **Schema:** `ErrorResponse`
 - **Example Request:**
     ```http
-    GET /api/v1/animaldata/latest/12345/weight
+    GET /api/v1/animaldata/latest/A12345/weight
     ```
 
 ---
@@ -64,7 +67,7 @@ Base URL: `/api/v1/animaldata`
     - **Schema:** `ErrorResponse`
 - **Example Request:**
     ```http
-    GET /api/v1/animaldata/latest/12345
+    GET /api/v1/animaldata/latest/A12345
     ```
 
 ---
@@ -91,62 +94,49 @@ Base URL: `/api/v1/animaldata`
     - **Schema:** `ErrorResponse`
 - **Example Request:**
     ```http
-    GET /api/v1/animaldata/historic/12345/weight?start=-2d&end=now()&interval=15m&aggregate=mean
+    GET /api/v1/animaldata/historic/A12345/weight?start=-2d&end=now()&interval=30m&aggregate=mean
     ```
-  
-**Time Examples:**
-  - `-1h`: Last hour
-  - `-1d`: Last day
-  - `-1w`: Last week
-  - `-1mo`: Last month
-  - `2024-11-03T16:48:00Z`: Specific date and time
-  - `now()`: Current date and time
 
 ---
 
-## AnimalDataDTO Schema
+### AnimalDataDTO Schema
 
 The `AnimalDataDTO` data transfer object (DTO) represents the structure for tracking various data points about an animal. Fields in this schema are optional and will only be included in JSON responses if they contain data, as the class uses `JsonInclude.Include.NON_EMPTY`.
 
-### Schema: `AnimalDataDTO`
+#### Schema: `AnimalDataDTO`
 
 - **`animalId`** (String, required): Unique identifier for the animal.
+- **`weight`** (Optional\<Double\>): The weight of the animal in kilograms.
+- **`height`** (Optional\<Double\>): The height of the animal in meters.
+- **`latitude`** (Optional\<Double\>): The geographical latitude of the animal's location.
+- **`longitude`** (Optional\<Double\>): The geographical longitude of the animal's location.
+- **`speed`** (Optional\<Double\>): The speed of the animal in meters per second.
+- **`heartRate`** (Optional\<Double\>): The heart rate of the animal in beats per minute.
+- **`breathRate`** (Optional\<Double\>): The respiratory rate of the animal in breaths per minute.
+- **`batteryPercentage`** (Optional\<Double\>): The battery level of the animal's tracking device (in percentage).
+- **`blinking`** (Optional\<Boolean\>): Indicates if the animal's device is currently blinking.
+- **`additionalTags`** (Map\<String, String\>): Additional custom key-value pairs for extra data.
+- **`timestamp`** (Optional\<Instant\>): The timestamp indicating when this data was recorded.
 
-- **`weight`** (Optional\<Double\>): The weight of the animal in kilograms. May be null.
-
-- **`height`** (Optional\<Double\>): The height of the animal in meters. May be null.
-
-- **`latitude`** (Optional\<Double\>): The geographical latitude of the animal's current location. May be null.
-
-- **`longitude`** (Optional\<Double\>): The geographical longitude of the animal's current location. May be null.
-
-- **`speed`** (Optional\<Double\>): The speed of the animal in meters per second. May be null.
-
-- **`heartRate`** (Optional\<Double\>): The heart rate of the animal in beats per minute. May be null.
-
-- **`breathRate`** (Optional\<Double\>): The respiratory rate of the animal in breaths per minute. May be null.
-
-- **`additionalTags`** (Map\<String, String\>): A map of additional custom key-value pairs for any extra data relevant to the animal.
-
-- **`timestamp`** (Optional\<Instant\>): The timestamp indicating when this data was recorded. May be null.
-
-### Example JSON Representation
+#### Example JSON Representation
 
 ```json
 {
   "animalId": "A12345",
-  "weight": 15.3,
-  "height": 0.6,
+  "weight": 25.0,
+  "height": 0.8,
   "latitude": -34.6118,
   "longitude": -58.4173,
-  "speed": 12.4,
-  "heartRate": 80,
-  "breathRate": 20,
+  "speed": 20.0,
+  "heartRate": 75,
+  "breathRate": 18,
+  "batteryPercentage": 90.0,
+  "blinking": true,
   "additionalTags": {
     "tag1": "value1",
     "tag2": "value2"
   },
-  "timestamp": "2024-10-12T07:20:50.52Z"
+  "timestamp": "2024-12-01T12:30:00Z"
 }
 ```
 
@@ -620,8 +610,455 @@ The `User` entity represents the structure of each user.
 }
 ```
 
+### 6. Fence Controller
+
+Base URL: `/api/v1/fences`
+
+---
+
+#### **Create or Update a Fence**
+
+- **Endpoint:** `POST /api/v1/fences`
+- **Description:** Creates or updates a geofence associated with a specific animal.
+- **Request Body:**
+  - `FenceDTO` (JSON) - Details of the fence to be created or updated.
+- **Responses:**
+  - **201 Created**: Fence created or updated successfully.
+    - **Schema:** 
+      ```json
+      {
+        "message": "Fence created/updated successfully"
+      }
+      ```
+  - **400 Bad Request**: Invalid input data.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Invalid input data: <details>"
+      }
+      ```
+  - **500 Internal Server Error**: Failed to process the request.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Failed to process request: <details>"
+      }
+      ```
+- **Example Request:**
+    ```json
+    POST /api/v1/fences
+    {
+      "animalId": 12345,
+      "vertices": [
+        {"latitude": 40.7128, "longitude": -74.0060},
+        {"latitude": 40.73061, "longitude": -73.935242},
+        {"latitude": 40.7519, "longitude": -73.9878}
+      ],
+      "type": "polygon"
+    }
+    ```
+
+---
+
+#### **Get Fence by Animal ID**
+
+- **Endpoint:** `GET /api/v1/fences/{animalId}`
+- **Description:** Fetches the geofence details for a specific animal.
+- **Path Parameters:**
+  - `animalId` (Long) - The unique ID of the animal.
+- **Responses:**
+  - **200 OK**: Fence data retrieved successfully.
+    - **Schema:** `FenceDTO`
+  - **404 Not Found**: Fence not found for the specified animal.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Fence not found for animalId: <animalId>"
+      }
+      ```
+  - **500 Internal Server Error**: Failed to fetch the fence.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Failed to fetch fence: <details>"
+      }
+      ```
+- **Example Request:**
+    ```http
+    GET /api/v1/fences/12345
+    ```
+
+---
+
+#### **Delete Fence by Animal ID**
+
+- **Endpoint:** `DELETE /api/v1/fences/{animalId}`
+- **Description:** Deletes the geofence details associated with a specific animal.
+- **Path Parameters:**
+  - `animalId` (Long) - The unique ID of the animal.
+- **Responses:**
+  - **200 OK**: Fence deleted successfully.
+    - **Schema:** 
+      ```json
+      {
+        "message": "Fence deleted successfully"
+      }
+      ```
+  - **404 Not Found**: Fence not found.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Fence not found for animalId: <animalId>"
+      }
+      ```
+  - **400 Bad Request**: Invalid input data.
+  - **500 Internal Server Error**: Failed to delete the fence.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Failed to delete fence: <details>"
+      }
+      ```
+- **Example Request:**
+    ```http
+    DELETE /api/v1/fences/12345
+    ```
+
+---
+
+#### **Check if a Point is Inside the Fence**
+
+- **Endpoint:** `GET /api/v1/fences/{animalId}/isInside`
+- **Description:** Checks whether a given latitude and longitude point is inside the geofence for a specific animal.
+- **Path Parameters:**
+  - `animalId` (Long) - The unique ID of the animal.
+- **Query Parameters:**
+  - `latitude` (Double) - Latitude of the point.
+  - `longitude` (Double) - Longitude of the point.
+- **Responses:**
+  - **200 OK**: Point check completed successfully.
+    - **Schema:** 
+      ```json
+      {
+        "animalId": 12345,
+        "latitude": 40.7128,
+        "longitude": -74.0060,
+        "isInside": true
+      }
+      ```
+  - **404 Not Found**: Fence not found for the specified animal.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Fence not found for animalId: <animalId>"
+      }
+      ```
+  - **400 Bad Request**: Invalid input data.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Invalid input data: <details>"
+      }
+      ```
+  - **500 Internal Server Error**: Failed to check if the point is inside the fence.
+    - **Schema:** 
+      ```json
+      {
+        "error": "Failed to check point: <details>"
+      }
+      ```
+- **Example Request:**
+    ```http
+    GET /api/v1/fences/12345/isInside?latitude=40.7128&longitude=-74.0060
+    ```
+
+---
+
+## FenceDTO Schema
+
+The `FenceDTO` represents the structure for managing geofence data for animals.
+
+### Schema: `FenceDTO`
+
+- **`animalId`** (Long, required): The unique ID of the animal.
+- **`vertices`** (List\<Object\>, required): List of geographical points (latitude, longitude) defining the geofence boundary.
+  - **`latitude`** (Double): Latitude of the vertex.
+  - **`longitude`** (Double): Longitude of the vertex.
+- **`type`** (String, optional): The type of geofence. Example: `"polygon"` or `"circle"`.
+- **`radius`** (Double, optional): Radius of the fence (if the type is `"circle"`).
+
+### Example JSON Representation
+
+```json
+{
+  "animalId": 12345,
+  "vertices": [
+    {"latitude": 40.7128, "longitude": -74.0060},
+    {"latitude": 40.73061, "longitude": -73.935242},
+    {"latitude": 40.7519, "longitude": -73.9878}
+  ],
+  "type": "polygon"
+}
+```
+
 ---
 ---
+
+Aqui está a documentação detalhada para os controladores `FindersController` do `animal` e `user`. Adaptei o estilo da referência que você forneceu:
+
+---
+
+### 7. Finders Animal Controller
+
+Base URL: `/api/v1/finders/animal`
+
+---
+
+#### **Get Animal By DeviceId**
+
+- **Endpoint:** `POST /api/v1/finders/animal`
+- **Description:** Retrieve an animal by the ID of the device that is attached to it.
+- **Request Body:**
+  - `FindersRequest` (JSON) - Contains the `deviceId` of the device attached to the animal.
+- **Responses:**
+  - **200 OK**: Animal found successfully.
+    - **Schema:** `Animal`
+  - **404 Not Found**: Animal not found.
+    - **Schema:** `ErrorResponse`
+- **Example Request:**
+    ```json
+    POST /api/v1/finders/animal
+    {
+      "deviceId": "device12345"
+    }
+    ```
+
+---
+
+#### **Get Public Animal Image**
+
+- **Endpoint:** `GET /api/v1/finders/animal/{id}/image`
+- **Description:** Retrieve the uploaded image for an animal (public access).
+- **Path Parameters:**
+  - `id` (Long) - ID of the animal whose image is being requested.
+- **Responses:**
+  - **200 OK**: Image retrieved successfully.
+    - **Content Type:** `image/jpeg`
+  - **404 Not Found**: Animal or image not found.
+    - **Schema:** `ErrorResponse`
+  - **500 Internal Server Error**: Error while retrieving the image.
+    - **Schema:** `ErrorResponse`
+- **Example Request:**
+    ```http
+    GET /api/v1/finders/animal/123/image
+    ```
+
+---
+---
+
+### 8. Finders User Controller
+
+Base URL: `/api/v1/finders/user`
+
+---
+
+#### **Get User By Id**
+
+- **Endpoint:** `POST /api/v1/finders/user`
+- **Description:** Retrieve user contact information by providing the ID of the animal's attached device.
+- **Request Body:**
+  - `FindersRequest` (JSON) - Contains the `deviceId` of the device attached to the animal.
+- **Responses:**
+  - **200 OK**: User contact information retrieved successfully.
+    - **Schema:** `User`
+  - **404 Not Found**: Animal or user not found.
+    - **Schema:** `ErrorResponse`
+- **Example Request:**
+    ```json
+    POST /api/v1/finders/user
+    {
+      "deviceId": "device12345"
+    }
+    ```
+
+---
+
+## DTOs and Models
+
+### Schema: `FindersRequest`
+
+- **`deviceId`** (String, required): The unique identifier of the device attached to the animal.
+
+**Example JSON:**
+
+```json
+{
+  "deviceId": "device12345"
+}
+```
+
+---
+
+### Schema: `Animal`
+
+- **`id`** (Long, required): Unique identifier for the animal.
+- **`name`** (String): Name of the animal.
+- **`species`** (String): Species of the animal.
+- **`age`** (Integer): Age of the animal in years.
+- **`imagePath`** (String): Path to the animal's image.
+- **`userId`** (Long): ID of the user associated with the animal.
+
+**Example JSON:**
+
+```json
+{
+  "id": 123,
+  "name": "Buddy",
+  "species": "Dog",
+  "age": 5,
+  "imagePath": "buddy.jpg",
+  "userId": 456
+}
+```
+
+---
+
+### Schema: `User`
+
+- **`id`** (Long, required): Unique identifier for the user.
+- **`name`** (String): Name of the user.
+- **`email`** (String): Email address of the user.
+- **`phone`** (String): Contact phone number of the user.
+
+**Example JSON:**
+
+```json
+{
+  "id": 456,
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "phone": "+1234567890"
+}
+```
+
+---
+---
+
+Aqui está a documentação para o **Actions Controller**, seguindo o formato solicitado:
+
+---
+
+### 9. Actions Controller
+
+Base URL: `/api/v1/actions`
+
+---
+
+#### **Trigger an Action**
+
+- **Endpoint:** `POST /api/v1/actions`
+- **Description:** Triggers an action for a specified animal.
+- **Headers:**
+  - `X-User-Id` (String, required): The ID of the user initiating the action.
+- **Request Body:**
+  - `ActionDTO` (JSON) - Details of the action to be triggered.
+- **Responses:**
+  - **200 OK**: Action triggered successfully.
+  - **400 Bad Request**: The action type is invalid.
+    - **Schema:** `ErrorResponse`
+  - **401 Unauthorized**: Missing `X-User-Id` header.
+    - **Schema:** `ErrorResponse`
+  - **403 Forbidden**: The `X-User-Id` header does not match the owner of the animal.
+    - **Schema:** `ErrorResponse`
+  - **404 Not Found**: The specified animal was not found.
+    - **Schema:** `ErrorResponse`
+- **Example Request:**
+    ```json
+    POST /api/v1/actions
+    {
+      "actionType": "FEED",
+      "animalId": 12345
+    }
+    ```
+
+- **Example Response (400 Bad Request):**
+    ```json
+    {
+      "message": "Invalid action type",
+      "status": "BAD_REQUEST",
+      "code": 400
+    }
+    ```
+
+- **Example Response (404 Not Found):**
+    ```json
+    {
+      "message": "Animal not found",
+      "status": "NOT_FOUND",
+      "code": 404
+    }
+    ```
+
+---
+
+## ActionDTO Schema
+
+The `ActionDTO` data transfer object represents the structure for defining actions to be performed on an animal.
+
+### Schema: `ActionDTO`
+
+- **`actionType`** (String, required): The type of action to be triggered (e.g., `"FEED"`, `"WALK"`).
+- **`animalId`** (Long, required): The unique identifier of the animal for which the action is triggered.
+
+### Example JSON Representation
+
+```json
+{
+  "actionType": "FEED",
+  "animalId": 12345
+}
+```
+
+---
+
+## ErrorResponse Schema
+
+The `ErrorResponse` data transfer object is used to provide error details for failed requests.
+
+### Schema: `ErrorResponse`
+
+- **`message`** (String, required): A human-readable message describing the error.
+- **`status`** (String, required): The HTTP status associated with the error (e.g., `"BAD_REQUEST"`, `"NOT_FOUND"`).
+- **`code`** (Integer, required): The numeric HTTP status code.
+
+### Example JSON Representation
+
+```json
+{
+  "message": "Invalid action type",
+  "status": "BAD_REQUEST",
+  "code": 400
+}
+```
+
+---
+
+### Additional Details
+
+- **Validation:**
+  - The `actionType` and `animalId` fields in the `ActionDTO` are mandatory. Requests missing these fields will result in a validation error.
+  - The `X-User-Id` header must match the owner of the specified animal; otherwise, a `403 Forbidden` response is returned.
+
+- **Action Service Validation:**
+  - The `actionService.isActionTypeValid` method ensures that the provided action type is supported.
+
+- **Animal Existence Check:**
+  - The `animalService.getAnimal` method verifies the existence of the animal with the specified `animalId`.
+
+---
+---
+
+Se precisar de ajustes ou mais detalhes em alguma parte, é só avisar!
 
 ## Error Response Schema
 
