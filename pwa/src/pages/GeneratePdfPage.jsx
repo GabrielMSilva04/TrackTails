@@ -3,8 +3,9 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { baseUrl } from "../consts";
 import {InputField} from "../components/InputField.jsx";
+import { convertToInfluxDBFormat } from "../utils";
 
-export default function GeneratePdfPage(AnimalId) {
+export default function GeneratePdfPage({ animal }) {
     const {
         register,
         handleSubmit,
@@ -29,11 +30,11 @@ export default function GeneratePdfPage(AnimalId) {
                 return;
             }
 
-            const url = `${baseUrl}/reports/create`;
+            const url = `${baseUrl}/reports`;
 
             const params = {
-                start: data.startDate || "-1d",
-                end: data.endDate || "now()",
+                start: convertToInfluxDBFormat(data.startDate) || "-1d",
+                end: convertToInfluxDBFormat(data.endDate) || "now()",
                 interval: "15m",
                 include: metrics.join(","),
             };
@@ -41,8 +42,8 @@ export default function GeneratePdfPage(AnimalId) {
             console.log("Report params:", params);
 
             const reportPayload = {
-                animalId: AnimalId,
-                reportName: data.reportName || "Generated_Report",
+                animalId: animal,
+                fileName: data.reportName || "Generated_Report",
             };
 
             const headers = {
@@ -50,6 +51,7 @@ export default function GeneratePdfPage(AnimalId) {
                 "Content-Type": "application/json",
             };
 
+            console.log("Creating report with payload:", reportPayload);
             const response = await axios.post(url, reportPayload, { params, headers });
 
             console.log("Report created successfully:", response.data);
