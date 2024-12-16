@@ -4,7 +4,7 @@ import axios from "axios";
 import { baseUrl } from "../consts";
 import {InputField} from "../components/InputField.jsx";
 
-export default function GeneratePdfPage() {
+export default function GeneratePdfPage(AnimalId) {
     const {
         register,
         handleSubmit,
@@ -14,22 +14,50 @@ export default function GeneratePdfPage() {
 
     const onSubmit = async (data) => {
         try {
-            const token = localStorage.getItem('authToken');
+            const token = localStorage.getItem("authToken");
             if (!token) {
-                alert('No authentication token found. Please log in.');
+                alert("No authentication token found. Please log in.");
                 return;
             }
 
-            console.log('Form data:', data);
+            console.log("Form data:", data);
 
-            const selectedMetrics = Object.keys(data.metrics).filter((key) => data.metrics[key]);
-            console.log('Selected Metrics:', selectedMetrics);
+            const metrics = Object.keys(data.metrics || {}).filter((key) => data.metrics[key]);
 
-            // Make API call or handle data
-            const savedPdf = null; // Replace with actual save logic
-            console.log('Saved PDF:', savedPdf);
+            if (metrics.length === 0) {
+                alert("Please select at least one metric.");
+                return;
+            }
+
+            const url = `${baseUrl}/reports/create`;
+
+            const params = {
+                start: data.startDate || "-1d",
+                end: data.endDate || "now()",
+                interval: "15m",
+                include: metrics.join(","),
+            };
+
+            console.log("Report params:", params);
+
+            const reportPayload = {
+                animalId: AnimalId,
+                reportName: data.reportName || "Generated_Report",
+            };
+
+            const headers = {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            };
+
+            const response = await axios.post(url, reportPayload, { params, headers });
+
+            console.log("Report created successfully:", response.data);
+            alert("Report created successfully!");
+
         } catch (error) {
-            console.error('Error generating PDF:', error.response?.data || error.message);
+            console.error("Error creating report:", error.response?.data || error.message);
+            alert("An error occurred while creating the report.");
         }
     };
 
@@ -76,7 +104,7 @@ export default function GeneratePdfPage() {
                     <InputField
                         label="Start Date"
                         name="startDate"
-                        type="date"
+                        type="datetime-local"
                         placeholder="Start Date"
                         register={register}
                         required={true}
@@ -87,7 +115,7 @@ export default function GeneratePdfPage() {
                     <InputField
                         label="End Date"
                         name="endDate"
-                        type="date"
+                        type="datetime-local"
                         placeholder="End Date"
                         register={register}
                         required={true}

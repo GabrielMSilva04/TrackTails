@@ -127,7 +127,7 @@ function AppRoutes() {
                     />
                 </Route>
 
-                <Route path="/generate-pdf" element={<GeneratePdfPage />} />
+                <Route path="/generate-pdf" element={<GeneratePdfPage animal={selectedAnimal} />} />
             </Routes>
         </AnimalProvider>
     );
