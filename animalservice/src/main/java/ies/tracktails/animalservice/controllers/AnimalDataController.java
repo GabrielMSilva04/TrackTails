@@ -107,16 +107,12 @@ public class AnimalDataController {
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
-    @Operation(summary = "Get sleep duration for today",
-            description = "Retrieve the total sleep duration for a specific animal on the current day")
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Sleep duration retrieved successfully"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Animal data not found")
-    })
-    @GetMapping("/sleep/{animalId}/today")
-    public ResponseEntity<?> getSleepDurationToday(@PathVariable String animalId) {
-        long sleepDuration = animalDataService.getSleepDurationToday(animalId);
-        return ResponseEntity.ok(Map.of("animalId", animalId, "sleepDurationMinutes", sleepDuration));
+    @Operation(summary = "Get stored daily sleep duration",
+            description = "Returns the total sleep duration for the current day")
+    @GetMapping("/sleep/duration/{animalId}")
+    public ResponseEntity<?> getSleepDuration(@PathVariable String animalId) {
+        long duration = animalDataService.getStoredSleepDuration(animalId);
+        return ResponseEntity.ok(Map.of("animalId", animalId, "sleepDurationMinutes", duration));
     }
 }
 

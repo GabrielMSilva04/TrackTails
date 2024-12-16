@@ -212,8 +212,8 @@ public class AnimalDataService {
         return null;
     }
 
-    public long getSleepDurationToday(String animalId) {
-        // Query ajustada para calcular a duração do sono no dia atual
+    public void calculateAndStoreSleepDuration(String animalId) {
+        // Query para calcular a duração do sono no dia atual
         String query = "from(bucket: \"" + bucket + "\")\n" +
                 "  |> range(start: -1d)\n" + // Últimas 24 horas
                 "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
@@ -222,6 +222,8 @@ public class AnimalDataService {
                 "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
                 "  |> stateDuration(fn: (r) => true, column: \"duration\", unit: 1m)\n" +
                 "  |> keep(columns: [\"_time\", \"duration\"])";
+
+        System.out.println("Query: " + query);
 
         QueryApi queryApi = influxDBClient.getQueryApi();
         List<FluxTable> tables = queryApi.query(query);
@@ -241,7 +243,50 @@ public class AnimalDataService {
             }
         }
 
-        return totalDuration; // Retorna a duração total do sono em minutos
+        // Armazenar a duração total em uma nova tabela
+        storeDailySleepDuration(animalId, totalDuration);
+    }
+
+    private void storeDailySleepDuration(String animalId, long totalDuration) {
+        // Cria um ponto para armazenar os dados no InfluxDB
+        Point point = Point.measurement("daily_sleep_duration")
+                .addTag("animalId", animalId)
+                .addField("totalSleepDurationMinutes", totalDuration)
+                .time(System.currentTimeMillis(), WritePrecision.MS); // Define o timestamp
+
+        try (WriteApi writeApi = influxDBClient.getWriteApi()) {
+            writeApi.writePoint(point);
+            System.out.println("Daily sleep duration stored successfully for animalId: " + animalId);
+        }
+    }
+
+    public long getStoredSleepDuration(String animalId) {
+        // Query para obter o valor armazenado
+        calculateAndStoreSleepDuration(animalId);
+        String query = "from(bucket: \"" + bucket + "\")\n" +
+                "  |> range(start: -1d)\n" + // Últimas 24 horas
+                "  |> filter(fn: (r) => r[\"_measurement\"] == \"daily_sleep_duration\")\n" +
+                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+                "  |> keep(columns: [\"_field\", \"_value\"])\n" +
+                "  |> last()";
+
+        System.out.println("Query: " + query);
+
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        List<FluxTable> tables = queryApi.query(query);
+        debugTables(tables);
+
+        if (!tables.isEmpty()) {
+            List<FluxRecord> records = tables.get(0).getRecords();
+            if (!records.isEmpty()) {
+                Object duration = records.get(0).getValueByKey("_value");
+                if (duration instanceof Number) {
+                    return ((Number) duration).longValue();
+                }
+            }
+        }
+
+        return 0;
     }
 
     public void debugTables(List<FluxTable> tables) {
