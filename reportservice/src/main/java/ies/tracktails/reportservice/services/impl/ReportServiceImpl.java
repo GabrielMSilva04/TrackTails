@@ -1,17 +1,20 @@
 package ies.tracktails.reportservice.services.impl;
 
 import ies.tracktails.animalsDataCore.dtos.AnimalDataDTO;
+import ies.tracktails.reportservice.dtos.TableData;
+import ies.tracktails.reportservice.dtos.TableRow;
 import ies.tracktails.reportservice.entities.Report;
 import ies.tracktails.reportservice.repositories.ReportRepository;
 import ies.tracktails.reportservice.services.ReportService;
 import ies.tracktails.animalsDataCore.services.AnimalDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
 import com.itextpdf.html2pdf.HtmlConverter;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.ArrayList;
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,31 +30,26 @@ public class ReportServiceImpl implements ReportService {
 
     private final ReportRepository reportRepository;
     private final AnimalDataService animalDataService;
+    private final TemplateEngine templateEngine;
 
     @Autowired
-    public ReportServiceImpl(ReportRepository reportRepository, AnimalDataService animalDataService) {
+    public ReportServiceImpl(ReportRepository reportRepository, AnimalDataService animalDataService, TemplateEngine templateEngine) {
         this.reportRepository = reportRepository;
         this.animalDataService = animalDataService;
+        this.templateEngine = templateEngine;
     }
 
     @Override
     public Report createReport(Long animalId, String fileName, String start, String end, String interval, String metrics) {
         try {
-            // Fetch historical data for each field
-            List<AnimalDataDTO> weightData = animalDataService.getRangeValues(
-                    animalId.toString(), "weight", start, end, interval, "mean");
-            List<AnimalDataDTO> heightData = animalDataService.getRangeValues(
-                    animalId.toString(), "height", start, end, interval, "mean");
-            List<AnimalDataDTO> heartRateData = animalDataService.getRangeValues(
-                    animalId.toString(), "heartRate", start, end, interval, "mean");
-            List<AnimalDataDTO> breathRateData = animalDataService.getRangeValues(
-                    animalId.toString(), "breathRate", start, end, interval, "mean");
-
-            List<AnimalDataDTO> consolidatedData = consolidateData(
-                    weightData, heightData, heartRateData, breathRateData);
-
+            List<String> metricsList;
+            if (metrics.equals("all")) {
+                metricsList = Arrays.asList("weight", "height", "heartRate", "breathRate", "speed");
+            } else {
+                metricsList = Arrays.asList(metrics.split(","));
+            }
             // Generate the PDF
-            byte[] pdfBytes = generatePdfFromTemplate(animalId, consolidatedData);
+            byte[] pdfBytes = generatePdfFromTemplate(animalId, start, end, interval, metricsList);
 
             Report report = new Report();
             report.setAnimalId(animalId);
@@ -64,20 +62,13 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    private String loadHtmlTemplate() throws IOException {
-        try (InputStream inputStream = getClass().getResourceAsStream("/templates/animal-report.html")) {
-            if (inputStream == null) {
-                throw new FileNotFoundException("Template file not found: /templates/animal-report.html");
-            }
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        }
-    }
-
-    private byte[] generatePdfFromTemplate(Long animalId, List<AnimalDataDTO> historicalData) throws Exception {
-        String htmlTemplate = loadHtmlTemplate();
+    private byte[] generatePdfFromTemplate(Long animalId, String start, String end, String interval, List<String> metrics) throws Exception {
+        Context context = new Context();
 
         // Replace placeholders with data
-        String populatedHtml = populateTemplate(htmlTemplate, animalId, historicalData);
+        populateTemplate(context, animalId, start, end, interval, metrics);
+
+        String populatedHtml = templateEngine.process("animal-report", context);
 
         // Convert the populated HTML to PDF
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -87,50 +78,43 @@ public class ReportServiceImpl implements ReportService {
     }
 
 
-    private String populateTemplate(String htmlTemplate, Long animalId, List<AnimalDataDTO> historicalData) {
-        // Replace static placeholders
-        String populatedHtml = htmlTemplate
-                .replace("{{animalId}}", animalId.toString())
-                .replace("{{generatedAt}}", Instant.now().toString());
-
-        StringBuilder historicalDataHtml = new StringBuilder();
-        for (AnimalDataDTO data : historicalData) {
-            historicalDataHtml.append("<tr>")
-                    .append("<td>").append(data.getTimestamp().map(Instant::toString).orElse("N/A")).append("</td>")
-                    .append("<td>").append(data.getWeight().orElse(null)).append("</td>")
-                    .append("<td>").append(data.getHeight().orElse(null)).append("</td>")
-                    .append("<td>").append(data.getHeartRate().orElse(null)).append("</td>")
-                    .append("<td>").append(data.getBreathRate().orElse(null)).append("</td>")
-                    .append("</tr>");
-        }
-
-        // Replace the historical data placeholder in the template
-        populatedHtml = populatedHtml.replace("{{historicalData}}", historicalDataHtml.toString());
-
-        return populatedHtml;
+    private void populateTemplate(Context context, Long animalId, String start, String end, String interval, List<String> metrics) {
+        // Preencher o contexto com os dados básicos
+        context.setVariable("generatedAt", Instant.now().toString());
+        
+        // Cria uma estrutura de tabelas
+        List<TableData> tables = createTables(animalId, start, end, interval, metrics);
+        context.setVariable("tables", tables);
     }
 
-    private List<AnimalDataDTO> consolidateData(List<AnimalDataDTO>... dataLists) {
-        Map<Instant, AnimalDataDTO> consolidatedMap = new HashMap<>();
+    private List<TableData> createTables(Long animalId, String start, String end, String interval, List<String> metrics) {
+        // Aqui criamos uma tabela exemplo com o título e as linhas
+        // Para simplificar, vamos assumir que cada métrica é uma tabela
+        List<TableData> tables = new ArrayList<>();
+        
+        for (String metric : metrics) {
+            TableData tableData = new TableData();
+            tableData.setTableTitle("Data for " + metric);  // Título da tabela
+            tableData.setColumnTitle(metric); // Título da coluna
 
-        for (List<AnimalDataDTO> dataList : dataLists) {
-            for (AnimalDataDTO data : dataList) {
-                if (data.getTimestamp().isPresent()) {
-                    Instant timestamp = data.getTimestamp().get();
-                    AnimalDataDTO existingData = consolidatedMap.getOrDefault(timestamp, new AnimalDataDTO(data.getAnimalId()));
-
-                    data.getTimestamp().ifPresent(existingData::setTimestamp);
-                    data.getWeight().ifPresent(weight -> existingData.setWeight(round(weight)));
-                    data.getHeight().ifPresent(height -> existingData.setHeight(round(height)));
-                    data.getHeartRate().ifPresent(heartRate -> existingData.setHeartRate(round(heartRate)));
-                    data.getBreathRate().ifPresent(breathRate -> existingData.setBreathRate(round(breathRate)));
-
-                    consolidatedMap.put(timestamp, existingData);
-                }
+            // Cria linhas de exemplo com timestamp e valores dinâmicos
+            System.out.println("Getting data for metric " + metric + " for animal " + animalId + " from " + start + " to " + end + " with interval " + interval);
+            List<AnimalDataDTO> animalDataDTOs = animalDataService.getRangeValues(
+                    animalId.toString(), metric, start, end, interval, "mean");
+            System.out.println("Got " + animalDataDTOs);
+            List<TableRow> rows = new ArrayList<>();
+            for (AnimalDataDTO data : animalDataDTOs) {
+                TableRow row = new TableRow();
+                row.setTimestamp(data.getTimestamp().toString());
+                row.setDynamicValue(data.getField(metric));
+                rows.add(row);
             }
+
+            tableData.setRows(rows);
+            tables.add(tableData);
         }
 
-        return new ArrayList<>(consolidatedMap.values());
+        return tables;
     }
 
     private Double round(Double value) {
@@ -138,18 +122,6 @@ public class ReportServiceImpl implements ReportService {
     }
 
 
-    private void addDataToMap(List<AnimalDataDTO> dataList, Map<Instant, AnimalDataDTO> map, String field) {
-        if (dataList == null) return;
-
-        for (AnimalDataDTO data : dataList) {
-            Instant timestamp = data.getTimestamp().orElse(null);
-            if (timestamp != null) {
-                map.putIfAbsent(timestamp, new AnimalDataDTO(data.getAnimalId()));
-                map.get(timestamp).addField(field, data.getWeight().orElse(null).toString());
-                map.get(timestamp).setTimestamp(timestamp);
-            }
-        }
-    }
 
     @Override
     public Report getReport(Long id) {
