@@ -148,7 +148,7 @@ public class ReportServiceImpl implements ReportService {
 
 
     @Override
-    public Report getReport(Long id) {
+    public Report getReport(UUID id) {
         return reportRepository.findById(id).orElse(null);
     }
 

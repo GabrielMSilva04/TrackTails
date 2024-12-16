@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/reports")
@@ -51,7 +52,7 @@ public class ReportController {
 
     @Operation(summary = "Download a report by ID")
     @GetMapping("/{id}/download")
-    public ResponseEntity<byte[]> downloadReport(@PathVariable Long id) {
+    public ResponseEntity<byte[]> downloadReport(@PathVariable UUID id) {
         Report report = reportService.getReport(id);
         if (report == null || report.getFileContent() == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

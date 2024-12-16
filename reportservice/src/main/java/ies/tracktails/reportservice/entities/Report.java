@@ -2,13 +2,14 @@ package ies.tracktails.reportservice.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity(name = "reports")
 public class Report {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
 
     @Column(name = "animal_id", nullable = false)
     private Long animalId;
@@ -23,6 +24,13 @@ public class Report {
     @Column(name = "file_content", columnDefinition = "MEDIUMBLOB", nullable = true)
     private byte[] fileContent;
 
+    @PrePersist
+    public void generateUUID() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID(); // Gerar UUID se não estiver definido
+        }
+    }
+
     public Report() {
         this.timestamp = LocalDateTime.now();
     }
@@ -35,11 +43,11 @@ public class Report {
 
     // Getters and Setters
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
