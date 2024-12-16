@@ -18,7 +18,7 @@ To install and run main application, you need to have Docker installed on your m
 docker compose -f docker-compose.dev.yml up # for dev environment
 docker compose -f docker-compose.yml up # for production environment
 ```
-These will require a .env file, of which you can find an example in .example.env.
+These will require a .env file, of which you can find an example in example.env.
 
 Docker will only run the application, it will not generate any animal data. To generate data you need to install the following dependencies:
 ```bash
