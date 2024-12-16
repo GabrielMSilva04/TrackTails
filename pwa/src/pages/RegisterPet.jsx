@@ -1,10 +1,11 @@
 import { InputField } from "../components/InputField.jsx";
-import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { baseUrl } from "../consts";
 
 export default function RegisterPet() {
+    const navigate = useNavigate();
     const {
         register,
         handleSubmit,
@@ -117,7 +118,12 @@ export default function RegisterPet() {
             {/* Formulary Section */}
             <div className="bg-white w-full rounded-t-3xl p-8 flex flex-col items-center h-5/6 overflow-hidden">
                 <div className="flex items-center justify-between w-full relative mb-6">
-                    <Link to={"/mypets"} className="text-primary font-bold text-lg absolute left-0">← Back</Link>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-primary font-bold text-lg absolute left-0"
+                    >
+                        ← Back
+                    </button>
                     <h2 className="text-2xl font-bold text-primary mx-auto">Add pet</h2>
                 </div>
 

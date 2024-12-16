@@ -166,50 +166,6 @@ export default function Pet({ onMetricSelect }) {
         };
     }, [selectedAnimal]);
 
-    const onGenerateReport = async (animalId) => {
-        try {
-            const reportUrl = `/api/v1/reports`;
-
-            const reportRequestBody = {
-                animalId: animalId,
-                fileName: `${animalId}_report.pdf`
-            };
-
-            // TODO: Define the report generation parameters
-            const params = {
-                start: '-1d',
-                end: 'now()',
-                interval: '15m'
-            };
-
-            const response = await axios.post(reportUrl, reportRequestBody, { params });
-
-            if (response.status === 201) {
-                console.log('Report generation request successful', response.data);
-
-                // Download the generated report
-                const reportId = response.data.id;
-                const downloadUrl = `${reportUrl}/${reportId}/download`;
-
-                const pdfResponse = await axios.get(downloadUrl, {
-                    responseType: 'blob',
-                });
-
-                const blob = new Blob([pdfResponse.data], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = `${animalId}_report.pdf`;
-                link.click();
-            } else {
-                console.error('Failed to generate report:', response);
-                alert('Failed to generate report. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error during report generation:', error);
-            alert('An error occurred while generating the report.');
-        }
-    };
-
     const onLocationSelect = () => {
         navigate("/map/details");
     }
@@ -221,7 +177,6 @@ export default function Pet({ onMetricSelect }) {
         { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, trigger: (() => onMetricSelect("breathRate")), image: null },
         { icon: faMapLocationDot, label: "Location", value: "Location", trigger: (() => onLocationSelect()), image: null },
         { icon: faFilePdf, label: "Generate Report", value: "Generate", trigger: (() => navigate("/generate-pdf")), image: null },
-                // onGenerateReport(selectedAnimal.id)), image: null },
     ];
 
     return (

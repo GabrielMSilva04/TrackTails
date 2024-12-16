@@ -1,4 +1,4 @@
-import {Outlet, Link, useNavigate, useLocation, useParams} from "react-router-dom";
+import {Outlet, useNavigate, useParams} from "react-router-dom";
 import NavBar from "./Navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -11,14 +11,13 @@ import { baseUrl } from "../consts";
 export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
     const animalContext = useAnimalContext?.();
     const { selectedAnimal, setSelectedAnimal } = animalContext || {};
-    const [animal, setAnimal] = useState(null); // For URL-based animal loading
+    const [animal, setAnimal] = useState(null);
     const navigate = useNavigate();
-    const location = useLocation();
-    const { deviceId } = useParams(); // Get deviceId from URL if useUrl is true
+    const { deviceId } = useParams();
 
     LayoutAnimal.propTypes = {
         showButtons: PropTypes.oneOf(["all", "back-only", "none"]),
-        useUrl: PropTypes.bool, // New prop to determine the data source
+        useUrl: PropTypes.bool,
     };
 
     const fetchImageUrl = async (petId) => {
@@ -100,17 +99,6 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
         navigate(`/editpet`);
     };
 
-    const fromProfile = location.state?.fromProfile;
-
-    const onBackClick = () => {
-        if (fromProfile) {
-            navigate('/profile');
-        } else {
-            navigate(-1);
-        }
-        window.location.href = "/mypets";
-    };
-
     if (!animal) {
         return (
             <div className="text-center text-primary mt-10">
@@ -122,7 +110,10 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
     return (
         <div className="bg-primary h-screen flex flex-col overflow-hidden">
             {showButtons !== "none" && (
-                <button className="text-white text-2xl font-bold absolute left-4 mt-5 z-10 fixed" onClick={onBackClick}>
+                <button
+                    className="text-white text-2xl font-bold absolute left-4 mt-5 z-10"
+                    onClick={() => navigate(-1)}
+                >
                     <FontAwesomeIcon icon={faArrowLeft} />
                 </button>
             )}
