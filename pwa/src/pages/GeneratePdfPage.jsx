@@ -37,7 +37,7 @@ export default function GeneratePdfPage({ animal }) {
             const params = {
                 start: convertToInfluxDBFormat(data.startDate) || "-1d",
                 end: convertToInfluxDBFormat(data.endDate) || "now()",
-                interval: "15m",
+                interval: "5m",
                 include: metrics.join(","),
             };
 
@@ -72,11 +72,15 @@ export default function GeneratePdfPage({ animal }) {
             .catch(() => alert("Failed to copy link."));
     };
 
+    const downloadReport = () => {
+        window.open(reportLink, "_blank");
+    };
+
     const metricOptions = [
         { value: "weight", label: "Weight" },
         { value: "height", label: "Height" },
         { value: "heartRate", label: "Heart Rate" },
-        { value: "respiratoryRate", label: "Respiratory Rate" },
+        { value: "breathRate", label: "Respiratory Rate" },
         { value: "speed", label: "Speed" },
     ];
 
@@ -158,7 +162,7 @@ export default function GeneratePdfPage({ animal }) {
                                 className="input input-bordered"
                             />
                         </div>
-                        <div className="modal-action">
+                        <div className="modal-action space-x-2">
                             <div
                                 className={`tooltip tooltip-top ${tooltipVisible ? "tooltip-open" : ""}`}
                                 data-tip="Link copied!"
@@ -170,6 +174,12 @@ export default function GeneratePdfPage({ animal }) {
                                     Copy Link
                                 </button>
                             </div>
+                            <button
+                                onClick={downloadReport}
+                                className="btn btn-primary text-white"
+                            >
+                                Download PDF
+                            </button>
                             <button
                                 onClick={() => setModalVisible(false)}
                                 className="btn"
