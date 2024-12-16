@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ies.tracktails.notificationservice.entities.Notification;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     boolean existsByUserIdAndAnimalIdAndTitleAndContentAndRead(
             long userId, long animalId, String title, String content, boolean read
     );
+    boolean existsByUserIdAndAnimalIdAndTitleAndContentAndCreatedAtAfter(long userId, long animalId, String title,
+            String content, LocalDateTime minimumDate);
 
     Notification save(Notification notification);
 

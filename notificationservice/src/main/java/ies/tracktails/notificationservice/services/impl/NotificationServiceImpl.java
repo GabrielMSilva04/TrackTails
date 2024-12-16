@@ -88,6 +88,13 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public boolean existsNotification(long userId, long animalId, String title, String content, LocalDateTime minimumDate) {
+        return notificationRepository.existsByUserIdAndAnimalIdAndTitleAndContentAndCreatedAtAfter(
+                userId, animalId, title, content, minimumDate
+        );
+    }
+
+    @Override
     public void deleteNotificationsByAnimalId(long animalId) {
         notificationRepository.deleteByAnimalId(animalId);
     }

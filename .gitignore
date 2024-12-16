@@ -72,6 +72,10 @@ HELP.md
 .env*
 env
 
+### Python
+__pycache__/
+*.py[cod]
+
 ### Example user template template
 ### Example user template
 

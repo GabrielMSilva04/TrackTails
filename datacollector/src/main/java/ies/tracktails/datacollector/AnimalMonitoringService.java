@@ -13,6 +13,58 @@ import org.springframework.stereotype.Service;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
+class AnimalState {
+    private boolean heartRateOutOfRange = false;
+    private boolean breathRateOutOfRange = false;
+    private boolean speedOutOfRange = false;
+    private boolean fenceBreach = false;
+    private boolean lowBattery = false;
+    
+    public AnimalState() {
+    }
+
+    public AnimalState(boolean heartRateOutOfRange, boolean breathRateOutOfRange, boolean speedOutOfRange,
+            boolean fenceBreach, boolean lowBattery) {
+        this.heartRateOutOfRange = heartRateOutOfRange;
+        this.breathRateOutOfRange = breathRateOutOfRange;
+        this.speedOutOfRange = speedOutOfRange;
+        this.fenceBreach = fenceBreach;
+        this.lowBattery = lowBattery;
+    }
+    
+    public boolean isHeartRateOutOfRange() {
+        return heartRateOutOfRange;
+    }
+    public void setHeartRateOutOfRange(boolean heartRateOutOfRange) {
+        this.heartRateOutOfRange = heartRateOutOfRange;
+    }
+    public boolean isBreathRateOutOfRange() {
+        return breathRateOutOfRange;
+    }
+    public void setBreathRateOutOfRange(boolean breathRateOutOfRange) {
+        this.breathRateOutOfRange = breathRateOutOfRange;
+    }
+    public boolean isSpeedOutOfRange() {
+        return speedOutOfRange;
+    }
+    public void setSpeedOutOfRange(boolean speedOutOfRange) {
+        this.speedOutOfRange = speedOutOfRange;
+    }
+    public boolean isFenceBreach() {
+        return fenceBreach;
+    }
+    public void setFenceBreach(boolean fenceBreach) {
+        this.fenceBreach = fenceBreach;
+    }
+    public boolean isLowBattery() {
+        return lowBattery;
+    }
+    public void setLowBattery(boolean lowBattery) {
+        this.lowBattery = lowBattery;
+    }
+}
 
 @Service
 public class AnimalMonitoringService {
@@ -21,6 +73,10 @@ public class AnimalMonitoringService {
     private final AnimalService animalService;
     private final AnimalDataService animalDataService;
     private final KafkaTemplate<String, String> kafkaTemplate;
+
+    // Save the last state to not send the same notification multiple times
+    // This should be stored in a database in a real-world scenario (e.g. Redis)
+    ConcurrentHashMap<Long, AnimalState> animalStates = new ConcurrentHashMap<>();
 
     @Autowired
     public AnimalMonitoringService(FenceService fenceService, AnimalService animalService, AnimalDataService animalDataService, KafkaTemplate<String, String> kafkaTemplate) {
@@ -36,40 +92,63 @@ public class AnimalMonitoringService {
         String name = animal.getName();
         Long userId = animal.getUserId();
 
+        AnimalState newState = new AnimalState();
+
+        if (!animalStates.containsKey(animalId)) {
+            animalStates.put(animalId, new AnimalState());
+        }
+
         // Check Heart Rate
         if (!checkHeartRate(data, animal)) {
-            String title = "WARN - Abnormal Heart Rate Detected";
-            String content = String.format("%s's heart rate is outside the safe range.", name);
-            sendNotification(animalId, userId, title, content);
+            newState.setHeartRateOutOfRange(true);
+            if (!animalStates.get(animalId).isHeartRateOutOfRange()) {
+                String title = "WARN - Abnormal Heart Rate Detected";
+                String content = String.format("%s's heart rate is outside the safe range.", name);
+                sendNotification(animalId, userId, title, content);
+            }
         }
 
         // Check Breath Rate
         if (!checkBreathRate(data, animal)) {
-            String title = "WARN - Abnormal Breathing Rate Detected";
-            String content = String.format("%s's breathing rate is outside the safe range.", name);
-            sendNotification(animalId, userId, title, content);
+            newState.setBreathRateOutOfRange(true);
+            if (!animalStates.get(animalId).isBreathRateOutOfRange()) {
+                String title = "WARN - Abnormal Breathing Rate Detected";
+                String content = String.format("%s's breathing rate is outside the safe range.", name);
+                sendNotification(animalId, userId, title, content);
+            }
         }
 
         // Check Speed
         if (!checkSpeed(data)) {
-            String title = "WARN - Abnormal Speed Detected";
-            String content = String.format("An abnormal speed was detected for %s.", name);
-            sendNotification(animalId, userId, title, content);
+            newState.setSpeedOutOfRange(true);
+            if (!animalStates.get(animalId).isSpeedOutOfRange()) {
+                String title = "WARN - Abnormal Speed Detected";
+                String content = String.format("An abnormal speed was detected for %s.", name);
+                sendNotification(animalId, userId, title, content);
+            }
         }
 
         // Check Fence Breach
         if (!checkFence(data)) {
-            String title = "WARN - Fence Breach Detected";
-            String content = String.format("%s has trespassed the fenced area.", name);
-            sendNotification(animalId, userId, title, content);
+            newState.setFenceBreach(true);
+            if (!animalStates.get(animalId).isFenceBreach()) {
+                String title = "WARN - Fence Breach Detected";
+                String content = String.format("%s has trespassed the fenced area.", name);
+                sendNotification(animalId, userId, title, content);
+            }
         }
 
         // Check Battery Percentage
         if (!checkBatteryPercentage(data)) {
-            String title = "WARN - Low Battery";
-            String content = String.format("%s's device battery is below 20%%. Please recharge.", name);
-            sendNotification(animalId, userId, title, content);
+            newState.setLowBattery(true);
+            if (!animalStates.get(animalId).isLowBattery()) {
+                String title = "WARN - Low Battery";
+                String content = String.format("%s's device battery is below 20%%. Please recharge.", name);
+                sendNotification(animalId, userId, title, content);
+            }
         }
+
+        animalStates.put(animalId, newState);
     }
 
     private void sendNotification(Long animalId, Long userId, String title, String content) {

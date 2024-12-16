@@ -2,6 +2,9 @@ package ies.tracktails.notificationservice;
 
 import ies.tracktails.notificationservice.entities.Notification;
 import ies.tracktails.notificationservice.services.NotificationService;
+
+import java.time.LocalDateTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -27,11 +30,19 @@ public class NotificationConsumer {
             String json = objectMapper.readTree(message).asText();
             Notification notification = objectMapper.readValue(json, Notification.class);
 
+
+
             if (!notificationService.existsUnreadNotification(
                     notification.getUserId(),
                     notification.getAnimalId(),
                     notification.getTitle(),
-                    notification.getContent())) {
+                    notification.getContent())
+                && !notificationService.existsNotification(
+                    notification.getUserId(),
+                    notification.getAnimalId(),
+                    notification.getTitle(),
+                    notification.getContent(),
+                    LocalDateTime.now().minusMinutes(5))) {
 
                 notificationService.addNotification(notification);
                 System.out.println("Notification processed and saved: " + notification);

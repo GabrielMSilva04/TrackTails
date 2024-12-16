@@ -39,7 +39,7 @@ async def main():
     try:
         device_ids = await get_device_ids_from_db()
         for device_id in device_ids:
-            logger[device_id] = create_device_logger(device_id)
+            logger[device_id] = create_device_logger(device_id, logging.DEBUG)
         tasks = [run_simulation_for_device(device_id) for device_id in device_ids]
         tasks += [consume_messages(device_id) for device_id in device_ids]
         await asyncio.gather(*tasks)
