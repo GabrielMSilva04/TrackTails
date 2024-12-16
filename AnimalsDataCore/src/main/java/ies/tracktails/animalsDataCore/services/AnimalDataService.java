@@ -192,6 +192,7 @@ public class AnimalDataService {
                         Object rawValue = record.getValueByKey("_value");
                         String value = null;
         
+                        System.out.println("Raw value: " + rawValue);
                         if (rawValue instanceof Number) {
                             value = String.valueOf(((Number) rawValue).doubleValue());
                         } else if (rawValue instanceof Boolean) {
@@ -199,11 +200,16 @@ public class AnimalDataService {
                         } else if (rawValue != null) {
                             value = rawValue.toString(); // Fallback para outros tipos que você não esperava.
                         }
+
+                        System.out.println("Value: " + value);
         
                         if (value != null) {
                             animalDataDTO.addField(field, value);
                         }
                         animalDataDTO.setTimestamp(record.getTime());
+
+                        System.out.println("Adding animalDataDTO: " + animalDataDTO);
+                        result.add(animalDataDTO);
                     }
                 }
             }

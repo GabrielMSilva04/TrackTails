@@ -252,15 +252,21 @@ export default function LayoutMapDetails() {
                                             setAddingFence(true);
                                             setShowFence(true);
                                         }}
-                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                        className="bg-white text-primary text-xs font-bold mx-2 p-2 rounded-lg"
                                     >
                                         Start Fence
                                     </button>
                                     <button
                                         onClick={() => setShowFence((prev) => !prev)}
-                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                        className="bg-white text-primary text-xs font-bold mx-2 p-2 rounded-lg"
                                     >
                                         {showFence ? "Hide Fence" : "Show Fence"}
+                                    </button>
+                                    <button
+                                        onClick={deleteFence}
+                                        className="bg-white text-primary text-xs font-bold mx-2 p-2 rounded-lg"
+                                    >
+                                        Delete Fence
                                     </button>
                                 </>
                             )}
@@ -268,7 +274,7 @@ export default function LayoutMapDetails() {
                                 <>
                                     <button
                                         onClick={closeCurrentFence}
-                                        className="bg-white text-primary text-sm font-bold mx-2 p-2 rounded-lg"
+                                        className="bg-white text-primary text-xs font-bold mx-2 p-2 rounded-lg"
                                     >
                                         Close Fence
                                     </button>
