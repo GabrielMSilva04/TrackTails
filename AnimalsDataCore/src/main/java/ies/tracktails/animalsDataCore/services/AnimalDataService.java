@@ -212,6 +212,38 @@ public class AnimalDataService {
         return null;
     }
 
+    public long getSleepDurationToday(String animalId) {
+        // Query ajustada para calcular a duração do sono no dia atual
+        String query = "from(bucket: \"" + bucket + "\")\n" +
+                "  |> range(start: -1d)\n" + // Últimas 24 horas
+                "  |> filter(fn: (r) => r[\"_measurement\"] == \"animal_data\")\n" +
+                "  |> filter(fn: (r) => r[\"_field\"] == \"speed\")\n" +
+                "  |> filter(fn: (r) => r[\"_value\"] < 0.1)\n" +
+                "  |> filter(fn: (r) => r[\"animalId\"] == \"" + animalId + "\")\n" +
+                "  |> stateDuration(fn: (r) => true, column: \"duration\", unit: 1m)\n" +
+                "  |> keep(columns: [\"_time\", \"duration\"])";
+
+        QueryApi queryApi = influxDBClient.getQueryApi();
+        List<FluxTable> tables = queryApi.query(query);
+        debugTables(tables);
+
+        long totalDuration = 0;
+
+        if (!tables.isEmpty()) {
+            for (FluxTable table : tables) {
+                List<FluxRecord> records = table.getRecords();
+                for (FluxRecord record : records) {
+                    Object duration = record.getValueByKey("duration");
+                    if (duration instanceof Number) {
+                        totalDuration += ((Number) duration).longValue();
+                    }
+                }
+            }
+        }
+
+        return totalDuration; // Retorna a duração total do sono em minutos
+    }
+
     public void debugTables(List<FluxTable> tables) {
         for (FluxTable table : tables) {
             System.out.printf("\n\nTable: %s\n", table);
