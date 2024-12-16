@@ -220,7 +220,8 @@ export default function Pet({ onMetricSelect }) {
         { icon: faGauge, label: "Speed", value: `${latestData.speed} KM/H`, trigger: (() => onMetricSelect("speed")), image: null },
         { icon: faLungs, label: "Breathing", value: `${latestData.breathRate} Breaths/M`, trigger: (() => onMetricSelect("breathRate")), image: null },
         { icon: faMapLocationDot, label: "Location", value: "Location", trigger: (() => onLocationSelect()), image: null },
-        { icon: faFilePdf, label: "Generate Report", value: "Generate", trigger: (() => onGenerateReport(selectedAnimal.id)), image: null },
+        { icon: faFilePdf, label: "Generate Report", value: "Generate", trigger: (() => navigate("/generate-pdf")), image: null },
+                // onGenerateReport(selectedAnimal.id)), image: null },
     ];
 
     return (
