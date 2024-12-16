@@ -51,6 +51,7 @@ public class Consumer {
             System.out.println("Received message: " + data.toString());
             AnimalDataDTO animalDataDTO = convertToAnimalDataDTO(data);
             animalDataService.writeAnimalData(animalDataDTO);
+            animalDataService.calculateAndStoreSleepDuration(animalDataDTO.getAnimalId());
         } catch (Exception e) {
             System.err.println("Error processing message: " + e.getMessage());
         }
