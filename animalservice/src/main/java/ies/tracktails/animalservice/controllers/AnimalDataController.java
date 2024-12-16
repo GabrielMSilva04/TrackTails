@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
 
+import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
@@ -104,6 +105,14 @@ public class AnimalDataController {
             return new ResponseEntity<>(new ErrorResponse("Data not found", HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(data, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get stored daily sleep duration",
+            description = "Returns the total sleep duration for the current day")
+    @GetMapping("/sleep/duration/{animalId}")
+    public ResponseEntity<?> getSleepDuration(@PathVariable String animalId) {
+        long duration = animalDataService.getStoredSleepDuration(animalId);
+        return ResponseEntity.ok(Map.of("animalId", animalId, "sleepDurationMinutes", duration));
     }
 }
 
