@@ -93,20 +93,31 @@ public class ReportServiceImpl implements ReportService {
         List<TableData> tables = new ArrayList<>();
         
         for (String metric : metrics) {
+            System.out.println("Getting data for metric " + metric + " for animal " + animalId + " from " + start + " to " + end + " with interval " + interval);
+            List<AnimalDataDTO> animalDataDTOs_mean = animalDataService.getRangeValues(
+                    animalId.toString(), metric, start, end, interval, "mean");
+
+            if (animalDataDTOs_mean == null) {
+                System.out.println("No data found for metric " + metric);
+                continue;
+            }
+
             TableData tableData = new TableData();
             tableData.setTableTitle("Data for " + metric);  // Título da tabela
             tableData.setColumnTitle(metric); // Título da coluna
 
             // Cria linhas de exemplo com timestamp e valores dinâmicos
-            System.out.println("Getting data for metric " + metric + " for animal " + animalId + " from " + start + " to " + end + " with interval " + interval);
-            List<AnimalDataDTO> animalDataDTOs = animalDataService.getRangeValues(
-                    animalId.toString(), metric, start, end, interval, "mean");
-            System.out.println("Got " + animalDataDTOs);
             List<TableRow> rows = new ArrayList<>();
-            for (AnimalDataDTO data : animalDataDTOs) {
+            for (AnimalDataDTO data : animalDataDTOs_mean) {
                 TableRow row = new TableRow();
-                row.setTimestamp(data.getTimestamp().toString());
-                row.setDynamicValue(data.getField(metric));
+                row.setTimestamp(data.getTimestamp().isPresent() ? data.getTimestamp().get().toString() : "N/A");
+                String value = data.getField(metric);
+                // if is a number, round it
+                try {
+                    Double numberValue = Double.parseDouble(value);
+                    value = round(numberValue).toString();
+                } catch (NumberFormatException e) { /* Do nothing */ }
+                row.setDynamicValue(value);
                 rows.add(row);
             }
 
