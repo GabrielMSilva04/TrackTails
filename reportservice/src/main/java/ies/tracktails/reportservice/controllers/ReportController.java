@@ -34,6 +34,7 @@ public class ReportController {
             @RequestParam(defaultValue = "-1d") String start,
             @RequestParam(defaultValue = "now()") String end,
             @RequestParam(defaultValue = "15m") String interval,
+            @RequestParam(defaultValue = "all") String include,
             @RequestBody Report report) {
 
         Report savedReport = reportService.createReport(
@@ -41,7 +42,8 @@ public class ReportController {
                 report.getFileName(),
                 start,
                 end,
-                interval
+                interval,
+                include
         );
 
         return new ResponseEntity<>(savedReport, HttpStatus.CREATED);

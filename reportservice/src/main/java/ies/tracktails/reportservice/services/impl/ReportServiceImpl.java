@@ -35,7 +35,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Report createReport(Long animalId, String fileName, String start, String end, String interval) {
+    public Report createReport(Long animalId, String fileName, String start, String end, String interval, String metrics) {
         try {
             // Fetch historical data for each field
             List<AnimalDataDTO> weightData = animalDataService.getRangeValues(
