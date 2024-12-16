@@ -165,6 +165,7 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
                     </div>
                 </div>
             </div>
+            <NavBar />
         </div>
     );
 }

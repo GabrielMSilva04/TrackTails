@@ -10,8 +10,10 @@ export default function Layout() {
           <h1 className="btn btn-ghost text-xl text-primary mx-auto">trackTails.</h1>
         </div>
       </div>
-      <div className="w-full h-svh px-6 pt-16 pb-20">
-        <Outlet />
+      <div className="w-full h-svh px-6 pt-16 pb-40">
+        <div className="overflow-y-auto">
+          <Outlet />
+        </div>
       </div>
       <NavBar />
     </div>

@@ -313,6 +313,7 @@ const HistoricalAnimalsData = ({ metric }) => {
         )}
       </div>
       <TimeRangeSelector onSelect={timeRangeSelectHandler} />
+      <div class="h-24"></div>
     </div>
   );
 };
