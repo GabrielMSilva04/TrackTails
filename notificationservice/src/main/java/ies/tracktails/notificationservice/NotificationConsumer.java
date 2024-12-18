@@ -36,13 +36,7 @@ public class NotificationConsumer {
                     notification.getUserId(),
                     notification.getAnimalId(),
                     notification.getTitle(),
-                    notification.getContent())
-                && !notificationService.existsNotification(
-                    notification.getUserId(),
-                    notification.getAnimalId(),
-                    notification.getTitle(),
-                    notification.getContent(),
-                    LocalDateTime.now().minusMinutes(5))) {
+                    notification.getContent())) {
 
                 notificationService.addNotification(notification);
                 System.out.println("Notification processed and saved: " + notification);

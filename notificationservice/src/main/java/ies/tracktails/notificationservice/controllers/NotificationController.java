@@ -72,13 +72,13 @@ public class NotificationController {
         return new ResponseEntity<>(updatedNotification, HttpStatus.OK);
     }
 
-    @Operation(summary = "Get all notifications")
+    @Operation(summary = "Get my notifications")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notifications found",
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Notification.class))})
     })
-    @GetMapping
-    public ResponseEntity<?> getAllNotifications(@RequestParam(name = "userId", required = false) Long userId,
+    @GetMapping("/me")
+    public ResponseEntity<?> getAllNotifications(@RequestHeader("X-User-Id") Long userId,
                                                  @RequestParam(name = "animalId", required = false) Long animalId) {
         if (userId != null && animalId != null) {
             return new ResponseEntity<>(notificationService.getNotificationsByUserIdAndAnimalId(userId, animalId), HttpStatus.OK);

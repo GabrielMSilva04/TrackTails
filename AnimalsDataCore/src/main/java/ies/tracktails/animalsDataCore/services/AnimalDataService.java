@@ -234,7 +234,6 @@ public class AnimalDataService {
 
         QueryApi queryApi = influxDBClient.getQueryApi();
         List<FluxTable> tables = queryApi.query(query);
-        debugTables(tables);
 
         long totalDuration = 0;
 
