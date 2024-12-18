@@ -2,6 +2,7 @@ import {InputField} from "../components/InputField.jsx";
 import {useForm} from "react-hook-form";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import {useState} from "react";
 import {baseUrl} from "../consts";
 
 const login_url = `${baseUrl}/users/login`;
@@ -13,6 +14,7 @@ export default function Login() {
         handleSubmit,
         formState: { errors },
     } = useForm();
+    const [wrongCredentials, setWrongCredentials] = useState(false);
 
     const onSubmit = async (data) => {
         try {
@@ -29,7 +31,7 @@ export default function Login() {
             window.location.href = "/mypets";
         } catch (error) {
             console.error("Login Error:", error);
-            alert("Login failed. Please try again.");
+            setWrongCredentials(true);
         }
     };
 
@@ -70,6 +72,9 @@ export default function Login() {
                         }}
                         error={errors.password?.message}
                     />
+                    {/* Error message */}
+                    {errors.email && <span className="text-sm text-red-500">{errors.email.message}</span>}
+                    {wrongCredentials && <span className="text-sm text-red-500">Wrong credentials</span>}
                     <button className="btn btn-primary text-white w-full mt-6">Log in</button>
                 </form>
                 <p className="text-sm mt-32">

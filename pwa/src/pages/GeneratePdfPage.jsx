@@ -22,16 +22,12 @@ export default function GeneratePdfPage({ animal }) {
         try {
             const token = localStorage.getItem("authToken");
             if (!token) {
-                alert("No authentication token found. Please log in.");
+                // Redirect to login if not authenticated
+                navigate("/login");
                 return;
             }
 
             const metrics = Object.keys(data.metrics || {}).filter((key) => data.metrics[key]);
-
-            if (metrics.length === 0) {
-                alert("Please select at least one metric.");
-                return;
-            }
 
             const url = `${baseUrl}/reports`;
 

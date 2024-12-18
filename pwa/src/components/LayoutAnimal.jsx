@@ -86,12 +86,10 @@ export default function LayoutAnimal({ showButtons = "all", useUrl = false }) {
                 },
             });
 
-            alert("Animal and its notifications deleted successfully.");
             setSelectedAnimal(null);
             window.location.href = "/mypets";
         } catch (error) {
             console.error("Error deleting animal or its notifications:", error);
-            alert("Failed to delete the animal. Please try again.");
         }
     };
 
