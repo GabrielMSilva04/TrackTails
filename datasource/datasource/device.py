@@ -215,8 +215,8 @@ def simulate_respiratory_rate(estado, current_speed, bpm):
 def simulate_location(last_location, current_speed, update_interval, estado):
     if last_location is None:
         return {
-            "latitude": 38.722252,
-            "longitude": -9.139337
+            "latitude": 40.6322,
+            "longitude": -8.66
         }
 
     speed_deg = (current_speed / 3600) / 111
