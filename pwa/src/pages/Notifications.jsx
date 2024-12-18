@@ -24,7 +24,7 @@ export default function Notifications() {
             try {
                 // Fetch notifications
                 const token = localStorage.getItem("authToken");
-                const response = await axios.get(`${notificationsBaseUrl}`, {
+                const response = await axios.get(`${notificationsBaseUrl}/me`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },

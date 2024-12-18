@@ -33,7 +33,6 @@ export default function NotificationComponent({ id, name, notification, image, h
             if (onDelete) onDelete();
         } catch (error) {
             console.error("Error deleting notification:", error);
-            alert("Failed to delete the notification. Please try again.");
         }
     };
 
