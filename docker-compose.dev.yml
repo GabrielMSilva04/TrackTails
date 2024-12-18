@@ -329,7 +329,7 @@ services:
       VITE_API_BASE_URL: ${BASE_URL}/api/v1
       VITE_WS_BASE_URL: ${BASE_URL}/ws
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5000"]
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://localhost:5173"]
       interval: 20s
       timeout: 45s
       retries: 10
